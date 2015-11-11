@@ -156,8 +156,7 @@ abstract class CrudController extends BaseController
         $viewModel = new ViewModel();
         $viewModel->setVariables([
             'entity' => $entity,
-        ]);        
-        // return $viewModel->setTemplate(static::VIEW_VIEW);
+        ]);
         $this->layout('layout/admin');
         return $viewModel;
     }
@@ -187,25 +186,4 @@ abstract class CrudController extends BaseController
         $redirect = $this->composeCreateRedirect($entity, $paramsRoute);
         return $this->redirect()->toRoute($redirect['route'], $redirect['params']);      
     }
-
-    // public function checkDir($path)
-    // {
-    //     if (!is_dir($path)) {
-    //         $oldmask = umask(0);
-    //         if (!mkdir($path, 0777, true)) {
-    //             die('Failed to create folders' . $path );
-    //         }
-    //         umask($oldmask);
-    //     }        
-    // }
-
-    // public function addPhotoToDatabase($file)
-    // {
-    //     $original = array_pop(explode('public', $file));
-    //     list(,,,$eventId,,$name) = explode('/', $data['file']['tmp_name']);
-    //     $photo = new Entity\Photo();
-    //     $photo->setOriginal($original);
-    //     $this->entityManager->persist($photo);
-    //     $this->entityManager->flush();
-    // }
 }

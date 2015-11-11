@@ -2,6 +2,7 @@
     "name": "vadimizmalkov/visoft-base-module",
     "description": "Base ZF2 module for general purpose",
     "license": "MIT",
+    "minimum-stability": "dev",
     "authors": [
         {
             "name": "Vadim Izmalkov",
@@ -12,7 +13,6 @@
         "zf2"
     ],
     "homepage" : "https://github.com/VadimIzmalkov/VisoftBaseModule",
-    "minimum-stability": "dev",
     "require": {
         "php": ">=5.3.3",
         "zendframework/zendframework": ">=2.3"
