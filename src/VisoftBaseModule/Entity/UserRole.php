@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Role
  * @ORM\Entity
- * @ORM\Table(name="user_roles")
+ * @ORM\Table(name="visoft_base_user_roles")
  *
  */
 class UserRole
