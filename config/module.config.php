@@ -17,6 +17,6 @@ return [
                     __NAMESPACE__ . '\Entity' => __NAMESPACE__ . '_driver',
                 )
             )
-        )
+        ),
     ),
 ];
