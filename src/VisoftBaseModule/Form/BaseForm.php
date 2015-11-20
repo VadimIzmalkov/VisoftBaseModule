@@ -25,7 +25,7 @@ class BaseForm extends Form
         $this->title = $title;
     }
 
-    public function addText($name, $label = null, $id = null, $required = false, $placeholder = null, $disabled = false, $labelClass = 'label', $elementClass = 'form-control')
+    public function addText($name, $label = null, $labelClass = 'label', $id = null, $required = false, $placeholder = null, $disabled = false, $elementClass = 'form-control')
     {
         $this->add([
             'name' => $name,
@@ -64,6 +64,30 @@ class BaseForm extends Form
                     'class' => $labelClass,
                 ),
             ]
+        ]);
+    }
+
+    public function addMultiCheckboxEntities($name, $targetClass, $property = 'name', $labelClass = null, $id = null, $isMethod = true, $label = null)
+    {
+        $this->add([
+            'name' => $name,
+            'type' => 'DoctrineModule\Form\Element\ObjectMultiCheckbox',
+            'attributes' => ['id' => $id],
+            'options' => [
+                'label' => $label,
+                'label_attributes' => ['class' => $labelClass],
+                'object_manager' => $this->entityManager,
+                'target_class' => $targetClass,
+                'property' => $property,
+                'is_method' => $isMethod,
+                'find_method' => [
+                    'name'   => 'findBy',
+                    'params' => [
+                        'criteria' => [],
+                        'orderBy'  => ['name' => 'ASC'],
+                    ],
+                ],
+            ],
         ]);
     }
 
