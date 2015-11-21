@@ -18,14 +18,6 @@ abstract class CrudController extends BaseController
     	$this->entityManager = $entityManager;
     }
 
-    abstract function getEntity($entityId);
-    abstract function composeCreateRedirect($entity, $paramsRoute);
-    abstract function composeDeleteRedirect($entity, $paramsRoute);
-    abstract function composeEditRedirect($entity, $paramsRoute);
-    abstract function setDependencyData(&$entity, $post, $paramsRoute, $pictureName = null);
-    abstract function setDependencyFilter(&$form, $post);
-    abstract function bindDependencyData(&$form, $entity);
-
     public function createAction()
     {
         $request = $this->getRequest();
@@ -164,26 +156,30 @@ abstract class CrudController extends BaseController
     public function deleteAction()
     {
         $paramsRoute = $this->params()->fromRoute();
-        $id = $paramsRoute['entityId'];
-        // if($id === null)
-        //     return $this->redirect()->toRoute('administrator/default', array('controller' => $this->controllerName));
-        $entity = $this->entityManager->getRepository(static::ENTITY_CLASS)->findOneBy(['id' => $id]);
-        // if(is_null($entity))
-        //     return $this->redirect()->toRoute('administrator/default', array('controller' => $this->controllerName));
-        $dir = static::UPLOAD_PATH . '/'. $entity->getId() . '/';
-        if(is_dir($dir)) {
-            $objects = scandir($dir);
-            foreach ($objects as $object) {
-                if ($object != "." && $object != "..") {
-                    if (filetype($dir."/".$object) == "dir") rrmdir($dir."/".$object); else unlink($dir."/".$object);
-                }
-            }
-            reset($objects);
-            rmdir($dir);
-        }
+        $entityId = $paramsRoute['entityId'];
+        $entity = $this->entityManager->getRepository(static::ENTITY_CLASS)->findOneBy(['id' => $entityId]);
         $this->entityManager->remove($entity);
         $this->entityManager->flush();
-        $redirect = $this->composeCreateRedirect($entity, $paramsRoute);
-        return $this->redirect()->toRoute($redirect['route'], $redirect['params']);      
+        $this->flashMessenger()->addSuccessMessage('Entity successfully deleted');
+        $this->deleteRedirect();    
     }
+
+    protected function getEntity($entityId)
+    {
+        return $this->entityManager->getRepository(static::ENTITY_CLASS)->findOneBy(['id' => $entityId]);
+    }
+
+    protected function composeCreateRedirect($entity, $paramsRoute) {}
+    
+    protected function deleteRedirect() 
+    {
+        $request = $this->getRequest();
+        $refererUri = $request->getHeader('referer')->getUri();
+        return $this->redirect()->toUrl($refererUri);
+    }
+    
+    protected function composeEditRedirect($entity, $paramsRoute) {}
+    protected function setDependencyData(&$entity, $post, $paramsRoute, $pictureName = null) {}
+    protected function setDependencyFilter(&$form, $post) {}
+    protected function bindDependencyData(&$form, $entity) {}
 }
