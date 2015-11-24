@@ -161,7 +161,7 @@ abstract class CrudController extends BaseController
         $this->entityManager->remove($entity);
         $this->entityManager->flush();
         $this->flashMessenger()->addSuccessMessage('Entity successfully deleted');
-        $this->deleteRedirect();    
+        $this->redirectAfterDelete();    
     }
 
     protected function getEntity($entityId)
@@ -171,7 +171,7 @@ abstract class CrudController extends BaseController
 
     protected function composeCreateRedirect($entity, $paramsRoute) {}
     
-    protected function deleteRedirect() 
+    protected function redirectAfterDelete() 
     {
         $request = $this->getRequest();
         $refererUri = $request->getHeader('referer')->getUri();

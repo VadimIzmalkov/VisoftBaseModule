@@ -19,4 +19,21 @@ class Module
             ),
         );
     }
+
+    public function getServiceConfig() 
+    {
+        return [
+            'factories' => [
+                'VisoftBaseModule\Options\ModuleOptions' => function($serviceLocator) {
+                    $config = $serviceLocator->get('Config');
+                    return new Options\ModuleOptions(isset($config['visoftbasemodule']) ? $config['visoftbasemodule'] : []);
+                },
+                'VisoftBaseModule\Service\UserService' => function($serviceLocator) {
+                    $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
+                    $moduleOptions = $serviceLocator->get('VisoftBaseModule\Options\ModuleOptions');
+                    return new Service\UserService($entityManager, $moduleOptions);
+                },
+            ],
+        ];
+    }
 }
