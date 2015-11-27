@@ -4,12 +4,14 @@ namespace VisoftBaseModule\Form;
 
 use Zend\Form\Form;
 
+use Doctrine\ORM\EntityManager;
+
 class BaseForm extends Form 
 {
     private $title;
 	protected $entityManager;
 
-	public function __construct($entityManager)
+	public function __construct(EntityManager $entityManager)
 	{
 		parent::__construct();
         $this->entityManager = $entityManager;
