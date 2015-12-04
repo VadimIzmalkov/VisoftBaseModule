@@ -40,27 +40,30 @@ abstract class CrudController extends BaseController
                 $entity->setCreatedBy($this->identity());
                 $this->entityManager->persist($entity);
                 $this->entityManager->flush();
-                $targetDir = static::UPLOAD_PATH . '/'. $entity->getId() . '/';
-                $this->checkDir($targetDir);
-                $adapter = new \Zend\File\Transfer\Adapter\Http();
-                $adapter->setDestination($targetDir);
-                foreach ($files as $element => $file) {
-                    $fileInfo = pathinfo($post[$element]['name']);
-                    $adapter->setFilters([
-                        new \Zend\Filter\File\Rename([
-                            "target" => $targetDir . 'img' . '.' . $fileInfo['extension'],
-                            "randomize" => true,
-                        ])
-                    ]);
-                    if ($adapter->receive($element))
-                        $pictureNames[$element] = $adapter->getFileName($element);
+                if(!empty($files)) {
+                    $targetDir = static::UPLOAD_PATH . '/'. $entity->getId() . '/';
+                    $this->checkDir($targetDir);
+                    $adapter = new \Zend\File\Transfer\Adapter\Http();
+                    $adapter->setDestination($targetDir);
+                    foreach ($files as $element => $file) {
+                        $fileInfo = pathinfo($post[$element]['name']);
+                        $adapter->setFilters([
+                            new \Zend\Filter\File\Rename([
+                                "target" => $targetDir . 'img' . '.' . $fileInfo['extension'],
+                                "randomize" => true,
+                            ])
+                        ]);
+                        if ($adapter->receive($element))
+                            $pictureNames[$element] = $adapter->getFileName($element);
+                    }
                 }
                 if(!isset($pictureNames)) $pictureNames = null;
-                $this->setDependencyData($entity, $post, $paramsRoute, $pictureNames);
+                $this->setExtraData($entity, $post, $paramsRoute, $pictureNames);
                 $this->entityManager->persist($entity);
                 $this->entityManager->flush();
-                $redirect = $this->composeCreateRedirect($entity, $paramsRoute);
-                return $this->redirect()->toRoute($redirect['route'], $redirect['params']);
+                $this->redirectAfterCreate($request, $entity);  
+                // $redirect = $this->composeCreateRedirect($entity, $paramsRoute);
+                // return $this->redirect()->toRoute($redirect['route'], $redirect['params']);
             }
         }
     	$viewModel = new ViewModel();
@@ -115,12 +118,13 @@ abstract class CrudController extends BaseController
                     }
                 }
                 if(!isset($pictureNames)) $pictureNames = null;
-                $this->setDependencyData($entity, $post, $paramsRoute, $pictureNames);
+                $this->setExtraData($entity, $post, $paramsRoute, $pictureNames);
                 $this->entityManager->persist($entity);
                 $this->entityManager->flush();
                 $redirect = $this->composeEditRedirect($entity, $paramsRoute);
                 $this->flashMessenger()->addSuccessMessage('Changes successfully saved!');
-                return $this->redirect()->toRoute($redirect['route'], $redirect['params']);
+                $this->redirectAfterEdit($request, $entity);  
+                // return $this->redirect()->toRoute($redirect['route'], $redirect['params']);
             }
         }
         $form->bind($entity);
@@ -155,6 +159,7 @@ abstract class CrudController extends BaseController
 
     public function deleteAction()
     {
+        $request = $this->getRequest();
         $paramsRoute = $this->params()->fromRoute();
         $entityId = $paramsRoute['entityId'];
         $entity = $this->entityManager->getRepository(static::ENTITY_CLASS)->findOneBy(['id' => $entityId]);
@@ -169,17 +174,29 @@ abstract class CrudController extends BaseController
         return $this->entityManager->getRepository(static::ENTITY_CLASS)->findOneBy(['id' => $entityId]);
     }
 
-    protected function composeCreateRedirect($entity, $paramsRoute) {}
-    
-    protected function redirectAfterDelete() 
+    protected function redirectAfterCreate($request, $entity) 
     {
-        $request = $this->getRequest();
+        $routeMatch = $this->getEvent()->getRouteMatch();
+        $route = $routeMatch->getMatchedRouteName();
+        $params = $routeMatch->getParams();
+        return $this->redirect()->toRoute($route);
+    }
+
+    protected function redirectAfterEdit($request) 
+    {
+        $route = $this->getEvent()->getRouteMatch()->getMatchedRouteName();
+        $parameters = $this->getEvent()->getRouteMatch()->getParams();
+        return $this->redirect()->toRoute($route, $parameters);
+    }
+
+    protected function redirectAfterDelete($request) 
+    {
         $refererUri = $request->getHeader('referer')->getUri();
         return $this->redirect()->toUrl($refererUri);
     }
     
     protected function composeEditRedirect($entity, $paramsRoute) {}
-    protected function setDependencyData(&$entity, $post, $paramsRoute, $pictureName = null) {}
+    protected function setExtraData(&$entity, $post, $paramsRoute, $pictureName = null) {}
     protected function setDependencyFilter(&$form, $post) {}
     protected function bindDependencyData(&$form, $entity) {}
 }

@@ -93,6 +93,28 @@ class BaseForm extends Form
         ]);
     }
 
+    public function addCheckbox($name, $label = null, $labelClass = "", $id = null, $elementClass = "", $elementStyle = "") 
+    {
+        $this->add([
+            'name' => $name,
+            'type' => 'Zend\Form\Element\Checkbox',
+            'attributes' => [
+                'class' => $elementClass, //'checkbox fryday-checkbox',
+                'style' => $elementStyle,//"left: 22px; position: absolute; z-index: 1",
+                'id' => $id,
+            ],
+            'options' => [
+                'label' => $label,
+                'label_attributes' => array(
+                    'class'  => $labelClass, //'checkbox fryday-checkbox',
+                ),
+                'use_hidden_element' => true,
+                'checked_value' => 1,
+                'unchecked_value' => 'no',
+            ],
+        ]);
+    }
+
     public function addSubmit($name, $value = 'Submit', $elementClass = '', $id = null)
     {
         $this->add(array(
