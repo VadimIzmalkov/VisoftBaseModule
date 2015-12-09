@@ -33,7 +33,10 @@ abstract class CrudController extends BaseController
                 $request->getFiles()->toArray()
             );
             $files = $this->params()->fromFiles();
-            $this->setDependencyFilter($form, $post);
+            if(is_null($this->createInputFilter))
+                $this->setCreateInputFilter($form, $post);
+            else
+                $form->setInputFilter($this->createInputFilter);
             $form->setData($post);
             if($form->isValid()) {
                 $data = $form->getData(); 
@@ -61,9 +64,7 @@ abstract class CrudController extends BaseController
                 $this->setExtraData($entity, $post, $paramsRoute, $pictureNames);
                 $this->entityManager->persist($entity);
                 $this->entityManager->flush();
-                $this->redirectAfterCreate($request, $entity);  
-                // $redirect = $this->composeCreateRedirect($entity, $paramsRoute);
-                // return $this->redirect()->toRoute($redirect['route'], $redirect['params']);
+                $this->redirectAfterCreate($request, $entity);
             }
         }
     	$viewModel = new ViewModel();
@@ -71,7 +72,7 @@ abstract class CrudController extends BaseController
     		'form' => $form,
     	]);
     	$this->layout('layout/admin');
-    	return $viewModel;//->setTemplate(static::VIEW_CREATE);
+    	return $viewModel;
     }
 
     public function editAction()
@@ -92,7 +93,10 @@ abstract class CrudController extends BaseController
                 $request->getFiles()->toArray()
             );
             $files = $this->params()->fromFiles();
-            $this->setDependencyFilter($form, $post);
+            if(is_null($this->editInputFilter))
+                $this->setEditInputFilter($form, $post);
+            else
+                $form->setInputFilter($this->editInputFilter);
             $form->bind($entity);
             $form->setData($post);
             if ($form->isValid()) {
@@ -121,14 +125,13 @@ abstract class CrudController extends BaseController
                 $this->setExtraData($entity, $post, $paramsRoute, $pictureNames);
                 $this->entityManager->persist($entity);
                 $this->entityManager->flush();
-                $redirect = $this->composeEditRedirect($entity, $paramsRoute);
                 $this->flashMessenger()->addSuccessMessage('Changes successfully saved!');
-                $this->redirectAfterEdit($request, $entity);  
-                // return $this->redirect()->toRoute($redirect['route'], $redirect['params']);
+                $this->redirectAfterEdit($request, $entity);
             }
         }
+
         $form->bind($entity);
-        $this->bindDependencyData($form, $entity);
+        $this->bindExtraData($form, $entity);
         $viewModel = new ViewModel();
         $viewModel->setVariables([
             'form' => $form,
@@ -144,9 +147,7 @@ abstract class CrudController extends BaseController
         $id = $paramsRoute['entityId'];
         // if($id === null)
         //     return $this->redirect()->toRoute('administrator/default', array('controller' => $this->controllerName));
-        // var_dump($id);
         $entity = $this->entityManager->getRepository(static::ENTITY_CLASS)->findOneBy(['id' => $id]);
-        // var_dump($entity);
         // if(is_null($entity))
         //     return $this->redirect()->toRoute('administrator/default', array('controller' => $this->controllerName));
         $viewModel = new ViewModel();
@@ -178,7 +179,6 @@ abstract class CrudController extends BaseController
     {
         $routeMatch = $this->getEvent()->getRouteMatch();
         $route = $routeMatch->getMatchedRouteName();
-        $params = $routeMatch->getParams();
         return $this->redirect()->toRoute($route);
     }
 
@@ -195,8 +195,8 @@ abstract class CrudController extends BaseController
         return $this->redirect()->toUrl($refererUri);
     }
     
-    protected function composeEditRedirect($entity, $paramsRoute) {}
-    protected function setExtraData(&$entity, $post, $paramsRoute, $pictureName = null) {}
-    protected function setDependencyFilter(&$form, $post) {}
-    protected function bindDependencyData(&$form, $entity) {}
+    protected function setExtraData(&$entity, $post, $paramsRoute, $pictureName) {}
+    protected function setCreateInputFilter(&$form, $post) {}
+    protected function setEditInputFilter(&$form, $post) {}
+    protected function bindExtraData(&$form, $entity) {}
 }
