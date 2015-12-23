@@ -27,7 +27,7 @@ class BaseForm extends Form
         $this->title = $title;
     }
 
-    public function addText($name, $label = null, $labelClass = 'label', $id = null, $required = false, $placeholder = null, $disabled = false, $elementClass = 'form-control')
+    public function addText($name, $label = null, $labelClass = 'label', $id = null, $required = false, $placeholder = null, $disabled = false, $readonly = false, $elementClass = 'form-control')
     {
         $this->add([
             'name' => $name,
@@ -44,6 +44,7 @@ class BaseForm extends Form
                 'id' => $id,
                 'disabled' => $disabled,
                 'required' => $required,
+                'readonly' => $readonly,
             ],
         ]);
     }
@@ -137,8 +138,10 @@ class BaseForm extends Form
         ]);
     }
 
-    public function addSelectEntites($name, $label, $targetClass, $emtyItemLabel, $property = 'name', $labelClass = 'label', $id = null, $elementClass = 'form-control', $isMethod = true)
+    public function addSelectEntites($name, $label, $targetClass, $emtyItemLabel = null, $property = 'name', $labelClass = 'label', $id = null, $elementClass = 'form-control', $isMethod = true)
     {
+        if ('emtyItemLabel' === null) 
+             $emtyItemLabel = '--- ' . $label . ' ---';
         $this->add([
             'name' => $name,
             'type' => 'DoctrineModule\Form\Element\ObjectSelect',

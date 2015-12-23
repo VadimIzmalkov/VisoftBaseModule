@@ -1,0 +1,10 @@
+<?php
+return [
+    'oauth2' => [
+        'facebook' => [
+            'client_id' => 'id',
+            'client_secret' => 'secret',
+            'redirect_uri'  => 'callback url',
+        ],
+    ],
+];

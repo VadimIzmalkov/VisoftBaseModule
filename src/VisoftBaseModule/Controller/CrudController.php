@@ -20,17 +20,16 @@ abstract class CrudController extends BaseController
 
     public function createAction()
     {
-        $request = $this->getRequest();
         $paramsRoute = $this->params()->fromRoute();
         $form = $this->createForm;
-        $form->setAttributes(['action' => $request->getRequestUri()]);
+        $form->setAttributes(['action' => $this->request->getRequestUri()]);
         $entityClass = static::ENTITY_CLASS;
         $entity = new $entityClass();
         $form->bind($entity);
-        if($request->isPost()) {
+        if($this->request->isPost()) {
             $post = array_merge_recursive(
-                $request->getPost()->toArray(),           
-                $request->getFiles()->toArray()
+                $this->request->getPost()->toArray(),           
+                $this->request->getFiles()->toArray()
             );
             $files = $this->params()->fromFiles();
             if(is_null($this->createInputFilter))
@@ -43,6 +42,7 @@ abstract class CrudController extends BaseController
                 $entity->setCreatedBy($this->identity());
                 $this->entityManager->persist($entity);
                 $this->entityManager->flush();
+                $fileNames = null;
                 if(!empty($files)) {
                     $targetDir = static::UPLOAD_PATH . '/'. $entity->getId() . '/';
                     $this->checkDir($targetDir);
@@ -52,26 +52,27 @@ abstract class CrudController extends BaseController
                         $fileInfo = pathinfo($post[$element]['name']);
                         $adapter->setFilters([
                             new \Zend\Filter\File\Rename([
-                                "target" => $targetDir . 'img' . '.' . $fileInfo['extension'],
+                                "target" => $targetDir . 'upload_' . '.' . $fileInfo['extension'],
                                 "randomize" => true,
                             ])
                         ]);
                         if ($adapter->receive($element))
-                            $pictureNames[$element] = $adapter->getFileName($element);
+                            $fileNames[$element] = $adapter->getFileName($element);
                     }
                 }
-                if(!isset($pictureNames)) $pictureNames = null;
-                $this->setExtraData($entity, $post, $paramsRoute, $pictureNames);
+                $this->setExtraData($entity, $post, $paramsRoute, $fileNames);
                 $this->entityManager->persist($entity);
                 $this->entityManager->flush();
-                $this->redirectAfterCreate($request, $entity);
+                if(static::CREATE_SUCCESS_MESSAGE !== null)
+                    $this->flashMessenger()->addSuccessMessage(static::CREATE_SUCCESS_MESSAGE);
+                $this->redirectAfterCreate($this->request, $entity);
             }
         }
+        $this->setLayout($this->identity()->getRole());
     	$viewModel = new ViewModel();
     	$viewModel->setVariables([
     		'form' => $form,
     	]);
-    	$this->layout('layout/admin');
     	return $viewModel;
     }
 
@@ -84,8 +85,7 @@ abstract class CrudController extends BaseController
         $entity = $this->getEntity($entityId);
         if(is_null($entity))
             return $this->notFoundAction();
-        $form = $this->editForm;
-        $form->setAttributes(['action' => $this->getRequest()->getRequestUri()]);
+        $form = $this->setEditForm($this->identity()->getRole());
         $request = $this->getRequest();
         if($request->isPost()) {
             $post = array_merge_recursive(
@@ -93,10 +93,12 @@ abstract class CrudController extends BaseController
                 $request->getFiles()->toArray()
             );
             $files = $this->params()->fromFiles();
-            if(is_null($this->editInputFilter))
-                $this->setEditInputFilter($form, $post);
-            else
-                $form->setInputFilter($this->editInputFilter);
+            if (isset($this->editInputFilter)) {
+                if(is_null($this->editInputFilter))
+                    $this->setEditInputFilter($form, $post);
+                else
+                    $form->setInputFilter($this->editInputFilter);
+            }
             $form->bind($entity);
             $form->setData($post);
             if ($form->isValid()) {
@@ -125,7 +127,8 @@ abstract class CrudController extends BaseController
                 $this->setExtraData($entity, $post, $paramsRoute, $pictureNames);
                 $this->entityManager->persist($entity);
                 $this->entityManager->flush();
-                $this->flashMessenger()->addSuccessMessage('Changes successfully saved!');
+                if(static::EDIT_SUCCESS_MESSAGE !== null)
+                    $this->flashMessenger()->addSuccessMessage(static::EDIT_SUCCESS_MESSAGE);
                 $this->redirectAfterEdit($request, $entity);
             }
         }
@@ -137,7 +140,10 @@ abstract class CrudController extends BaseController
             'form' => $form,
             'entity' => $entity,
         ]);
-        $this->layout('layout/admin');
+        $this->setLayout($this->identity()->getRole());
+        // if(defined(static::LAYOUT))
+        //     $this->layout(static::LAYOUT);
+        // $this->layout('layout/admin');
         return $viewModel;
     }
 
@@ -173,6 +179,19 @@ abstract class CrudController extends BaseController
     protected function getEntity($entityId)
     {
         return $this->entityManager->getRepository(static::ENTITY_CLASS)->findOneBy(['id' => $entityId]);
+    }
+
+    public function setEditForm($role)
+    {
+        $form = $this->editForm;
+        $form->setAttributes(['action' => $this->getRequest()->getRequestUri()]);
+        return $form;
+    }
+
+    public function setLayout($role)
+    {
+        if(defined('static::LAYOUT'))
+            $this->layout(static::LAYOUT);
     }
 
     protected function redirectAfterCreate($request, $entity) 
