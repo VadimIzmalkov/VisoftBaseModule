@@ -77,14 +77,15 @@ class FacebookClient extends AbstractOAuth2Client
         return $url;
     }
 
-    public function createUser($userProviderId, $email) 
+    public function createUser($oAuth2ProfileInfo, $email) 
     {
         $userEntityInfo = $this->entityManager->getClassMetadata('VisoftBaseModule\Entity\UserInterface');
         $user = new $userEntityInfo->name;
-        $user->setProviderId($this->providerName, $userProviderId);
-        $user->setAvatar($this->getAvatar($userProviderId));
-        $user->setRole($entityManager->getRepository('VisoftBaseModule\Entity\UserRole')->findOneBy(['name' => 'member']));
-        $user->setState($entityManager->getRepository('VisoftMailerModule\Entity\ContactState')->findOneBy(['name' => 'Confirmed']));
+        $user->setFullName($oAuth2ProfileInfo['first_name'] . " " . $oAuth2ProfileInfo['last_name']);
+        $user->setProviderId($this->providerName, $oAuth2ProfileInfo['id']);
+        $user->setAvatar($this->getAvatar($oAuth2ProfileInfo['id']));
+        $user->setRole($this->entityManager->getRepository('VisoftBaseModule\Entity\UserRole')->findOneBy(['name' => 'member']));
+        $user->setState($this->entityManager->getRepository('VisoftMailerModule\Entity\ContactState')->findOneBy(['name' => 'Confirmed']));
         $user->setEmail($email);
         $this->entityManager->persist($user);
         $this->entityManager->flush();

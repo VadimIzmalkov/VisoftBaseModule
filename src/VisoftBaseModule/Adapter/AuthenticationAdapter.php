@@ -36,7 +36,7 @@ class AuthenticationAdapter extends DoctrineAdapter implements ServiceLocatorAwa
     			$user = $userRepository->findOneBy([$oAuth2ProviderName . 'Id' => $oAuth2ProfileInfoArray['id']]);
             // if email not registered create new account
     		if(empty($user)) {
-    			$user = $this->oAuth2Client->createUser($oAuth2ProfileInfoArray['id'], $oAuth2ProfileInfoArray['email']);
+    			$user = $this->oAuth2Client->createUser($oAuth2ProfileInfoArray, $oAuth2ProfileInfoArray['email']);
                 $this->oAuth2Client->setNewUserFlag(true);
     			$this->getLogger()->log(\Zend\Log\Logger::INFO, 'Signed up via facebook', ['user' => $user]);
     		} else {
