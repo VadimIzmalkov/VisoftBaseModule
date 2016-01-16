@@ -49,6 +49,28 @@ class BaseForm extends Form
         ]);
     }
 
+    public function addPassword($name, $label = null, $labelClass = 'label', $id = null, $required = false, $placeholder = null, $disabled = false, $readonly = false, $elementClass = 'form-control')
+    {
+        $this->add([
+            'name' => $name,
+            'type' => 'Zend\Form\Element\Password',
+            'options' => [
+                'label' => $label,
+                'label_attributes' => [
+                    'class' => $labelClass,
+                ], 
+            ],
+            'attributes' => [
+                'class' => $elementClass,
+                'placeholder' => $placeholder,
+                'id' => $id,
+                'disabled' => $disabled,
+                'required' => $required,
+                'readonly' => $readonly,
+            ],
+        ]);
+    }
+
     public function addHidden($name, $id, $value = null, $attributes)
     {
         $this->add([

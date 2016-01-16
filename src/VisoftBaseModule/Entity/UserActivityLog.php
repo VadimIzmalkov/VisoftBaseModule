@@ -1,0 +1,63 @@
+<?php
+
+namespace VisoftBaseModule\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Table(name="visoft_base_users_activity_logs")
+ * @ORM\Entity
+ */
+class UserActivityLog
+{
+    /**
+     * @var integer
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    protected $id;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="created_at", type="datetime", nullable=true)
+     */
+    protected $actionTime;
+
+    /**
+     * @var string
+     * @ORM\Column(name="message", type="string", length=255, nullable=true)
+     */
+    protected $message;
+
+    /**
+     * @var User
+     * @ORM\ManyToOne(targetEntity="VisoftBaseModule\Entity\UserInterface")
+     * @ORM\JoinColumn(name="user", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     */
+    protected $user;
+
+    public function __construct() {
+        $this->actionTime = new \DateTime();
+    }
+    
+    public function getId() { return $this->id; }
+
+    public function getMessage() { return $this->message; }
+    public function setMessage($message){
+        $this->message = $message;
+        return $this;
+    }
+
+    public function getUser() { return $this->user; }
+    public function setUser($user) {
+        $this->user = $user;
+        return $this;
+    }
+
+    public function getActionTime() { return $this->actionTime; }
+    public function setActionTime($actionTime) {
+        $this->actionTime = $actionTime;
+        return $this;
+    }
+}

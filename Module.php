@@ -66,24 +66,22 @@ class Module
                     return new Controller\OAuth2Controller($authenticationService, $moduleOptions);
                 }
             ],
+            'abstract_factories' => [
+                'VisoftBaseModule\Controller\Factory\AbstractCrudControllerFactory',
+            ],
         ];
     }
-    //         'factories' => array(
-    //             // 'VisoftMailerModule\Controller\Contact' => function(ControllerManager $controllerManager) {
-    //             //     $serviceLocator = $controllerManager->getServiceLocator();
-    //             //     $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
-    //             //     $moduleOptions = $serviceLocator->get('VisoftMailerModule\Options\ModuleOptions');
-    //             //     $contactService = $serviceLocator->get('VisoftMailerModule\Service\ContactService');
-    //             //     $processingService = $serviceLocator->get('VisoftBaseModule\Service\ProcessingService');
-    //             //     return new Controller\ContactController($entityManager, $contactService, $moduleOptions, $processingService);
-    //             // },
-    //             // 'VisoftMailerModule\Controller\Mailer' => function(ControllerManager $controllerManager) {
-    //             //     $serviceLocator = $controllerManager->getServiceLocator();
-    //             //     $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
-    //             //     $moduleOptions = $serviceLocator->get('VisoftMailerModule\Options\ModuleOptions');
-    //             //     $processingService = $serviceLocator->get('VisoftBaseModule\Service\ProcessingService');
-    //             //     $mailerService = $serviceLocator->get('VisoftMailerModule\Service\MailerService');
-    //             //     return new Controller\MailerController($entityManager, $mailerService, $moduleOptions, $processingService);
-    //             // },
-    // }
+
+    public function getControllerPluginConfig()
+    {
+        return array(
+            'factories' => array(
+                'UserActivityLogger' => function($serviceLocator) {
+                    $parentLocator = $serviceLocator->getServiceLocator();
+                    $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
+                    return new Service\Log\Controller\Plugin\UserActivityLogger($entityManager);
+                },
+            ),
+        );
+    }
 }
