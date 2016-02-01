@@ -42,8 +42,8 @@ class OAuth2Controller extends BaseController
 		if (strlen($code) > 10) {
 			// send request to facebook, generate token and save it to session
 			$result = $this->oAuth2Client->generateToken($this->request);
-			var_dump($result);
-			die('gg12');
+			// var_dump($result);
+			// die('gg12');
 			if($result)
                 $token = $this->oAuth2Client->getSessionToken(); // token in session
             else 

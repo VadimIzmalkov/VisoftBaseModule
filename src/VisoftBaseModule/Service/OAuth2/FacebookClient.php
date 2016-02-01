@@ -27,6 +27,7 @@ class FacebookClient extends AbstractOAuth2Client
         ) {
             // $this->httpClient
             //     ->setUri($this->options->getTokenUri())
+            //     // ->setUri('https://graph.facebook.com/v2.0/oauth/access_token')
             //     ->setMethod(\Zend\Http\PhpEnvironment\Request::METHOD_POST)
             //     ->setParameterPost([
             //         'code'          => $request->getQuery('code'),
@@ -39,21 +40,38 @@ class FacebookClient extends AbstractOAuth2Client
             $client_id = $this->options->getClientId();
             $client_secret = $this->options->getClientSecret();
             $redirect_uri = $this->options->getRedirectUri();
-            $url = 'https://graph.facebook.com/oauth/access_token?' 
+            $url = 'https://graph.facebook.com/v2.1/oauth/access_token?' 
                 . 'client_id=' . $client_id
                 . '&redirect_uri=' . $redirect_uri
                 . '&client_secret=' . $client_secret
                 . '&code=' . $code;
-            var_dump($url);
-            $this->httpClient
-                ->setUri($url)
-                ->setMethod(\Zend\Http\PhpEnvironment\Request::METHOD_GET);
 
-            $responseContent = $this->httpClient->send()->getContent();
+            // // var_dump($url);
+            // $this->httpClient
+            //     ->setUri($url)
+            //     ->setMethod(\Zend\Http\PhpEnvironment\Request::METHOD_GET);
+
+            // $responseContent = $this->httpClient->send()->getContent();
+            $curl = curl_init();
+            $timeout = 0;
+
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+            // curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $timeout);
+            $responseContent = curl_exec($curl);
+            // var_dump($buffer);
+            // die('hhh');
+            // die('gg1234');
+            // var_dump(curl_exec($curl));
+            curl_close($curl);
+            // die('gg1234');
             var_dump($responseContent);
-            var_dump($this->options->getTokenUri());
-            die('iddd');
+            // var_dump($this->options->getTokenUri());
+            // echo $url;
+            // die('iddd');
             parse_str($responseContent, $token);
+            // var_dump($token);
+            // die('gg123');
             if(is_array($token) AND isset($token['access_token']) AND $token['expires'] > 0) {
                 $this->session->token = (object)$token;
                 return true;

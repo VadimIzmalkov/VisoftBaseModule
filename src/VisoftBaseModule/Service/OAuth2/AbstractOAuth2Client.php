@@ -22,9 +22,17 @@ abstract class AbstractOAuth2Client
     public function __construct()
     {
         $this->session = new Container('OAuth2_' . get_class($this));
-        $this->httpClient = new Client(null, [
-            'timeout' => 30, 
-            'adapter' => '\Zend\Http\Client\Adapter\Curl'
+//         $config = array(
+//     'adapter'   => 'Zend\Http\Client\Adapter\Curl',
+//     'curloptions' => array(CURLOPT_FOLLOWLOCATION => true),
+// );
+// $client = new Zend\Http\Client($uri, $config);
+        $this->httpClient = new \Zend\Http\Client(null, [
+            // 'timeout' => 30, 
+            'adapter' => '\Zend\Http\Client\Adapter\Curl', 
+            'curloptions' => [
+                CURLOPT_FOLLOWLOCATION => true,
+            ],
         ]);
     }
 
@@ -37,6 +45,8 @@ abstract class AbstractOAuth2Client
             return $this->session->info;
         } elseif(isset($this->session->token->access_token)) {
             $urlProfile = $this->options->getInfoUri() . '?access_token=' . $this->session->token->access_token;
+            // var_dump($urlProfile);
+            // die('ff');
             $this->httpClient
                 ->resetParameters(true)
                 ->setHeaders(array('Accept-encoding' => 'utf-8'))
