@@ -53,12 +53,12 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
             if(isset($formParameters['options']['create'])) {
                 $formType = $formParameters['options']['create'];
                 $form = new $formClass($entityManager, $formType);
-                $forms = ['create' => $form];
+                $forms['create'] = $form;
             }
             if(isset($formParameters['options']['edit'])) {
                 $formType = $formParameters['options']['edit'];
                 $form = new $formClass($entityManager, $formType);
-                $forms = ['edit' => $form];
+                $forms['edit'] = $form;
             }
             $crudController->setForms($forms);
         }
