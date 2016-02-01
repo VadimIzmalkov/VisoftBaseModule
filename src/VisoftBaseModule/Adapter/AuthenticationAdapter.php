@@ -25,6 +25,11 @@ class AuthenticationAdapter extends DoctrineAdapter implements ServiceLocatorAwa
         // $oAuth2ProfileInfo = $this->oAuth2Client->getInfo();
     	$userRepository = $entityManager->getRepository('VisoftBaseModule\Entity\UserInterface');
     	// $isOAuth2 = ;
+        var_dump(is_object($this->oAuth2Client));
+        var_dump(is_object($oAuth2ProfileInfo = $this->oAuth2Client->getInfo()));
+        var_dump($this->oAuth2Client->getInfo());
+        var_dump($this->oAuth2Client->getError());
+        die('gg');
     	if(is_object($this->oAuth2Client) AND is_object($oAuth2ProfileInfo = $this->oAuth2Client->getInfo())) { // OAuth2 
             // $oAuth2ProfileInfo = $this->oAuth2Client->getInfo();
     		$oAuth2Code = AuthenticationResult::SUCCESS;

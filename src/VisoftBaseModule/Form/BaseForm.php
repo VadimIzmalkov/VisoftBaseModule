@@ -225,7 +225,7 @@ class BaseForm extends Form
                 'required' => $required,
             ],
             'options' => [
-                'label' => $label,
+                'label' => $label . $num,
                 'label_attributes' => array(
                     'class' => 'label'
                 ),

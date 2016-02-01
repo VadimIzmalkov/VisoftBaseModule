@@ -82,6 +82,9 @@ class Module
                     return new Service\Log\Controller\Plugin\UserActivityLogger($entityManager);
                 },
             ),
+            'invokables' => [
+                'checkDir' => 'VisoftBaseModule\Controller\Plugin\CheckDir',
+            ],
         );
     }
 }

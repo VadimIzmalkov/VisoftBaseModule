@@ -30,41 +30,4 @@ return [
             )
         ),
     ),
-    // 'router' => [
-    //     'routes' => [
-    //         'visoft-authentication' => [
-    //             'type' => 'Literal',
-    //             'options' => [
-    //                 'route' => '/visoft-authentication',
-    //                 'defaults' => [
-    //                     'controller' => 'Base\Controller\Index',
-    //                     'action' => 'index',
-    //                 ],
-    //             ],
-    //             'may_terminate' => true,
-    //             'child_routes' => array(
-    //                 // 'default' => array(
-    //                 //     'type'    => 'Segment',
-    //                 //     'options' => array(
-    //                 //         'route'    => '/',
-    //                 //         'defaults' => array(
-    //                 //             'controller' => 'Base\Controller\Index',
-    //                 //             'action' => 'Index',
-    //                 //         ),
-    //                 //     ),
-    //                 // ),
-    //                 'oauth2-callback' => array(
-    //                     'type'    => 'Segment',
-    //                     'options' => array(
-    //                         'route'    => '/oauth2-callback/:provider[/]',
-    //                         'defaults' => array(
-    //                             'controller' => 'VisoftBaseModule\Controller\OAuth2',
-    //                             'action' => 'oauth2-callback',
-    //                         ),
-    //                     ),
-    //                 ),
-    //             ),
-    //         ],
-    //     ],
-    // ],
 ];

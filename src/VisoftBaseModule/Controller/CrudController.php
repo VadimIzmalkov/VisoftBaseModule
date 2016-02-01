@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManager;
 
 abstract class CrudController extends BaseController
 {
+    const EDIT_SUCCESS_MESSAGE = "Entity successfully updated";
 	/**
      * @var Doctrine\ORM\EntityManager
      */
@@ -205,6 +206,9 @@ abstract class CrudController extends BaseController
     {
         $route = $this->getEvent()->getRouteMatch()->getMatchedRouteName();
         $parameters = $this->getEvent()->getRouteMatch()->getParams();
+        // var_dump($route);
+        // var_dump($parameters);
+        // die('kk');
         return $this->redirect()->toRoute($route, $parameters);
     }
 

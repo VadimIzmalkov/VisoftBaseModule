@@ -2,8 +2,6 @@
 
 namespace VisoftBaseModule\Service\OAuth2;
 
-use Zend\Http\PhpEnvironment\Request;
-
 use VisoftBaseModule\Entity;
 
 class FacebookClient extends AbstractOAuth2Client
@@ -18,7 +16,7 @@ class FacebookClient extends AbstractOAuth2Client
         $this->entityManager = $entityManager;
     } 
 
-    public function generateToken(Request $request) 
+    public function generateToken(\Zend\Http\PhpEnvironment\Request $request) 
     {
         if(isset($this->session->token)) { 
             return true;
@@ -27,16 +25,34 @@ class FacebookClient extends AbstractOAuth2Client
         	AND $this->session->state == $request->getQuery('state') 
         	AND strlen($request->getQuery('code')) > 5
         ) {
+            // $this->httpClient
+            //     ->setUri($this->options->getTokenUri())
+            //     ->setMethod(\Zend\Http\PhpEnvironment\Request::METHOD_POST)
+            //     ->setParameterPost([
+            //         'code'          => $request->getQuery('code'),
+            //         'client_id'     => $this->options->getClientId(),
+            //         'client_secret' => $this->options->getClientSecret(),
+            //         'redirect_uri'  => $this->options->getRedirectUri()
+            //     ]);
+
+            $code = $request->getQuery('code');
+            $client_id = $this->options->getClientId();
+            $client_secret = $this->options->getClientSecret();
+            $redirect_uri = $this->options->getRedirectUri();
+            $url = 'https://graph.facebook.com/oauth/access_token?' 
+                . 'client_id=' . $client_id
+                . '&redirect_uri=' . $redirect_uri
+                . '&client_secret=' . $client_secret
+                . '&code=' . $code;
+            var_dump($url);
             $this->httpClient
-                ->setUri($this->options->getTokenUri())
-                ->setMethod(Request::METHOD_POST)
-                ->setParameterPost([
-                    'code'          => $request->getQuery('code'),
-                    'client_id'     => $this->options->getClientId(),
-                    'client_secret' => $this->options->getClientSecret(),
-                    'redirect_uri'  => $this->options->getRedirectUri()
-                ]);
+                ->setUri($url)
+                ->setMethod(\Zend\Http\PhpEnvironment\Request::METHOD_GET);
+
             $responseContent = $this->httpClient->send()->getContent();
+            var_dump($responseContent);
+            var_dump($this->options->getTokenUri());
+            die('iddd');
             parse_str($responseContent, $token);
             if(is_array($token) AND isset($token['access_token']) AND $token['expires'] > 0) {
                 $this->session->token = (object)$token;

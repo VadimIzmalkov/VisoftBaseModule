@@ -25,6 +25,7 @@ class UserActivityLogger extends AbstractPlugin
 
 	public function getLogger()
 	{
-
+		if(is_null($this->entityManager))
+			
 	}
 }

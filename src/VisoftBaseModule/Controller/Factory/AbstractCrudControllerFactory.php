@@ -31,6 +31,8 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         if (!$this->canCreateServiceWithName($serviceLocator, $name, $requestedName)) 
             throw new \BadMethodCallException('This abstract factory can\'t create service "' . $requestedName . '"');
         $parentLocator = $serviceLocator->getServiceLocator();
+        $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
+        $thumbnailer = $parentLocator->get('WebinoImageThumb');
         $config = $parentLocator->get('config');
         $config = $config['crud_controllers'][$requestedName];
         if (isset($config['controller_class']))
@@ -40,26 +42,38 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         if (!class_exists($controllerClass))
             if ('Controller' !== substr($requestedName, -10))
                 $controllerClass .= 'Controller';
-        // $fm = $parentLocator->get('FormElementManager');
         $entityClass = isset($config['entityClass']) ? $config['entityClass'] : null;
         $uploadPath = isset($config['uploadPath']) ? $config['uploadPath'] : null;
-        // $form = isset($config['form_class']) ? $fm->get($config['form_class']) : null;
-        // $paginator = isset($config['paginator_class']) ? $parentLocator->get($config['paginator_class']) : null;
-        // $templates = $this->getTemplates($config);
-        // $routes = $this->getRoutes($config);
-        // $repository = $parentLocator->get('Nicovogelaar\CrudController\Repository\CrudRepository');
-        // $repository->setEntityClass($entityClass);
-        $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
-        // var_dump($requestedName);
-        // var_dump($config);
-        // die('1');
-        // $isEx = class_exists($controllerClass);
-        // var_dump($isEx);
-        // $controller =  new \Fryday\Controller\EventController($entityManager, $entityClass, $uploadPath);
-        // die('2');
-        // return $controller;
-        $crudController = new $controllerClass($entityManager, $entityClass, $uploadPath);
-        // $crudController->setAuthenticationService();
+
+        $crudController = new $controllerClass($entityManager, $entityClass);
+
+        if(isset($config['forms'])) {
+            $formParameters = $config['forms'];
+            $formClass = $formParameters['class'];
+            if(isset($formParameters['options']['create'])) {
+                $formType = $formParameters['options']['create'];
+                $form = new $formClass($entityManager, $formType);
+                $forms = ['create' => $form];
+            }
+            if(isset($formParameters['options']['edit'])) {
+                $formType = $formParameters['options']['edit'];
+                $form = new $formClass($entityManager, $formType);
+                $forms = ['edit' => $form];
+            }
+            $crudController->setForms($forms);
+        }
+
+        if(isset($config['templates']))
+            $crudController->setTemplates($config['templates']);
+
+        if(isset($config['layout']))
+            $crudController->setLayout($config['layout']);
+
+        if(isset($config['uploadPath']))
+            $crudController->setUploadPath($config['uploadPath']);
+
+        $crudController->setThumbnailer($thumbnailer);
+
         return $crudController;
     }
     /**
