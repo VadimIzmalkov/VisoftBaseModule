@@ -284,8 +284,8 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	public function setForms($forms)
 	{
-		$this->createForm = $forms['create'];
-		$this->editForm = $forms['edit'];
+		$this->createForm = isset($forms['create']) ? $forms['create'] : null;
+		$this->editForm = isset($forms['edit']) ? $forms['edit'] : null;
 		return $this;
 	}
 

@@ -30,11 +30,16 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
     {
         if (!$this->canCreateServiceWithName($serviceLocator, $name, $requestedName)) 
             throw new \BadMethodCallException('This abstract factory can\'t create service "' . $requestedName . '"');
+        
         $parentLocator = $serviceLocator->getServiceLocator();
         $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
         $thumbnailer = $parentLocator->get('WebinoImageThumb');
+        $authenticationService = $parentLocator->get('Zend\Authentication\AuthenticationService');
+        $identity = $authenticationService->getIdentity();
+
         $config = $parentLocator->get('config');
         $config = $config['crud_controllers'][$requestedName];
+        
         if (isset($config['controller_class']))
             $controllerClass = $config['controller_class'];
         else
@@ -52,12 +57,12 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
             $formClass = $formParameters['class'];
             if(isset($formParameters['options']['create'])) {
                 $formType = $formParameters['options']['create'];
-                $form = new $formClass($entityManager, $formType);
+                $form = new $formClass($entityManager, $formType, $identity);
                 $forms['create'] = $form;
             }
             if(isset($formParameters['options']['edit'])) {
                 $formType = $formParameters['options']['edit'];
-                $form = new $formClass($entityManager, $formType);
+                $form = new $formClass($entityManager, $formType, $identity);
                 $forms['edit'] = $form;
             }
             $crudController->setForms($forms);
