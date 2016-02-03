@@ -103,8 +103,9 @@ class FacebookClient extends AbstractOAuth2Client
 
     public function getUrl()
     {
+        $redirectPrefix = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'];
         $url = $this->options->getAuthUri().'?'
-            . 'redirect_uri='  . urlencode($this->options->getRedirectUri())
+            . 'redirect_uri='  . $redirectPrefix . urlencode($this->options->getRedirectUri())
             . '&client_id='    . $this->options->getClientId()
             . '&state='        . $this->generateState()
             . $this->getScope(',');
