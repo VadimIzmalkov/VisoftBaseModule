@@ -39,7 +39,8 @@ class FacebookClient extends AbstractOAuth2Client
             $code = $request->getQuery('code');
             $client_id = $this->options->getClientId();
             $client_secret = $this->options->getClientSecret();
-            $redirect_uri = $this->options->getRedirectUri();
+            $redirectPrefix = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'];
+            $redirect_uri = $redirectPrefix . urlencode($this->options->getRedirectUri());
             $url = 'https://graph.facebook.com/v2.1/oauth/access_token?' 
                 . 'client_id=' . $client_id
                 . '&redirect_uri=' . $redirect_uri
@@ -104,8 +105,11 @@ class FacebookClient extends AbstractOAuth2Client
     public function getUrl()
     {
         $redirectPrefix = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'];
-        $url = $this->options->getAuthUri().'?'
+        // var_dump($redirectPrefix);
+        // die('11');
+        $url = $this->options->getAuthUri() . '?'
             . 'redirect_uri='  . $redirectPrefix . urlencode($this->options->getRedirectUri())
+            // . 'redirect_uri='  . urlencode($this->options->getRedirectUri())
             . '&client_id='    . $this->options->getClientId()
             . '&state='        . $this->generateState()
             . $this->getScope(',');
