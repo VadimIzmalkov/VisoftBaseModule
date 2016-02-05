@@ -23,9 +23,9 @@ class UserActivityLogger extends AbstractPlugin
 		$this->logger->log(\Zend\Log\Logger::INFO, $message, ['user' => $user]);
 	}
 
-	public function getLogger()
-	{
-		if(is_null($this->entityManager))
+	// public function getLogger()
+	// {
+	// 	if(is_null($this->entityManager))
 			
-	}
+	// }
 }
