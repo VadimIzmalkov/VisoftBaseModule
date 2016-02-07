@@ -32,8 +32,11 @@ class OAuth2Controller extends BaseController
 			case 'facebook':
 				$this->oAuth2Client = $this->getServiceLocator()->get('VisoftBaseModule\Service\OAuth2\FacebookClient');
 				break;
+			case 'linkedin':
+				$this->oAuth2Client = $this->getServiceLocator()->get('VisoftBaseModule\Service\OAuth2\LinkedInClient');
+				break;
 			default:
-				throw new Exception("Provider not defined", 1);
+				throw new \Exception("Provider not defined", 1);
 				break;
 		}
 		// setting scope

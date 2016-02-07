@@ -9,6 +9,11 @@ return [
             'token_uri' => 'https://graph.facebook.com/oauth/access_token',
             'info_uri' => 'https://graph.facebook.com/me',
         ],
+        'linkedin' => [
+            'auth_uri' => 'https://www.linkedin.com/uas/oauth2/authorization',
+            'token_uri' => 'https://www.linkedin.com/uas/oauth2/accessToken',
+            'info_uri' => 'https://api.linkedin.com/v1/people/~',
+        ],
     ],
     // 'Zend\Authentication\AuthenticationService' => 'Base\Factory\Service\AuthenticationServiceFactory',
     'doctrine_factories' => array(

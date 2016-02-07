@@ -32,10 +32,13 @@ class AuthenticationAdapter extends DoctrineAdapter implements ServiceLocatorAwa
         // die('gg');
     	if(is_object($this->oAuth2Client) AND is_object($oAuth2ProfileInfo = $this->oAuth2Client->getInfo())) { // OAuth2 
             // $oAuth2ProfileInfo = $this->oAuth2Client->getInfo();
-            var_dump($oAuth2ProfileInfo);
-    		$oAuth2Code = AuthenticationResult::SUCCESS;
+            // var_dump($oAuth2ProfileInfo);
+            // var_dump($this->oAuth2Client->getProvider());
+            // die('fff');
+    		$oAuth2Code = \Zend\Authentication\Result::SUCCESS;
     		$oAuth2ProfileInfoArray = (array)$oAuth2ProfileInfo;
     		$oAuth2ProviderName = $this->oAuth2Client->getProvider();
+            // var_dump($oAuth2ProfileInfoArray);
             // find user by email
     		if(empty($user = $userRepository->findOneBy(['email' => $oAuth2ProfileInfoArray['email']]))) 
                 // find user by provider ID
@@ -44,12 +47,14 @@ class AuthenticationAdapter extends DoctrineAdapter implements ServiceLocatorAwa
     		if(empty($user)) {
     			$user = $this->oAuth2Client->createUser($oAuth2ProfileInfoArray, $oAuth2ProfileInfoArray['email']);
                 $this->oAuth2Client->setNewUserFlag(true);
-    			$this->getLogger()->log(\Zend\Log\Logger::INFO, 'Signed up via facebook', ['user' => $user]);
+                $logMessage = 'Signed up via ' . $this->oAuth2Client->getProvider();
+    			$this->getLogger()->log(\Zend\Log\Logger::INFO, $logMessage, ['user' => $user]);
     		} else {
                 // update remote ID and avatar (if needs)  
-    			$this->oAuth2Client->updateUser($user, $oAuth2ProfileInfoArray['id']);
+    			$this->oAuth2Client->updateUser($user, $oAuth2ProfileInfoArray);
                 $this->oAuth2Client->setNewUserFlag(false);
-    			$this->getLogger()->log(\Zend\Log\Logger::INFO, 'Signed in via facebook', ['user' => $user]);
+                $logMessage = 'Signed in via ' . $this->oAuth2Client->getProvider();
+    			$this->getLogger()->log(\Zend\Log\Logger::INFO, $logMessage, ['user' => $user]);
     		}
     		return new AuthenticationResult($oAuth2Code, $user);
     	} else { // not OAuth2

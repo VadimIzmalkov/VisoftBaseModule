@@ -34,22 +34,36 @@ class Module
                     $config = $serviceLocator->get('Config');
                     return new Options\ModuleOptions(isset($config['visoftbasemodule']) ? $config['visoftbasemodule'] : []);
                 },
-                'VisoftBaseModule\Options\OAuth2Options' => function($serviceLocator){
-                    $config = $serviceLocator->get('Config');
-                    return new Options\OAuth2Options(isset($config['oauth2']['facebook']) ? $config['oauth2']['facebook'] : []);
-                },
                 'VisoftBaseModule\Service\UserService' => function($serviceLocator) {
                     $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
                     $moduleOptions = $serviceLocator->get('VisoftBaseModule\Options\ModuleOptions');
                     return new Service\UserService($entityManager, $moduleOptions);
                 },
+                'VisoftBaseModule\Options\OAuth2FacebookOptions' => function($serviceLocator){
+                    $config = $serviceLocator->get('Config');
+                    return new Options\OAuth2Options(isset($config['oauth2']['facebook']) ? $config['oauth2']['facebook'] : []);
+                },
+                'VisoftBaseModule\Options\OAuth2LinkedInOptions' => function($serviceLocator){
+                    $config = $serviceLocator->get('Config');
+                    return new Options\OAuth2Options(isset($config['oauth2']['linkedin']) ? $config['oauth2']['linkedin'] : []);
+                },
                 'VisoftBaseModule\Service\OAuth2\FacebookClient' => function($serviceLocator) {
                     $config = $serviceLocator->get('Config');
                     $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
-                    $oAuth2Options = $serviceLocator->get('VisoftBaseModule\Options\OAuth2Options');
-                    $facebookClient = new Service\OAuth2\FacebookClient($entityManager);
-                    $facebookClient->setOptions($oAuth2Options);
-                    return $facebookClient;
+                    $oAuth2Options = $serviceLocator->get('VisoftBaseModule\Options\OAuth2FacebookOptions');
+                    $client = new Service\OAuth2\FacebookClient($entityManager);
+                    $client->setOptions($oAuth2Options);
+                    return $client;
+                },
+                'VisoftBaseModule\Service\OAuth2\LinkedInClient' => function($serviceLocator) {
+                    $config = $serviceLocator->get('Config');
+                    $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
+                    $oAuth2Options = $serviceLocator->get('VisoftBaseModule\Options\OAuth2LinkedInOptions');
+                    // var_dump($oAuth2Options);
+                    // die('gg');
+                    $client = new Service\OAuth2\LinkedInClient($entityManager);
+                    $client->setOptions($oAuth2Options);
+                    return $client;
                 },
             ],
         ];
