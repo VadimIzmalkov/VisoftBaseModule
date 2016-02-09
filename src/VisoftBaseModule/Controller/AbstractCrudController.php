@@ -7,6 +7,10 @@ use Zend\Mvc\Controller\AbstractActionController,
 
 abstract class AbstractCrudController extends AbstractActionController
 {
+	// page titles
+	const CREATE_PAGE_TITLE = 'Create entity';
+	const EDIT_PAGE_TITLE = 'Edit entity';
+	// messages
 	const CREATE_SUCCESS_MESSAGE = 'Entity successfully created';
 	const EDIT_SUCCESS_MESSAGE = 'Entity successfully updated';
 
@@ -51,7 +55,7 @@ abstract class AbstractCrudController extends AbstractActionController
             $form->setData($this->post);
             if($form->isValid()) {
             	$data = $form->getData();
-            	$this->entity->setCreatedBy($this->identity());
+            	// $this->entity->setCreatedBy($this->identity());
             	$this->entityManager->persist($this->entity);
             	$this->entityManager->flush();
             	if(!empty($images)) {
@@ -73,6 +77,7 @@ abstract class AbstractCrudController extends AbstractActionController
 		$viewModel->setVariables([
 			'form' => $form,
 			'thisAction' => 'create',
+			'pageName' => static::CREATE_PAGE_TITLE,
 		]);
 		return $viewModel;
 	}
@@ -123,7 +128,9 @@ abstract class AbstractCrudController extends AbstractActionController
     {
         $routeMatch = $this->getEvent()->getRouteMatch();
         $route = $routeMatch->getMatchedRouteName();
-        return $this->redirect()->toRoute($route);
+        $parameters['controller'] = strtolower(array_pop(explode('\\', $routeMatch->getParam('controller'))));
+        $parameters['action'] = 'index';
+        return $this->redirect()->toRoute($route, $parameters);
     }
 
     protected function redirectAfterEdit() 
