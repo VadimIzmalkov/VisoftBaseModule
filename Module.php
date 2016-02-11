@@ -95,6 +95,12 @@ class Module
                     $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
                     return new Service\Log\Controller\Plugin\UserActivityLogger($entityManager);
                 },
+                'Social' => function($serviceLocator) {
+                    $parentLocator = $serviceLocator->getServiceLocator();
+                    $socialClients['facebook'] = $parentLocator->get('VisoftBaseModule\Service\OAuth2\FacebookClient');
+                    $socialClients['linkedin'] = $parentLocator->get('VisoftBaseModule\Service\OAuth2\LinkedInClient');
+                    return new Controller\Plugin\Social($socialClients);
+                },
             ),
             'invokables' => [
                 'checkDir' => 'VisoftBaseModule\Controller\Plugin\CheckDir',

@@ -71,8 +71,8 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         if(isset($config['templates']))
             $crudController->setTemplates($config['templates']);
 
-        if(isset($config['layout']))
-            $crudController->setLayout($config['layout']);
+        if(isset($config['layouts']))
+            $crudController->setLayouts($config['layouts']);
 
         if(isset($config['uploadPath']))
             $crudController->setUploadPath($config['uploadPath']);

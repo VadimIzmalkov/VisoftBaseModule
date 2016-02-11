@@ -18,7 +18,7 @@ abstract class AbstractCrudController extends AbstractActionController
 	protected $entityClass;
 	protected $entity;
 	protected $entityRepository;
-	protected $layout = null;
+	protected $layouts = null;
 	protected $templates = null;
 	protected $uploadPath = null;
 	protected $createForm;
@@ -70,14 +70,14 @@ abstract class AbstractCrudController extends AbstractActionController
             $this->redirectAfterCreate();
 		}
 		$viewModel = new ViewModel();
-		if(!is_null($this->templates['create']))
+		if(isset($this->templates['create']))
 			$viewModel->setTemplate($this->templates['create']);
-		if(!is_null($this->layout))
-			$this->layout($this->layout);
+		if(isset($this->layouts['create']))
+			$this->layout($this->layouts['create']);
 		$viewModel->setVariables([
 			'form' => $form,
 			'thisAction' => 'create',
-			'pageName' => static::CREATE_PAGE_TITLE,
+			'pageTitle' => static::CREATE_PAGE_TITLE,
 		]);
 		return $viewModel;
 	}
@@ -112,10 +112,10 @@ abstract class AbstractCrudController extends AbstractActionController
 			$this->bindExtra();
 		}
 		$viewModel = new ViewModel();
-		if(!is_null($this->templates['edit']))
+		if(isset($this->templates['edit']))
 			$viewModel->setTemplate($this->templates['edit']);
-		if(!is_null($this->layout))
-			$this->layout($this->layout);
+		if(isset($this->layouts['edit']))
+			$this->layout($this->layouts['edit']);
 		$viewModel->setVariables([
 			'form' => $form,
 			'entity' => $this->entity,
@@ -128,7 +128,10 @@ abstract class AbstractCrudController extends AbstractActionController
     {
         $routeMatch = $this->getEvent()->getRouteMatch();
         $route = $routeMatch->getMatchedRouteName();
-        $parameters['controller'] = strtolower(array_pop(explode('\\', $routeMatch->getParam('controller'))));
+        // var_dump($routeMatch->getParams());
+        // die("dfs");
+        // $parameters['controller'] = strtolower(array_pop(explode('\\', $routeMatch->getParam('controller'))));
+        $parameters['controller'] = $routeMatch->getParam('__CONTROLLER__');
         $parameters['action'] = 'index';
         return $this->redirect()->toRoute($route, $parameters);
     }
@@ -296,9 +299,9 @@ abstract class AbstractCrudController extends AbstractActionController
 		return $this;
 	}
 
-	public function setLayout($layout)
+	public function setLayouts($layouts)
 	{
-		$this->layout = $layout;
+		$this->layouts = $layouts;
 		return $this;
 	}
 
