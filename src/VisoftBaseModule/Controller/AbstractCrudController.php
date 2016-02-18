@@ -15,15 +15,20 @@ abstract class AbstractCrudController extends AbstractActionController
 	const EDIT_SUCCESS_MESSAGE = 'Entity successfully updated';
 
 	protected $entityManager;
+
+	private $entity = null;
 	protected $entityClass;
-	protected $entity;
 	protected $entityRepository;
+
 	protected $layouts = null;
 	protected $templates = null;
 	protected $uploadPath = null;
+	// forms
 	protected $createForm;
 	protected $editForm;
-	
+	// view models
+	// protected $createViewModel;
+	protected $viewModel;
 	protected $post;
 
 	//services
@@ -55,13 +60,12 @@ abstract class AbstractCrudController extends AbstractActionController
             $form->setData($this->post);
             if($form->isValid()) {
             	$data = $form->getData();
-            	// $this->entity->setCreatedBy($this->identity());
+            	if(!is_null($this->identity()))
+            		$this->entity->setCreatedBy($this->identity());
             	$this->entityManager->persist($this->entity);
             	$this->entityManager->flush();
-            	if(!empty($images)) {
-            		//TODO: saving images;
+            	if(!empty($images)) 
             		$this->saveImages($images);
-            	}
             }
             $this->entityManager->persist($this->entity);
             $this->entityManager->flush();
@@ -85,22 +89,20 @@ abstract class AbstractCrudController extends AbstractActionController
 	public function editAction()
 	{
 		$this->entity = $this->getEntity();
-		$form = $this->editForm;
-		$form->setAttributes(['action' => $this->request->getRequestUri()]);
+		$this->editForm = $this->editForm;
+		$this->editForm->setAttributes(['action' => $this->request->getRequestUri()]);
 		if($this->getRequest()->isPost()) {
 			$this->post = array_merge_recursive(
                 $this->request->getPost()->toArray(),           
                 $this->request->getFiles()->toArray()
             );
             $images = $this->params()->fromFiles();
-            $form->bind($this->entity);
-            $form->setData($this->post);
-            if($form->isValid()) {
-            	$data = $form->getData();
-            	if(!empty($images)) {
-            		//TODO: saving images;
+            $this->editForm->bind($this->entity);
+            $this->editForm->setData($this->post);
+            if($this->editForm->isValid()) {
+            	$data = $this->editForm->getData();
+            	if(!empty($images))
             		$this->saveImages($images);
-            	}
             }
             $this->entityManager->persist($this->entity);
             $this->entityManager->flush();
@@ -108,20 +110,33 @@ abstract class AbstractCrudController extends AbstractActionController
             $this->flashMessenger()->addSuccessMessage(static::EDIT_SUCCESS_MESSAGE);
             $this->redirectAfterEdit();
 		} else {
-			$form->bind($this->entity);
+			$this->editForm->bind($this->entity);
 			$this->bindExtra();
 		}
-		$viewModel = new ViewModel();
-		if(isset($this->templates['edit']))
-			$viewModel->setTemplate($this->templates['edit']);
-		if(isset($this->layouts['edit']))
-			$this->layout($this->layouts['edit']);
-		$viewModel->setVariables([
-			'form' => $form,
+		$this->setViewModel([
+			'form' => $this->editForm,
 			'entity' => $this->entity,
 			'thisAction' => 'edit',
+			'pageTitle' => static::EDIT_PAGE_TITLE,
 		]);
-		return $viewModel;
+		// $this->returnViewModel([
+		// 	'form' => $this->editForm,
+		// 	'entity' => $this->entity,
+		// 	'thisAction' => 'edit',
+		// ]);
+		// $viewModel = new ViewModel();
+		// if(isset($this->templates['edit']))
+		// 	$viewModel->setTemplate($this->templates['edit']);
+		// if(isset($this->layouts['edit']))
+		// 	$this->layout($this->layouts['edit']);
+		// $viewModel->setVariables([
+		// 	'form' => $this->editForm,
+		// 	'entity' => $this->entity,
+		// 	'thisAction' => 'edit',
+		// 	'pageTitle' => static::EDIT_PAGE_TITLE,
+		// ]);
+		$this->addEditViewModelVariables();
+		return $this->viewModel;
 	}
 
     protected function redirectAfterCreate() 
@@ -138,11 +153,15 @@ abstract class AbstractCrudController extends AbstractActionController
 
     protected function redirectAfterEdit() 
     {
-        $route = $this->getEvent()->getRouteMatch()->getMatchedRouteName();
-        $parameters = $this->getEvent()->getRouteMatch()->getParams();
-        var_dump($route);
-        var_dump($parameters);
-        die('kk');
+    	$routeMatch = $this->getEvent()->getRouteMatch();
+        $route = $routeMatch->getMatchedRouteName();
+        $parameters = $routeMatch->getParams();
+        $parameters['controller'] = $routeMatch->getParam('__CONTROLLER__');
+        $parameters['action'] = $routeMatch->getParam('action');
+        $parameters['entityId'] = $this->getEntity()->getId();
+        // var_dump($route);
+        // var_dump($parameters);
+        // die('kk');
         return $this->redirect()->toRoute($route, $parameters);
     }
 
@@ -154,6 +173,20 @@ abstract class AbstractCrudController extends AbstractActionController
     	$entity = $this->entityManager->find($this->entityClass, $entityId);
     	return $entity;
     }
+
+    protected function setViewModel(array $variables = null)
+    {
+    	$routeMatch = $this->getEvent()->getRouteMatch();
+    	$action = $routeMatch->getParam('action');
+		$this->viewModel = new ViewModel();
+		if(isset($this->templates[$action]))
+			$this->viewModel->setTemplate($this->templates[$action]);
+		if(isset($this->layouts[$action]))
+			$this->layout($this->layouts[$action]);
+		$this->viewModel->setVariables($variables);
+    }
+
+    protected function addEditViewModelVariables() { }
 
     protected function saveImages($images) 
     {
@@ -170,7 +203,7 @@ abstract class AbstractCrudController extends AbstractActionController
     		preg_match_all('!\d+!', $element, $matches);
     		$indx = (int)implode('', $matches[0]);
 
-    		// saving cropping coordinates
+    		// cropping coordinates
     		$xStartCrop = $this->post['xStartCrop' . $indx];
     		$yStartCrop = $this->post['yStartCrop' . $indx];
     		$heightCrop = $this->post['heightCrop' . $indx];
@@ -276,6 +309,11 @@ abstract class AbstractCrudController extends AbstractActionController
 	        // save image
 	        $this->entityManager->persist($image);
     	}
+    }
+
+    public function bindExtra() 
+    {
+
     }
 
 	public function setAuthenticationService($authenticationService)

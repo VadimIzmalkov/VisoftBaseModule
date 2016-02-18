@@ -160,6 +160,37 @@ class BaseForm extends Form
         ]);
     }
 
+    public function addSelectRole($name, $labelClass = 'label', $label = 'Select role', $id = null, $elementClass = 'form-control')
+    {
+        $this->add([
+            'name' => $name,
+            'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+            'attributes' => [
+                'class' => $elementClass,
+                'id' => $id,
+           ],
+           'options' => [
+                'label' => $label,
+                'label_attributes' => [
+                    'class' => $labelClass,
+                ],
+                'object_manager' => $this->entityManager,
+                'target_class' => 'VisoftBaseModule\Entity\UserRole',
+                'property' => 'name',
+                'display_empty_item' => true,
+                'empty_item_label' => '-- select role --',
+                'is_method' => true,
+                'find_method' => array(
+                    'name'   => 'findBy',
+                    'params' => array(
+                        'criteria' => array(),
+                        'orderBy'  => array('name' => 'ASC'),
+                    ),
+                ),
+            ],
+        ]);
+    }
+
     public function addSelectEntites($name, $label, $targetClass, $emtyItemLabel = null, $property = 'name', $labelClass = 'label', $id = null, $elementClass = 'form-control', $isMethod = true)
     {
         if ('emtyItemLabel' === null) 
@@ -278,6 +309,24 @@ class BaseForm extends Form
             'attributes' => [
                 'id' => 'height-current' . $num,
             ],
+        ]);
+    }
+
+    public function addFile($name, $label = null, $id = null, $required = false, $labelClass = 'label')
+    {
+        $this->add([
+            'name' => $name,
+            'type' => 'Zend\Form\Element\File',
+            'attributes' => [
+                'id' => $id,
+                'required' => $required,
+            ],
+            'options' => [
+                'label' => $label,
+                'label_attributes' => [
+                    'class' => $labelClass,
+                ],
+            ]
         ]);
     }
 

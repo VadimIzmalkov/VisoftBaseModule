@@ -15,11 +15,15 @@ return [
             'info_uri' => 'https://api.linkedin.com/v1/people/~',
         ],
     ],
-    // 'Zend\Authentication\AuthenticationService' => 'Base\Factory\Service\AuthenticationServiceFactory',
     'doctrine_factories' => array(
         'authenticationadapter' => 'VisoftBaseModule\Factory\AuthenticationAdapterFactory',
     ),
     'doctrine' => array(
+        'configuration' => array(
+            'orm_default' => array(
+                'generate_proxies' => true,
+            ),
+        ),
         'driver' => array(
             __NAMESPACE__ . '_driver' => array(
                 'class' => 'Doctrine\ORM\Mapping\Driver\AnnotationDriver',
@@ -33,6 +37,15 @@ return [
                     __NAMESPACE__ . '\Entity' => __NAMESPACE__ . '_driver',
                 )
             )
+        ),
+        'authentication' => array(
+            'orm_default' => array(
+                'object_manager' => 'Doctrine\ORM\EntityManager',
+                'identity_class' => 'VisoftBaseModule\Entity\UserInterface',
+                'identity_property' => 'email',
+                'credential_property' => 'password',
+                'credential_callable' => 'VisoftBaseModule\Service\RegistrationService::verifyHashedPassword',
+            ),
         ),
     ),
 ];

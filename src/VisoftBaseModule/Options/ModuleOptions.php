@@ -2,9 +2,7 @@
 
 namespace VisoftBaseModule\Options;
 
-use Zend\Stdlib\AbstractOptions;
-
-class ModuleOptions extends AbstractOptions
+class ModuleOptions extends \Zend\Stdlib\AbstractOptions
 {
 	// roles
 	// protected $roleGuest = null;
@@ -14,6 +12,12 @@ class ModuleOptions extends AbstractOptions
 	protected $roleSubscriberId = 4;
     protected $signInRedirectRoute = 'account';
     protected $signUpRedirectRoute = 'sign-up/profile-complete';
+
+    protected $templates;
+    protected $layouts;
+    protected $forms;
+
+    protected $redirects;
 
     public function __construct($options)
     {
@@ -35,6 +39,30 @@ class ModuleOptions extends AbstractOptions
     public function getSignUpRedirectRoute() { return $this->signUpRedirectRoute; }
     public function setSignUpRedirectRoute($signUpRedirectRoute) {
         $this->signUpRedirectRoute = $signUpRedirectRoute;
+        return $this;
+    }  
+
+    public function getTemplates() { return $this->templates; }
+    public function setTemplates($templates) {
+        $this->templates = $templates;
+        return $this;
+    }
+
+    public function getLayouts() { return $this->layouts; }
+    public function setLayouts($layouts) {
+        $this->layouts = $layouts;
+        return $this;
+    }
+
+    public function getForms() { return $this->forms; }
+    public function setForms($forms) {
+        $this->forms = $forms;
+        return $this;
+    }
+
+    public function getRedirects() { return $this->redirects; }
+    public function setRedirects($redirects) {
+        $this->redirects = $redirects;
         return $this;
     }  
 }

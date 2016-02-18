@@ -22,23 +22,14 @@ class AuthenticationAdapter extends DoctrineAdapter implements ServiceLocatorAwa
     public function authenticate()
     {
     	$entityManager = $this->options->getObjectManager();
-        // $oAuth2ProfileInfo = $this->oAuth2Client->getInfo();
     	$userRepository = $entityManager->getRepository('VisoftBaseModule\Entity\UserInterface');
-    	// $isOAuth2 = ;
-        // var_dump(is_object($this->oAuth2Client));
-        // var_dump(is_object($oAuth2ProfileInfo = $this->oAuth2Client->getInfo()));
-        // var_dump($this->oAuth2Client->getInfo());
-        // var_dump($this->oAuth2Client->getError());
-        // die('gg');
-    	if(is_object($this->oAuth2Client) AND is_object($oAuth2ProfileInfo = $this->oAuth2Client->getInfo())) { // OAuth2 
-            // $oAuth2ProfileInfo = $this->oAuth2Client->getInfo();
-            // var_dump($oAuth2ProfileInfo);
-            // var_dump($this->oAuth2Client->getProvider());
-            // die('fff');
+        
+        // check if registration with OAuth2
+    	if(is_object($this->oAuth2Client) AND is_object($oAuth2ProfileInfo = $this->oAuth2Client->getInfo())) {  
     		$oAuth2Code = \Zend\Authentication\Result::SUCCESS;
-    		$oAuth2ProfileInfoArray = (array)$oAuth2ProfileInfo;
+    		// person profile from Social Network provider
+            $oAuth2ProfileInfoArray = (array)$oAuth2ProfileInfo;
     		$oAuth2ProviderName = $this->oAuth2Client->getProvider();
-            // var_dump($oAuth2ProfileInfoArray);
             // find user by email
     		if(empty($user = $userRepository->findOneBy(['email' => $oAuth2ProfileInfoArray['email']]))) 
                 // find user by provider ID
@@ -59,6 +50,8 @@ class AuthenticationAdapter extends DoctrineAdapter implements ServiceLocatorAwa
     		return new AuthenticationResult($oAuth2Code, $user);
     	} else { // not OAuth2
     		$this->setup();
+            // var_dump($this->options->getIdentityProperty());
+            // die('dddd');
             $identity = $userRepository->findOneBy([$this->options->getIdentityProperty() => $this->identity]);
             if (!$identity) {
                 $this->authenticationResultInfo['code'] = AuthenticationResult::FAILURE_IDENTITY_NOT_FOUND;

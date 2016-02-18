@@ -4,6 +4,10 @@ namespace VisoftBaseModule\Service;
 
 use Doctrine\ORM\EntityManager;
 
+/*
+gearadmin --workers
+*/
+
 class ProcessingService
 {
 	private $worker = null;
