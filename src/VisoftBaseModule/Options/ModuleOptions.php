@@ -10,8 +10,8 @@ class ModuleOptions extends \Zend\Stdlib\AbstractOptions
 	// protected $roleUser = 2;
 	// protected $roleMember = 3;
 	protected $roleSubscriberId = 4;
-    protected $signInRedirectRoute = 'account';
-    protected $signUpRedirectRoute = 'sign-up/profile-complete';
+    // protected $signInRedirectRoute = 'account';
+    // protected $signUpRedirectRoute = 'sign-up/profile-complete';
 
     protected $templates;
     protected $layouts;
@@ -30,17 +30,17 @@ class ModuleOptions extends \Zend\Stdlib\AbstractOptions
         return $this;
     }
 
-    public function getSignInRedirectRoute() { return $this->signInRedirectRoute; }
-    public function setSignInRedirectRoute($signInRedirectRoute) {
-        $this->signInRedirectRoute = $signInRedirectRoute;
-        return $this;
-    }
+    // public function getSignInRedirectRoute() { return $this->signInRedirectRoute; }
+    // public function setSignInRedirectRoute($signInRedirectRoute) {
+    //     $this->signInRedirectRoute = $signInRedirectRoute;
+    //     return $this;
+    // }
 
-    public function getSignUpRedirectRoute() { return $this->signUpRedirectRoute; }
-    public function setSignUpRedirectRoute($signUpRedirectRoute) {
-        $this->signUpRedirectRoute = $signUpRedirectRoute;
-        return $this;
-    }  
+    // public function getSignUpRedirectRoute() { return $this->signUpRedirectRoute; }
+    // public function setSignUpRedirectRoute($signUpRedirectRoute) {
+    //     $this->signUpRedirectRoute = $signUpRedirectRoute;
+    //     return $this;
+    // }  
 
     public function getTemplates() { return $this->templates; }
     public function setTemplates($templates) {

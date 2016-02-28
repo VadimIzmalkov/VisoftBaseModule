@@ -17,9 +17,6 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         }
         $parentLocator = $serviceLocator->getServiceLocator();
         $config = $parentLocator->get('config');
-        // var_dump($requestedName);
-        // var_dump($config);
-        // die('1');
         return isset($config['crud_controllers'][$requestedName]);
     }
  
@@ -55,11 +52,13 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         if(isset($config['forms'])) {
             $formParameters = $config['forms'];
             $formClass = $formParameters['class'];
+            // set form for create action
             if(isset($formParameters['options']['create'])) {
                 $formType = $formParameters['options']['create'];
                 $form = new $formClass($entityManager, $formType, $identity);
                 $forms['create'] = $form;
             }
+            // set form for edit action
             if(isset($formParameters['options']['edit'])) {
                 $formType = $formParameters['options']['edit'];
                 $form = new $formClass($entityManager, $formType, $identity);

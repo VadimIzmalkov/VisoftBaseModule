@@ -2,19 +2,15 @@
 
 namespace VisoftBaseModule\Service\Authentication\Controller;
 
-use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 use Zend\Session\SessionManager;
 use Zend\Session\Config\StandardConfig;
 
-// use Base\Options\ModuleOptions,
-//     Base\Service\UserService as UserCredentialsService,
-//     Base\Form;
-
 /**
  * Index controller
  */
-class AuthenticationController extends AbstractActionController
+class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionController
+
 {
     protected $authenticationService;
 
@@ -38,25 +34,16 @@ class AuthenticationController extends AbstractActionController
 
     public function signInAction()
     {
-        // var_dump($this->redirects['sign-in']);
-            // die();
         if ($this->authenticationService->hasIdentity()) {
-            // var_dump($this->options->getLoginRedirectRoute());
-            // die();
-            // var_dump($this->redirects['has-identity']);
-            // die('ddd');
-            $route = $this->redirects['sign-in']['route'];
-            // $parameters = $this->redirects['sign-in']['parameters'];
-            // var_dump($this->redirects);
-            // var_dump($route);
-            // var_dump($parameters);
-            // die('ddd');
+            $route = $this->redirects['authenticated']['route'];
             return $this->redirect()->toRoute($route);
         }
         $form = new $this->forms['sign-in']($this->entityManager, 'sign-in');
         $form->setAttributes(['action' => $this->request->getRequestUri()]);
         $viewModel = new ViewModel([
             'form' => $form,
+            'facebookSignInUrl' => $this->social()->getSignInUrl('facebook'),
+            'linkedinSignInUrl' => $this->social()->getSignInUrl('linkedin'),
         ]);
         if ($this->request->isPost()) {
             $post = $this->request->getPost();
@@ -65,7 +52,7 @@ class AuthenticationController extends AbstractActionController
                 $data = $form->getData();
                 $adapter = $this->authenticationService->getAdapter();
                 $email = $this->params()->fromPost('email');
-                $password = 
+                // $password = 
                 $user = $this->entityManager->getRepository('VisoftBaseModule\Entity\UserInterface')->findOneBy(['email' => $email]);
                 if(empty($user)) {
                     $this->flashMessenger()->addMessage('The username or email is not valid!');
@@ -122,6 +109,38 @@ class AuthenticationController extends AbstractActionController
         $viewModel->setTemplate($this->templates['sign-in']);
         $this->layout($this->layouts['sign-in']);
         return $viewModel;
+    }
+
+    public function signUpAction()
+    {
+        if ($this->authenticationService->hasIdentity()) {
+            $route = $this->redirects['authenticated']['route'];
+            return $this->redirect()->toRoute($route);
+        }
+        $form = new $this->forms['sign-up']($this->entityManager, 'sign-up');
+        $form->setAttributes(['action' => $this->request->getRequestUri()]);
+        $viewModel = new ViewModel([
+            'form' => $form,
+            'facebookSignInUrl' => $this->social()->getSignInUrl('facebook'),
+            'linkedinSignInUrl' => $this->social()->getSignInUrl('linkedin'),
+        ]);
+        if ($this->request->isPost()) {
+            $post = $this->request->getPost();
+            $form->setData($post);
+            if($form->isValid()) {
+                if($this->Authentication()->signUp($post)) {
+                    $this->userActivityLogger()->log($this->identity(), 'Signed up');
+                    $this->flashMessenger()->addInfoMessage('We just sent you an email asking you to confirm your registration. Please search for fryday@fryady.net in your inbox and click on the "Confirm my registration" button');
+                    $route = $this->redirects['sign-up']['route'];
+                    $parameters = $this->redirects['sign-up']['parameters'];
+                    return $this->redirect()->toRoute($route, $parameters);
+                }
+            }
+        }
+        $viewModel->setTemplate($this->templates['sign-up']);
+        $this->layout($this->layouts['sign-up']);
+        return $viewModel;
+    }
         // $authenticationService = $serviceManader->get('Zend\Authentication\AuthenticationService');
         // if ($user = $this->identity()) {
         //     // var_dump($this->options->getLoginRedirectRoute());
@@ -209,6 +228,18 @@ class AuthenticationController extends AbstractActionController
         // $viewModel->setTemplate($this->options->getLoginTemplate());
         // $this->layout('layout/layout-empty.phtml');
         // return $viewModel;
+    // }
+
+    public function confirmEmailAction()
+    {
+        $token = $this->params()->fromRoute('token');
+        $user = $this->entityManager->getRepository($this->options->getUserClass())->findOneBy(['registrationToken' => $token]);
+        $user->setState($this->entityManager->getRepository('VisoftMailerModule\Entity\ContactState')->findOneBy(['name' => 'Confirmed']));
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+        $viewModel = new ViewModel([]);
+        // TODO: confirm email template should be as an option
+        return $viewModel->setTemplate($this->templates['confirm-email']);       
     }
 
     public function signOutAction()
@@ -221,6 +252,7 @@ class AuthenticationController extends AbstractActionController
         }
         return $this->redirect()->toRoute($this->redirects['sign-out']['route']);
     }
+
     /**
      * @var ModuleOptions
      */

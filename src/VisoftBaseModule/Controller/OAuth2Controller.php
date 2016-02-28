@@ -9,11 +9,13 @@ class OAuth2Controller extends BaseController
 	protected $oAuth2Client;
 	protected $authenticationService;
 	protected $moduleOptions;
+	protected $redirects;
 
 	public function __construct($authenticationService, $moduleOptions) 
 	{
 		$this->authenticationService = $authenticationService;
 		$this->moduleOptions = $moduleOptions;
+		$this->redirects = $this->moduleOptions->getRedirects();
 	}
 
 	public function oAuth2Action()
@@ -75,9 +77,9 @@ class OAuth2Controller extends BaseController
                 return $this->redirect()->toUrl($redirectUri);
             } else {
             	if($this->oAuth2Client->getNewUserFlag())
-            		$redirectRoute = $this->moduleOptions->getSignUpRedirectRoute();
+            		$redirectRoute = $this->redirects['sign-up']['route'];
             	else 
-            		$redirectRoute = $this->moduleOptions->getSignInRedirectRoute();
+            		$redirectRoute = $this->redirects['sign-in']['route'];
                 return $this->redirect()->toRoute($redirectRoute);
             }
 		}

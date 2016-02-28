@@ -160,6 +160,311 @@ class BaseForm extends Form
         ]);
     }
 
+    public function addSelectVenue($name, $id = null, $label = "Select Venue", $required = false)
+    {
+        $this->add([
+            'name' => $name,
+            'attributes' => [
+                'class' => 'form-control',
+                'id' => $id,
+                'required' => $required,
+            ],
+            'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+            'options' => array(
+                'label' => $label,
+                'label_attributes' => [
+                    'class' => 'label',
+                ],
+                'object_manager' => $this->entityManager,
+                'target_class' => 'Admin\Entity\VenuePartner',
+                'property' => 'name',
+                'display_empty_item' => true,
+                'empty_item_label' => '-- Select Venue --',
+                'is_method' => true,
+                'find_method' => array(
+                    'name'   => 'findBy',
+                    'params' => array(
+                        'criteria' => array(),
+                        'orderBy'  => array('name' => 'ASC'),
+                    ),
+                ),
+            ),
+        ]); 
+    }
+
+    public function addRadioEventType($name, $id = null, $label = "Select event type", $required = false)
+    {
+        $this->add([
+            'name' => $name,
+            'attributes' => [
+                'id' => $id,
+                'required' => $required,
+            ],
+            'type' => 'DoctrineModule\Form\Element\ObjectRadio',
+            'options' => array(
+                'label' => $label,
+                'label_attributes' => [
+                    'class' => 'radio fryday-radio'
+                ],
+                'object_manager' => $this->entityManager,
+                'target_class' => 'Admin\Entity\EventType',
+                'property' => 'name',
+                'is_method' => true,
+                'find_method' => array(
+                    'name'   => 'findBy',
+                    'params' => array(
+                        'criteria' => array(),
+                        'orderBy'  => array('name' => 'ASC'),
+                    ),
+                ),
+            ),
+        ]);
+    }
+
+    public function addSelectSpeaker($name, $id = null, $label = "Select speaker", $required = false)
+    {
+        $this->add([
+            'name' => $name,
+            'attributes' => [
+                'class' => 'form-control',
+                'id' => $id,
+                'required' => $required,
+            ],
+            'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+            'options' => array(
+                'label' => $label,
+                'label_attributes' => [
+                    'class' => 'label'
+                ],
+                'object_manager' => $this->entityManager,
+                'target_class' => 'Admin\Entity\SpeakerPartner',
+                'label_generator' => function($targetEntity) {
+                    return $targetEntity->getFirstName() . ' ' . $targetEntity->getLastName();
+                },
+                'display_empty_item' => true,
+                'empty_item_label' => '-- Select Speaker --',
+                'is_method' => true,
+                'find_method' => array(
+                    'name'   => 'findBy',
+                    'params' => array(
+                        'criteria' => array(),
+                        'orderBy'  => array('firstName' => 'ASC'),
+                    ),
+                ),
+            ),
+        ]);
+    }
+
+    public function addSelectPartner($name) 
+    {
+        $this->add([
+           'name' => 'partner',
+           'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+           'attributes' => [
+                'class' => 'form-control',
+                'id' => 'partner-select',
+           ],
+           'options' => [
+                'label' => 'Select Partner',
+                'label_attributes' => [
+                    'class' => 'label'
+                ], 
+                'object_manager' => $this->entityManager,
+                'target_class' => 'Admin\Entity\FrydayPartner',
+                'label_generator' => function($targetEntity) {
+                    if($targetEntity instanceof \Admin\Entity\SpeakerPartner)
+                        return $targetEntity->getFirstName() . ' ' . $targetEntity->getLastName();
+                    else
+                        return $targetEntity->getName();
+                },
+                'display_empty_item' => true,
+                'empty_item_label' => '-- Select Partner --',
+                'is_method' => true,
+                'find_method' => array(
+                    'name'   => 'findBy',
+                    'params' => array(
+                        'criteria' => array(),
+                        'orderBy'  => array('slug' => 'ASC'),
+                    ),
+                ),
+            ], 
+        ]);
+    }
+
+    public function addCurrencySelect($name, $id = null, $label = 'Currency')
+    {
+        $this->add([
+            'name' => $name,
+            'attributes' => [
+                'class' => 'form-control',
+                'id' => $id,
+            ],
+            'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+            'options' => array(
+                'label' => $label,
+                'label_attributes' => [
+                    'class' => 'label'
+                ],
+                'object_manager' => $this->entityManager,
+                'target_class' => 'Fryday\Entity\Iso4217',
+                'label_generator' => function($targetEntity) {
+                    return $targetEntity->getCode() . ' - ' . $targetEntity->getCurrency();
+                },
+                'display_empty_item' => true,
+                'empty_item_label' => '-- Select Currency --',
+                'is_method' => true,
+                'find_method' => array(
+                    'name'   => 'findBy',
+                    'params' => array(
+                        'criteria' => array(),
+                        'orderBy'  => array('code' => 'ASC'),
+                    ),
+                ),
+            ),
+        ]);
+    }
+
+    public function addSelectVenueType($name, $id = null, $required = false, $label = 'Select venue type')
+    {
+        $this->add([
+           'name' => $name,
+           'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+           'attributes' => [
+                'class' => 'form-control',
+                'id' => $id,
+                'required' => $required,
+           ],
+           'options' => [
+                'label' => $label,
+                'label_attributes' => array(
+                    'class' => 'label'
+                ),
+                'object_manager' => $this->entityManager,
+                'target_class' => 'Admin\Entity\VenueType',
+                'property' => 'name',
+                'display_empty_item' => true,
+                'empty_item_label' => '-- Select Venue Type --',
+                'find_method'    => array(
+                    'name'   => 'findBy',
+                    'params' => array(
+                        'criteria' => array(),
+                        'orderBy'  => array('name' => 'ASC'),
+                    ),
+                ),
+            ], 
+        ]);
+    }
+
+    public function addSelectCity($name, $id, $required = false, $label = 'Select city')
+    {
+        $this->add([
+           'name' => $name,
+           'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+           'attributes' => [
+                'class' => 'form-control',
+                'id' => $id,
+                'required' => $required,
+           ],
+           'options' => [
+                'label' => $label,
+                'label_attributes' => array(
+                    'class' => 'label'
+                ),
+                'object_manager' => $this->entityManager,
+                'target_class' => 'Fryday\Entity\City',
+                'property' => 'name',
+                'display_empty_item' => true,
+                'empty_item_label' => '-- Select City --',
+            ], 
+        ]);
+    }
+
+    public function addCountrySelect($name, $id = null, $label = 'Select country')
+    {
+        $this->add([
+           'name' => $name,
+           'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+           'attributes' => [
+                'class' => 'form-control',
+                'id' => $id,
+           ],
+           'options' => [
+                'label' => $label,
+                'label_attributes' => [
+                    'class' => 'label',
+                ], 
+                'label_generator' => function($targetEntity) {
+                    return $targetEntity->getName();
+                },
+                'object_manager' => $this->entityManager,
+                'target_class' => 'Admin\Entity\Country',
+                'display_empty_item' => true,
+                'empty_item_label' => '-- Select Country --',
+                'is_method' => true,
+                'find_method' => array(
+                    'name'   => 'findBy',
+                    'params' => array(
+                        'criteria' => array(),
+                        'orderBy'  => array('name' => 'ASC'),
+                    ),
+                ),
+            ], 
+        ]);
+    }
+
+    public function addIndustrySelect($name, $id = null, $label = 'Select Industry')
+    {
+        $this->add([
+           'name' => $name,
+           'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+           'attributes' => [
+                'class' => 'form-control',
+                'id' => $id,
+           ],
+           'options' => [
+                'label' => $label,
+                'label_attributes' => [
+                    'class' => 'label',
+                ], 
+                'label_generator' => function($targetEntity) {
+                    return $targetEntity->getName();
+                },
+                'object_manager' => $this->entityManager,
+                'target_class' => 'Fryday\Entity\Industry',
+                'display_empty_item' => true,
+                'empty_item_label' => '-- Select Industry --',
+            ], 
+        ]);
+    }
+
+    public function addCitiesMultiCheckbox($name, $id = null, $label = 'Select city')
+    {
+        $this->add([
+            'name' => $name,
+            'type' => 'DoctrineModule\Form\Element\ObjectMultiCheckbox',
+            'attributes' => [
+                'id' => $id,
+            ],
+            'options' => array(
+                'label' => $label,
+                'label_attributes' => array(
+                    'class'  => 'checkbox fryday-checkbox col-md-3 col-sm-4 col-xs-6'
+                ),
+                'object_manager' => $this->entityManager,
+                'target_class' => 'Fryday\Entity\City',
+                'property' => 'name',
+                'is_method' => true,
+                'find_method' => array(
+                    'name'   => 'findBy',
+                    'params' => array(
+                        'criteria' => array(),
+                        'orderBy'  => array('name' => 'ASC'),
+                    ),
+                ),
+            ),
+        ]);
+    }
+
     public function addSelectRole($name, $labelClass = 'label', $label = 'Select role', $id = null, $elementClass = 'form-control')
     {
         $this->add([
@@ -312,7 +617,7 @@ class BaseForm extends Form
         ]);
     }
 
-    public function addFile($name, $label = null, $id = null, $required = false, $labelClass = 'label')
+    public function addFile($name, $label = null, $id = null, $required = false, $labelClass = 'label', $enctype = null)
     {
         $this->add([
             'name' => $name,
@@ -320,6 +625,7 @@ class BaseForm extends Form
             'attributes' => [
                 'id' => $id,
                 'required' => $required,
+                'enctype' => $enctype,
             ],
             'options' => [
                 'label' => $label,

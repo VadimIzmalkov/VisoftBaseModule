@@ -24,8 +24,8 @@ abstract class AbstractCrudController extends AbstractActionController
 	protected $templates = null;
 	protected $uploadPath = null;
 	// forms
-	protected $createForm;
-	protected $editForm;
+	protected $createForm = null;
+	protected $editForm = null;
 	// view models
 	// protected $createViewModel;
 	protected $viewModel;
@@ -47,19 +47,20 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	public function createAction()
 	{
-		$form = $this->createForm;
-		$form->setAttributes(['action' => $this->request->getRequestUri()]);
+		if(is_null($this->createForm))
+			throw new \Exception("Create form not defined", 1);
+		$this->createForm->setAttributes(['action' => $this->request->getRequestUri()]);
 		$this->entity = new $this->entityClass();
-		$form->bind($this->entity);
+		$this->createForm->bind($this->entity);
 		if($this->request->isPost()) {
 			$this->post = array_merge_recursive(
                 $this->request->getPost()->toArray(),           
                 $this->request->getFiles()->toArray()
             );
             $images = $this->params()->fromFiles();
-            $form->setData($this->post);
-            if($form->isValid()) {
-            	$data = $form->getData();
+            $this->createForm->setData($this->post);
+            if($this->createForm->isValid()) {
+            	$data = $this->createForm->getData();
             	if(!is_null($this->identity()))
             		$this->entity->setCreatedBy($this->identity());
             	$this->entityManager->persist($this->entity);
@@ -79,7 +80,7 @@ abstract class AbstractCrudController extends AbstractActionController
 		if(isset($this->layouts['create']))
 			$this->layout($this->layouts['create']);
 		$viewModel->setVariables([
-			'form' => $form,
+			'form' => $this->createForm,
 			'thisAction' => 'create',
 			'pageTitle' => static::CREATE_PAGE_TITLE,
 		]);
@@ -88,9 +89,8 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	public function editAction()
 	{
-		$this->entity = $this->getEntity();
-		$this->editForm = $this->editForm;
-		$this->editForm->setAttributes(['action' => $this->request->getRequestUri()]);
+		$this->entity = $this->getEntity(); // here entity can be overrided
+		$this->editForm = $this->getEditForm(); // here form can be overrided
 		if($this->getRequest()->isPost()) {
 			$this->post = array_merge_recursive(
                 $this->request->getPost()->toArray(),           
@@ -101,19 +101,25 @@ abstract class AbstractCrudController extends AbstractActionController
             $this->editForm->setData($this->post);
             if($this->editForm->isValid()) {
             	$data = $this->editForm->getData();
+            	// var_dump($images);
+            	// var_dump(empty($images));
+            	// die('FFF');
             	if(!empty($images))
             		$this->saveImages($images);
+            	$this->entityManager->persist($this->entity);
+	            $this->entityManager->flush();
+	            // if(static::CREATE_SUCCESS_MESSAGE !== null)
+	            $this->flashMessenger()->addSuccessMessage(static::EDIT_SUCCESS_MESSAGE);
+	            $this->redirectAfterEdit();
             }
-            $this->entityManager->persist($this->entity);
-            $this->entityManager->flush();
-            // if(static::CREATE_SUCCESS_MESSAGE !== null)
-            $this->flashMessenger()->addSuccessMessage(static::EDIT_SUCCESS_MESSAGE);
-            $this->redirectAfterEdit();
 		} else {
+			// var_dump($this->editForm);
+			// var_dump($this->entity);
+			// die('ff');
 			$this->editForm->bind($this->entity);
 			$this->bindExtra();
 		}
-		$this->setViewModel([
+		$viewModel = $this->getViewModel([
 			'form' => $this->editForm,
 			'entity' => $this->entity,
 			'thisAction' => 'edit',
@@ -135,17 +141,14 @@ abstract class AbstractCrudController extends AbstractActionController
 		// 	'thisAction' => 'edit',
 		// 	'pageTitle' => static::EDIT_PAGE_TITLE,
 		// ]);
-		$this->addEditViewModelVariables();
-		return $this->viewModel;
+		$this->addEditViewModelVariables($viewModel);
+		return $viewModel;
 	}
 
     protected function redirectAfterCreate() 
     {
         $routeMatch = $this->getEvent()->getRouteMatch();
         $route = $routeMatch->getMatchedRouteName();
-        // var_dump($routeMatch->getParams());
-        // die("dfs");
-        // $parameters['controller'] = strtolower(array_pop(explode('\\', $routeMatch->getParam('controller'))));
         $parameters['controller'] = $routeMatch->getParam('__CONTROLLER__');
         $parameters['action'] = 'index';
         return $this->redirect()->toRoute($route, $parameters);
@@ -159,22 +162,25 @@ abstract class AbstractCrudController extends AbstractActionController
         $parameters['controller'] = $routeMatch->getParam('__CONTROLLER__');
         $parameters['action'] = $routeMatch->getParam('action');
         $parameters['entityId'] = $this->getEntity()->getId();
-        // var_dump($route);
-        // var_dump($parameters);
-        // die('kk');
         return $this->redirect()->toRoute($route, $parameters);
     }
 
     protected function getEntity()
     {
     	$routeParams = $this->params()->fromRoute();
-    	// var_dump()
     	$entityId = isset($routeParams['entityId']) ? $routeParams['entityId'] : null;
     	$entity = $this->entityManager->find($this->entityClass, $entityId);
     	return $entity;
     }
 
-    protected function setViewModel(array $variables = null)
+    // overrides form if one depends on route, but not depends on action
+    protected function getEditForm()
+    {
+    	$this->editForm->setAttributes(['action' => $this->request->getRequestUri()]);
+    	return $this->editForm;
+    }
+
+    protected function getViewModel(array $variables = null)
     {
     	$routeMatch = $this->getEvent()->getRouteMatch();
     	$action = $routeMatch->getParam('action');
@@ -183,10 +189,12 @@ abstract class AbstractCrudController extends AbstractActionController
 			$this->viewModel->setTemplate($this->templates[$action]);
 		if(isset($this->layouts[$action]))
 			$this->layout($this->layouts[$action]);
-		$this->viewModel->setVariables($variables);
+		if(!is_null($variables))
+			$this->viewModel->setVariables($variables);
+		return $this->viewModel;
     }
 
-    protected function addEditViewModelVariables() { }
+    protected function addEditViewModelVariables(&$viewModel) { }
 
     protected function saveImages($images) 
     {
@@ -195,7 +203,9 @@ abstract class AbstractCrudController extends AbstractActionController
     	$this->checkDir($targetDir);
 
     	// receiver of the upload
+    	// die('ff');
     	$receiver = new \Zend\File\Transfer\Adapter\Http();
+    	// die('ff');
     	$receiver->setDestination($targetDir);
 
     	foreach ($images as $element => $image) {
@@ -311,7 +321,7 @@ abstract class AbstractCrudController extends AbstractActionController
     	}
     }
 
-    public function bindExtra() 
+    protected function bindExtra() 
     {
 
     }

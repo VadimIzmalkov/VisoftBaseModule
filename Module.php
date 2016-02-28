@@ -68,6 +68,7 @@ class Module
                     $config = $serviceLocator->get('Config');
                     return new Service\Authorization\Acl\Acl($config);
                 },
+
             ],
         ];
     }
@@ -99,22 +100,62 @@ class Module
     public function getControllerPluginConfig()
     {
         return array(
-            'factories' => array(
-                'UserActivityLogger' => function($serviceLocator) {
-                    $parentLocator = $serviceLocator->getServiceLocator();
-                    $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
-                    return new Service\Log\Controller\Plugin\UserActivityLogger($entityManager);
-                },
-                'Social' => function($serviceLocator) {
-                    $parentLocator = $serviceLocator->getServiceLocator();
-                    $socialClients['facebook'] = $parentLocator->get('VisoftBaseModule\Service\OAuth2\FacebookClient');
-                    $socialClients['linkedin'] = $parentLocator->get('VisoftBaseModule\Service\OAuth2\LinkedInClient');
-                    return new Controller\Plugin\Social($socialClients);
-                },
-            ),
+            // 'factories' => array(
+            //     'UserActivityLogger' => function($serviceLocator) {
+            //         $parentLocator = $serviceLocator->getServiceLocator();
+            //         $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
+            //         return new Service\Log\Controller\Plugin\UserActivityLogger($entityManager);
+            //     },
+            //     'Social' => function($serviceLocator) {
+            //         $parentLocator = $serviceLocator->getServiceLocator();
+            //         $socialClients['facebook'] = $parentLocator->get('VisoftBaseModule\Service\OAuth2\FacebookClient');
+            //         $socialClients['linkedin'] = $parentLocator->get('VisoftBaseModule\Service\OAuth2\LinkedInClient');
+            //         return new Controller\Plugin\Social($socialClients);
+            //     },
+            //     'Authentication' => function($serviceLocator) {
+            //         $parentLocator = $serviceLocator->getServiceLocator();
+            //         $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
+            //         $authenticationService = $parentLocator->get('Zend\Authentication\AuthenticationService');
+            //         return new Service\Authentication\Controller\Plugin\Authentication($entityManager, $authenticationService);
+            //     },
+            // ),
             'invokables' => [
                 'checkDir' => 'VisoftBaseModule\Controller\Plugin\CheckDir',
             ],
+        );
+    }
+
+    public function getViewHelperConfig()
+    {
+        return array(
+            'factories' => array(
+                // This will overwrite the native navigation helper
+                'navigation' => function(\Zend\View\HelperPluginManager $pm) {
+                    $sm = $pm->getServiceLocator();
+                    $config = $sm->get('Config');
+                    // // Setup ACL:
+                    $acl = new \VisoftBaseModule\Service\Authorization\Acl\Acl($config);
+
+                    // // Get the AuthenticationService
+                    $auth = $sm->get('Zend\Authentication\AuthenticationService');
+                    $role = \VisoftBaseModule\Service\Authorization\Acl\Acl::DEFAULT_ROLE;
+
+                    if ($auth->hasIdentity())
+                        $role = $auth->getIdentity()->getRole()->getName();
+
+                    // Get an instance of the proxy helper
+                    $navigation = $pm->get('Zend\View\Helper\Navigation');
+                    // TODO: ServiceLocator Should set automaticaly!!!!!
+                    // Why needs this line??? FIX IT!
+                    $navigation->setServiceLocator($sm);
+                    
+                    // Store ACL and role in the proxy helper:
+                    $navigation->setAcl($acl)->setRole($role); // 'member'
+                    // die('ff');
+                    // Return the new navigation helper instance
+                    return $navigation;
+                },
+            ),
         );
     }
 
