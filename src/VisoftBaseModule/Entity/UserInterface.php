@@ -16,8 +16,8 @@ interface UserInterface
 	public function setProviderId($providerName, $providerId);
 	public function getProviderId($providerName);
 
-	public function setAvatar(Image $avatar);
-	public function getAvatar();
+	public function setImage(Image $image);
+	public function getImage();
 
 	public function setRole(UserRole $role);
 	public function getRole();

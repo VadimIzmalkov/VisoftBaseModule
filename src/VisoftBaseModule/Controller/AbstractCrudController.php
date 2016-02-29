@@ -70,7 +70,6 @@ abstract class AbstractCrudController extends AbstractActionController
             }
             $this->entityManager->persist($this->entity);
             $this->entityManager->flush();
-            // if(static::CREATE_SUCCESS_MESSAGE !== null)
             $this->flashMessenger()->addSuccessMessage(static::CREATE_SUCCESS_MESSAGE);
             $this->redirectAfterCreate();
 		}
@@ -89,33 +88,30 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	public function editAction()
 	{
-		$this->entity = $this->getEntity(); // here entity can be overrided
-		$this->editForm = $this->getEditForm(); // here form can be overrided
+		// needs to clone because after isValid() binded entity looses image object
+		$this->entity = clone($this->getEntity());
+		// var_dump($this->editForm);
+		// die('ss');
+		$this->editForm = $this->getEditForm();
 		if($this->getRequest()->isPost()) {
 			$this->post = array_merge_recursive(
                 $this->request->getPost()->toArray(),           
                 $this->request->getFiles()->toArray()
             );
             $images = $this->params()->fromFiles();
-            $this->editForm->bind($this->entity);
+            $this->editForm->bind($this->getEntity());
             $this->editForm->setData($this->post);
             if($this->editForm->isValid()) {
             	$data = $this->editForm->getData();
-            	// var_dump($images);
-            	// var_dump(empty($images));
-            	// die('FFF');
-            	if(!empty($images))
+            	// can be empty if InpuFile not defined
+            	if(!empty($images)) 
             		$this->saveImages($images);
-            	$this->entityManager->persist($this->entity);
+            	$this->entityManager->persist($this->getEntity());
 	            $this->entityManager->flush();
-	            // if(static::CREATE_SUCCESS_MESSAGE !== null)
 	            $this->flashMessenger()->addSuccessMessage(static::EDIT_SUCCESS_MESSAGE);
 	            $this->redirectAfterEdit();
             }
 		} else {
-			// var_dump($this->editForm);
-			// var_dump($this->entity);
-			// die('ff');
 			$this->editForm->bind($this->entity);
 			$this->bindExtra();
 		}
@@ -125,22 +121,6 @@ abstract class AbstractCrudController extends AbstractActionController
 			'thisAction' => 'edit',
 			'pageTitle' => static::EDIT_PAGE_TITLE,
 		]);
-		// $this->returnViewModel([
-		// 	'form' => $this->editForm,
-		// 	'entity' => $this->entity,
-		// 	'thisAction' => 'edit',
-		// ]);
-		// $viewModel = new ViewModel();
-		// if(isset($this->templates['edit']))
-		// 	$viewModel->setTemplate($this->templates['edit']);
-		// if(isset($this->layouts['edit']))
-		// 	$this->layout($this->layouts['edit']);
-		// $viewModel->setVariables([
-		// 	'form' => $this->editForm,
-		// 	'entity' => $this->entity,
-		// 	'thisAction' => 'edit',
-		// 	'pageTitle' => static::EDIT_PAGE_TITLE,
-		// ]);
 		$this->addEditViewModelVariables($viewModel);
 		return $viewModel;
 	}
@@ -199,19 +179,46 @@ abstract class AbstractCrudController extends AbstractActionController
     protected function saveImages($images) 
     {
     	// dir for files
-    	$targetDir = $this->uploadPath . '/'. $this->entity->getId() . '/';
+    	$targetDir = $this->uploadPath . '/'. $this->getEntity()->getId() . '/';
     	$this->checkDir($targetDir);
 
     	// receiver of the upload
-    	// die('ff');
     	$receiver = new \Zend\File\Transfer\Adapter\Http();
-    	// die('ff');
     	$receiver->setDestination($targetDir);
 
     	foreach ($images as $element => $image) {
-    		// find index for element number
+    		// find indx for element number
     		preg_match_all('!\d+!', $element, $matches);
-    		$indx = (int)implode('', $matches[0]);
+    		$indx = implode('', $matches[0]); // last character is number - $image1
+    		// saving data to image entity
+    		$getImageFunctionName = 'getImage' . $indx;
+    		$setImageFunctionName = 'setImage' . $indx;
+    		// get image from original entity
+    		$image = $this->entity->$getImageFunctionName();
+    		if(empty($image)) 
+    			// if image not set (null) - create new entity for image
+    			$image = new \VisoftBaseModule\Entity\Image();
+
+    		// get image path 
+    		if(!empty($this->post[$element]['name'])) {
+    			// if image uploaded - transfer one and get new file path
+	    		$imageInfo = pathinfo($this->post[$element]['name']);
+	    		$receiver->setFilters([
+	                new \Zend\Filter\File\Rename([
+	                    "target" => $targetDir . 'image_' . '.' . $imageInfo['extension'],
+	                    "randomize" => true,
+	                ]),
+	            ]);
+	            $receiver->receive($element);
+	            $imagePath = $receiver->getFileName($element);
+    		} else {
+    			// if image not uploaded check if image has been uploaded before
+    			if(empty($image->getOriginalSize()))
+    				// stop saving image because image not uploaded and was has been uploaded before
+    				continue;
+    			// image has been uploaded before and continue saving
+    			$imagePath = 'public' . $image->getOriginalSize();
+    		}
 
     		// cropping coordinates
     		$xStartCrop = $this->post['xStartCrop' . $indx];
@@ -219,15 +226,7 @@ abstract class AbstractCrudController extends AbstractActionController
     		$heightCrop = $this->post['heightCrop' . $indx];
     		$widthCrop = $this->post['widthCrop' . $indx];
 
-    		// set image entity
-    		$getImageFunctionName = 'getImg' . $indx;
-    		$setImageFunctionName = 'setImg' . $indx;
-    		if(empty($this->entity->$getImageFunctionName())) {
-    			$image = new \VisoftBaseModule\Entity\Image();
-    			$this->entity->$setImageFunctionName($image);
-    		} else {
-    			$image = $this->entity->$getImageFunctionName();
-    		}
+    		// save coordinates
     		$image->setXStartCrop($xStartCrop);
     		$image->setYStartCrop($yStartCrop);
     		$image->setHeightCrop($heightCrop);
@@ -236,27 +235,16 @@ abstract class AbstractCrudController extends AbstractActionController
     		$image->setHeightCurrent($this->post['heightCurrent' . $indx]);
 
     		// save coordinates and skip next if image not uploded 
-    		if(empty($this->post[$element]['name'])) {
-    			$this->entityManager->persist($image);
-	        	$this->entity->$setImageFunctionName($image);
-                continue;
-    		}
-    		
-    		// transfer file to target dir
-    		$imageInfo = pathinfo($this->post[$element]['name']);
-    		$receiver->setFilters([
-                new \Zend\Filter\File\Rename([
-                    "target" => $targetDir . 'image_' . '.' . $imageInfo['extension'],
-                    "randomize" => true,
-                ]),
-            ]);
-            $receiver->receive($element);
-            $imagePath = $receiver->getFileName($element);
+    		// if(!empty($this->post[$element]['name'])) {
+    		// 	// $this->entityManager->persist($image);
+		    //   	// $this->entity->$setImageFunctionName($image);
+	     //   		// 		continue;
+    		// }
 
             // get image name
             $explodedImagePath = explode('/', $imagePath);
         	$imageName = end($explodedImagePath); // last is image name
-        	$imageNameKey = key($explodedImagePath); // index for image name in array
+        	$imageNameKey = key($explodedImagePath); // key for image name value in array
             
             // create thumb
             $thumb = $this->thumbnailer->create($imagePath, $options = [], $plugins = []);
@@ -272,8 +260,9 @@ abstract class AbstractCrudController extends AbstractActionController
 	        );
 
         	// set original image
-        	if($image->getOriginalSize() !== null) 
-        		unlink('public' . $image->getOriginalSize());
+        	if($image->getOriginalSize() !== null)
+        		if(file_exists($image->getOriginalSize()))
+        			unlink('public' . $image->getOriginalSize());
             $image->setOriginalSize(end(explode('public', $imagePath)));
 	        
 	        // set large 
@@ -283,7 +272,8 @@ abstract class AbstractCrudController extends AbstractActionController
 	        $newImagePath = implode("/", $explodedImagePath);
 	        $thumb->save($newImagePath);
 	        if($image->getLSize() !== null)
-        		unlink('public' . $image->getLSize());
+	        	if(file_exists($image->getLSize()))
+        			unlink('public' . $image->getLSize());
 	        $image->setLSize(end(explode('public', $newImagePath)));
 
 	        // set medium
@@ -293,7 +283,8 @@ abstract class AbstractCrudController extends AbstractActionController
 	        $newImagePath = implode("/", $explodedImagePath);
 	        $thumb->save($newImagePath);
 	        if($image->getMSize() !== null)
-        		unlink('public' . $image->getMSize());
+	        	if(file_exists($image->getMSize()))
+        			unlink('public' . $image->getMSize());
 	        $image->setMSize(end(explode('public', $newImagePath)));
 
 	        // set small
@@ -303,7 +294,8 @@ abstract class AbstractCrudController extends AbstractActionController
 	        $newImagePath = implode("/", $explodedImagePath);
 	        $thumb->save($newImagePath);
 	        if($image->getSSize() !== null)
-        		unlink('public' . $image->getSSize());
+	        	if(file_exists($image->getSSize()))
+        			unlink('public' . $image->getSSize());
 	        $image->setSSize(end(explode('public', $newImagePath)));
 
 	        // set x-small
@@ -313,8 +305,12 @@ abstract class AbstractCrudController extends AbstractActionController
 	        $newImagePath = implode("/", $explodedImagePath);
 	        $thumb->save($newImagePath);
 	        if($image->getXsSize() !== null)
-        		unlink('public' . $image->getXsSize());
+	        	if(file_exists($image->getXsSize()))
+        			unlink('public' . $image->getXsSize());
 	        $image->setXsSize(end(explode('public', $newImagePath)));
+
+	       	// image ready
+	        $this->getEntity()->$setImageFunctionName($image);
 
 	        // save image
 	        $this->entityManager->persist($image);
@@ -323,7 +319,21 @@ abstract class AbstractCrudController extends AbstractActionController
 
     protected function bindExtra() 
     {
-
+		// for ($indx = 1; $indx < 5; $indx++) { 
+    		// $getImageFunctionName = 'getImg';
+    		$image = $this->getEntity()->getImage();
+    		// var_dump($image);
+    		// die('dd');
+    		if(!empty($image)) {
+    			$this->editForm->get('xStartCrop')->setValue($image->getXStartCrop());
+	    		$this->editForm->get('yStartCrop')->setValue($image->getYStartCrop());
+	    		$this->editForm->get('heightCrop')->setValue($image->getHeightCrop());
+	    		$this->editForm->get('widthCrop')->setValue($image->getWidthCrop());
+	    		$this->editForm->get('heightCurrent')->setValue($image->getHeightCurrent());
+	    		$this->editForm->get('widthCurrent')->setValue($image->getWidthCurrent());
+    		}
+    		
+    	// }
     }
 
 	public function setAuthenticationService($authenticationService)

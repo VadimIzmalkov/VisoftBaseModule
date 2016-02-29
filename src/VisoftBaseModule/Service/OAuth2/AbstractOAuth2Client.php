@@ -146,7 +146,7 @@ abstract class AbstractOAuth2Client
         $user = new $userEntityInfo->name;
         $user->setFullName($oAuth2ProfileInfo['first_name'] . " " . $oAuth2ProfileInfo['last_name']);
         $user->setProviderId($this->providerName, $oAuth2ProfileInfo['id']);
-        $user->setAvatar($this->createAvatar($oAuth2ProfileInfo));
+        $user->setImage($this->createAvatar($oAuth2ProfileInfo));
         $user->setRole($this->entityManager->getRepository('VisoftBaseModule\Entity\UserRole')->findOneBy(['name' => 'member']));
         $user->setState($this->entityManager->getRepository('VisoftMailerModule\Entity\ContactState')->findOneBy(['name' => 'Confirmed']));
         $user->setEmail($oAuth2ProfileInfo['email']);
@@ -161,8 +161,8 @@ abstract class AbstractOAuth2Client
     {
         if(empty($user->getProviderId($this->providerName))) // update provider ID
             $user->setProviderId($this->providerName, $oAuth2ProfileInfo['id']);
-        if(empty($user->getAvatar)) // update user profile image 
-            $user->setAvatar($this->createAvatar($oAuth2ProfileInfo));
+        if(empty($user->getImage())) // update user profile image 
+            $user->setImage($this->createAvatar($oAuth2ProfileInfo));
         $this->entityManager->persist($user);
         $this->entityManager->flush();
     }

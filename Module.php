@@ -100,25 +100,25 @@ class Module
     public function getControllerPluginConfig()
     {
         return array(
-            // 'factories' => array(
-            //     'UserActivityLogger' => function($serviceLocator) {
-            //         $parentLocator = $serviceLocator->getServiceLocator();
-            //         $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
-            //         return new Service\Log\Controller\Plugin\UserActivityLogger($entityManager);
-            //     },
-            //     'Social' => function($serviceLocator) {
-            //         $parentLocator = $serviceLocator->getServiceLocator();
-            //         $socialClients['facebook'] = $parentLocator->get('VisoftBaseModule\Service\OAuth2\FacebookClient');
-            //         $socialClients['linkedin'] = $parentLocator->get('VisoftBaseModule\Service\OAuth2\LinkedInClient');
-            //         return new Controller\Plugin\Social($socialClients);
-            //     },
-            //     'Authentication' => function($serviceLocator) {
-            //         $parentLocator = $serviceLocator->getServiceLocator();
-            //         $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
-            //         $authenticationService = $parentLocator->get('Zend\Authentication\AuthenticationService');
-            //         return new Service\Authentication\Controller\Plugin\Authentication($entityManager, $authenticationService);
-            //     },
-            // ),
+            'factories' => array(
+                'UserActivityLogger' => function($serviceLocator) {
+                    $parentLocator = $serviceLocator->getServiceLocator();
+                    $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
+                    return new Service\Log\Controller\Plugin\UserActivityLogger($entityManager);
+                },
+                'Social' => function($serviceLocator) {
+                    $parentLocator = $serviceLocator->getServiceLocator();
+                    $socialClients['facebook'] = $parentLocator->get('VisoftBaseModule\Service\OAuth2\FacebookClient');
+                    $socialClients['linkedin'] = $parentLocator->get('VisoftBaseModule\Service\OAuth2\LinkedInClient');
+                    return new Controller\Plugin\Social($socialClients);
+                },
+                'Authentication' => function($serviceLocator) {
+                    $parentLocator = $serviceLocator->getServiceLocator();
+                    $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
+                    $authenticationService = $parentLocator->get('Zend\Authentication\AuthenticationService');
+                    return new Service\Authentication\Controller\Plugin\Authentication($entityManager, $authenticationService);
+                },
+            ),
             'invokables' => [
                 'checkDir' => 'VisoftBaseModule\Controller\Plugin\CheckDir',
             ],
