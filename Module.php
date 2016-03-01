@@ -169,6 +169,7 @@ class Module
 
     public function onRoute(\Zend\EventManager\EventInterface $e) 
     {         
+
         $application = $e->getApplication();
         $routeMatch = $e->getRouteMatch();
         $serviceManader = $application->getServiceManager();
@@ -193,12 +194,13 @@ class Module
             throw new \Exception('Resource ' . $controller . ' not defined in ACL');
         }
 
+        
         if (!$acl->isAllowed($role, $controller, $action)) {
+
             $response = $e->getResponse();
             $requestedUri = $e->getRequest()->getRequestUri();
             $config = $serviceManader->get('config');
             $redirect_route = $config['acl']['redirect_route'];
-            // var_dump($response);
             if(!empty($redirect_route)) {
                 // TODO: FIXIT
                 $url = $e->getRouter()->assemble($redirect_route['params'], $redirect_route['options']);

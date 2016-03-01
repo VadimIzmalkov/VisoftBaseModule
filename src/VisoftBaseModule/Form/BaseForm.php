@@ -496,6 +496,37 @@ class BaseForm extends Form
         ]);
     }
 
+    public function addSelectState($name, $labelClass = 'label', $label = 'Select state', $id = null, $elementClass = 'form-control')
+    {
+        $this->add([
+            'name' => $name,
+            'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+            'attributes' => [
+                'class' => $elementClass,
+                'id' => $id,
+           ],
+           'options' => [
+                'label' => $label,
+                'label_attributes' => [
+                    'class' => $labelClass,
+                ],
+                'object_manager' => $this->entityManager,
+                'target_class' => 'VisoftMailerModule\Entity\ContactState',
+                'property' => 'name',
+                'display_empty_item' => true,
+                'empty_item_label' => '-- select state --',
+                'is_method' => true,
+                'find_method' => array(
+                    'name'   => 'findBy',
+                    'params' => array(
+                        'criteria' => array(),
+                        'orderBy'  => array('name' => 'ASC'),
+                    ),
+                ),
+            ],
+        ]);
+    }
+
     public function addSelectEntites($name, $label, $targetClass, $emtyItemLabel = null, $property = 'name', $labelClass = 'label', $id = null, $elementClass = 'form-control', $isMethod = true)
     {
         if ('emtyItemLabel' === null) 
