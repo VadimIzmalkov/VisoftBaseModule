@@ -121,6 +121,7 @@ class Module
             ),
             'invokables' => [
                 'checkDir' => 'VisoftBaseModule\Controller\Plugin\CheckDir',
+                'downloadFile' => 'VisoftBaseModule\Controller\Plugin\DownloadFile',
             ],
         );
     }
