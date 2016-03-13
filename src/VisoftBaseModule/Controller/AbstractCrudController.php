@@ -10,12 +10,13 @@ abstract class AbstractCrudController extends AbstractActionController
 	// page titles
 	const CREATE_PAGE_TITLE = 'Create entity';
 	const EDIT_PAGE_TITLE = 'Edit entity';
+	
 	// messages
 	const CREATE_SUCCESS_MESSAGE = 'Entity successfully created';
 	const EDIT_SUCCESS_MESSAGE = 'Entity successfully updated';
 
 	protected $entityManager;
-
+	
 	private $entity = null;
 	protected $entityClass;
 	protected $entityRepository;
@@ -23,19 +24,19 @@ abstract class AbstractCrudController extends AbstractActionController
 	protected $layouts = null;
 	protected $templates = null;
 	protected $uploadPath = null;
+	protected $viewModel;
+	protected $post;
+	
 	// forms
 	protected $createForm = null;
 	protected $editForm = null;
-	// view models
-	// protected $createViewModel;
-	protected $viewModel;
-	protected $post;
+	
+	// inputFilters
+	protected $createInputFilter = null;
+	protected $editInputFilter = null;
 
 	//services
 	protected $authenticationService = null;
-	/**
-     * @var WebinoImageThumb\WebinoImageThumb
-     */
 	protected $thumbnailer;
 
 	public function __construct($entityManager, $entityClass)
@@ -58,6 +59,7 @@ abstract class AbstractCrudController extends AbstractActionController
                 $this->request->getFiles()->toArray()
             );
             $images = $this->params()->fromFiles();
+            $this->setCreateInputFilter();
             $this->createForm->setData($this->post);
             if($this->createForm->isValid()) {
             	$data = $this->createForm->getData();
@@ -88,10 +90,8 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	public function editAction()
 	{
-		// needs to clone because after isValid() binded entity looses image object
+		// clone because after isValid() binded entity looses image object
 		$this->entity = clone($this->getEntity());
-		// var_dump($this->editForm);
-		// die('ss');
 		$this->editForm = $this->getEditForm();
 		if($this->getRequest()->isPost()) {
 			$this->post = array_merge_recursive(
@@ -99,6 +99,7 @@ abstract class AbstractCrudController extends AbstractActionController
                 $this->request->getFiles()->toArray()
             );
             $images = $this->params()->fromFiles();
+            $this->setEditInputFilter();
             $this->editForm->bind($this->getEntity());
             $this->editForm->setData($this->post);
             if($this->editForm->isValid()) {
@@ -106,6 +107,7 @@ abstract class AbstractCrudController extends AbstractActionController
             	// can be empty if InpuFile not defined
             	if(!empty($images)) 
             		$this->saveImages($images);
+            	$this->setExtra();
             	$this->entityManager->persist($this->getEntity());
 	            $this->entityManager->flush();
 	            $this->flashMessenger()->addSuccessMessage(static::EDIT_SUCCESS_MESSAGE);
@@ -123,6 +125,16 @@ abstract class AbstractCrudController extends AbstractActionController
 		]);
 		$this->addEditViewModelVariables($viewModel);
 		return $viewModel;
+	}
+
+	protected function setCreateInputFilter()
+	{
+		$this->createForm->setInputFilter($this->createInputFilter);
+	}
+
+	protected function setEditInputFilter()
+	{
+		$this->editForm->setInputFilter($this->editInputFilter);
 	}
 
     protected function redirectAfterCreate() 
@@ -153,7 +165,7 @@ abstract class AbstractCrudController extends AbstractActionController
     	return $entity;
     }
 
-    // overrides form if one depends on route, but not depends on action
+    // override this method if action should be changed
     protected function getEditForm()
     {
     	$this->editForm->setAttributes(['action' => $this->request->getRequestUri()]);
@@ -317,6 +329,11 @@ abstract class AbstractCrudController extends AbstractActionController
     	}
     }
 
+    protected function 	setExtra()
+    {
+    	
+    }
+
     protected function bindExtra() 
     {
 		// for ($indx = 1; $indx < 5; $indx++) { 
@@ -354,6 +371,13 @@ abstract class AbstractCrudController extends AbstractActionController
 	{
 		$this->createForm = isset($forms['create']) ? $forms['create'] : null;
 		$this->editForm = isset($forms['edit']) ? $forms['edit'] : null;
+		return $this;
+	}
+
+	public function setInputFilters($inputFilters)
+	{
+		$this->createInputFilter = isset($inputFilters['create']) ? $inputFilters['create'] : null;
+		$this->editInputFilter = isset($inputFilters['edit']) ? $inputFilters['edit'] : null;
 		return $this;
 	}
 

@@ -52,19 +52,44 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         if(isset($config['forms'])) {
             $formParameters = $config['forms'];
             $formClass = $formParameters['class'];
-            // set form for create action
+            
+            // form for create action
             if(isset($formParameters['options']['create'])) {
                 $formType = $formParameters['options']['create'];
                 $form = new $formClass($entityManager, $formType, $identity);
                 $forms['create'] = $form;
             }
-            // set form for edit action
+            
+            // form for edit action
             if(isset($formParameters['options']['edit'])) {
                 $formType = $formParameters['options']['edit'];
                 $form = new $formClass($entityManager, $formType, $identity);
                 $forms['edit'] = $form;
             }
+
+            // set form
             $crudController->setForms($forms);
+
+            if(isset($formParameters['inputFulters'])) {
+                // input filter for create action
+                if(isset($formParameters['inputFulters']['options']['create'])) {
+                    $inputFilterClass = $formParameters['inputFulters']['class'];
+                    $inputFilterType = $formParameters['inputFulters']['options']['create'];
+                    $inputFilter = new $inputFilterClass($entityManager, $inputFilterType, $identity);
+                    $inputFilters['create'] = $inputFilter;
+                }
+
+                // input filter for edit action
+                if(isset($formParameters['inputFulters']['options']['edit'])) {
+                    $inputFilterClass = $formParameters['inputFulters']['class'];
+                    $inputFilterType = $formParameters['inputFulters']['options']['edit'];
+                    $inputFilter = new $inputFilterClass($entityManager, $inputFilterType, $identity);
+                    $inputFilters['edit'] = $inputFilter;
+                }
+
+                // set input filters
+                $crudController->setInputFilters($inputFilters);
+            }
         }
 
         if(isset($config['templates']))
