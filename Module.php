@@ -152,10 +152,18 @@ class Module
                     
                     // Store ACL and role in the proxy helper:
                     $navigation->setAcl($acl)->setRole($role); // 'member'
-                    // die('ff');
+                    
                     // Return the new navigation helper instance
                     return $navigation;
                 },
+
+                'oauth2uri' => function(\Zend\View\HelperPluginManager $pluginManager) {
+                    $serviceLocator = $pluginManager->getServiceLocator();
+                    $socialClients['facebook'] = $serviceLocator->get('VisoftBaseModule\Service\OAuth2\FacebookClient');
+                    $socialClients['linkedin'] = $serviceLocator->get('VisoftBaseModule\Service\OAuth2\LinkedInClient');
+                    $helper = new Service\OAuth2\View\Helper\OAuth2UriHelper($socialClients);
+                    return $helper;
+                }
             ),
         );
     }
