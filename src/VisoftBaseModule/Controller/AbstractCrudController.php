@@ -134,7 +134,8 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	protected function setEditInputFilter()
 	{
-		$this->editForm->setInputFilter($this->editInputFilter);
+		if(isset($this->editInputFilter))
+			$this->editForm->setInputFilter($this->editInputFilter);
 	}
 
     protected function redirectAfterCreate() 

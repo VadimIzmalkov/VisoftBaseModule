@@ -118,6 +118,9 @@ class Module
                     $authenticationService = $parentLocator->get('Zend\Authentication\AuthenticationService');
                     return new Service\Authentication\Controller\Plugin\Authentication($entityManager, $authenticationService);
                 },
+                'accessoryPlugin' => function($serviceLocator) {
+                    return new Controller\Plugin\AccessoryPlugin();
+                }
             ),
             'invokables' => [
                 'checkDir' => 'VisoftBaseModule\Controller\Plugin\CheckDir',
