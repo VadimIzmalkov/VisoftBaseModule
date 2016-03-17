@@ -375,6 +375,13 @@ class BaseForm extends Form
                 'property' => 'name',
                 'display_empty_item' => true,
                 'empty_item_label' => '-- Select City --',
+                'find_method'    => array(
+                    'name'   => 'findBy',
+                    'params' => array(
+                        'criteria' => array(),
+                        'orderBy'  => array('name' => 'ASC'),
+                    ),
+                ),
             ], 
         ]);
     }
