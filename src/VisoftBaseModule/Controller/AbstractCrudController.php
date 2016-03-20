@@ -129,7 +129,8 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	protected function setCreateInputFilter()
 	{
-		$this->createForm->setInputFilter($this->createInputFilter);
+		if(isset($this->createInputFilter))
+			$this->createForm->setInputFilter($this->createInputFilter);
 	}
 
 	protected function setEditInputFilter()
@@ -192,7 +193,7 @@ abstract class AbstractCrudController extends AbstractActionController
     protected function saveImages($images) 
     {
     	// dir for files
-    	$targetDir = $this->uploadPath . '/'. $this->getEntity()->getId() . '/';
+    	$targetDir = $this->uploadPath . '/'. $this->entity->getId() . '/';
     	$this->checkDir($targetDir);
 
     	// receiver of the upload
