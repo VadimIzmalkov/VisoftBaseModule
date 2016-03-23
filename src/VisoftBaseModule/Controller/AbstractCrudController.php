@@ -24,6 +24,8 @@ abstract class AbstractCrudController extends AbstractActionController
 	protected $layouts = null;
 	protected $templates = null;
 	protected $uploadPath = null;
+	protected $imageStorage = null;
+	
 	protected $viewModel;
 	protected $post;
 	
@@ -37,6 +39,7 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	//services
 	protected $authenticationService = null;
+	protected $slugService = null;
 	protected $thumbnailer;
 
 	public function __construct($entityManager, $entityClass)
@@ -67,13 +70,17 @@ abstract class AbstractCrudController extends AbstractActionController
             		$this->entity->setCreatedBy($this->identity());
             	$this->entityManager->persist($this->entity);
             	$this->entityManager->flush();
+            	// die('ffff');
             	if(!empty($images)) 
             		$this->saveImages($images);
+            	$this->setExtra();
+            	$this->entityManager->persist($this->entity);
+	            $this->entityManager->flush();
+	            $this->flashMessenger()->addSuccessMessage(static::CREATE_SUCCESS_MESSAGE);
+	            $this->redirectAfterCreate();
             }
-            $this->entityManager->persist($this->entity);
-            $this->entityManager->flush();
-            $this->flashMessenger()->addSuccessMessage(static::CREATE_SUCCESS_MESSAGE);
-            $this->redirectAfterCreate();
+            // var_dump($this->createForm->getMessages());
+            // die('fffff');
 		}
 		$viewModel = new ViewModel();
 		if(isset($this->templates['create']))
@@ -91,7 +98,8 @@ abstract class AbstractCrudController extends AbstractActionController
 	public function editAction()
 	{
 		// clone because after isValid() binded entity looses image object
-		$this->entity = clone($this->getEntity());
+		// $this->entity = clone($this->getEntity());
+		$this->entity = $this->getEntity();
 		$this->editForm = $this->getEditForm();
 		if($this->getRequest()->isPost()) {
 			$this->post = array_merge_recursive(
@@ -100,7 +108,7 @@ abstract class AbstractCrudController extends AbstractActionController
             );
             $images = $this->params()->fromFiles();
             $this->setEditInputFilter();
-            $this->editForm->bind($this->getEntity());
+            $this->editForm->bind($this->entity);
             $this->editForm->setData($this->post);
             if($this->editForm->isValid()) {
             	$data = $this->editForm->getData();
@@ -108,7 +116,7 @@ abstract class AbstractCrudController extends AbstractActionController
             	if(!empty($images)) 
             		$this->saveImages($images);
             	$this->setExtra();
-            	$this->entityManager->persist($this->getEntity());
+            	$this->entityManager->persist($this->entity);
 	            $this->entityManager->flush();
 	            $this->flashMessenger()->addSuccessMessage(static::EDIT_SUCCESS_MESSAGE);
 	            $this->redirectAfterEdit();
@@ -159,10 +167,22 @@ abstract class AbstractCrudController extends AbstractActionController
         return $this->redirect()->toRoute($route, $parameters);
     }
 
+    protected function redirectToRefer()
+    {
+        $scheme = $this->request->getHeader('Referer')->uri()->getScheme();
+        $host = $this->request->getHeader('Referer')->uri()->getHost();
+        $path = $this->request->getHeader('Referer')->uri()->getPath();
+        $port = $this->request->getHeader('Referer')->uri()->getPort();
+        $port = is_null($port) ? null : ':' . $port;
+        $query = $this->request->getHeader('Referer')->uri()->getQuery();
+        $redirectUrl = $scheme . '://' . $host  . $port . $path . '?' . $query;
+        return $this->redirect()->toUrl($redirectUrl);
+    }
+
     protected function getEntity()
     {
     	$routeParams = $this->params()->fromRoute();
-    	$entityId = isset($routeParams['entityId']) ? $routeParams['entityId'] : null;
+    	$entityId = isset($routeParams['entityId']) ? $routeParams['entityId'] : $this->entity->getId();
     	$entity = $this->entityManager->find($this->entityClass, $entityId);
     	return $entity;
     }
@@ -192,6 +212,154 @@ abstract class AbstractCrudController extends AbstractActionController
 
     protected function saveImages($images) 
     {
+    	if(!is_null($this->imageStorage)) {
+    		switch ($this->imageStorage) {
+    			case 'inline':
+    				$this->saveImagesInline($images);
+    				break;
+    			case 'multiple-inline':
+    				# code...
+    				break;
+    			case 'object':
+    				# code...
+    				break;
+    			case 'multiple-object':
+    				# code...
+    				break;
+    			default:
+    				# code...
+    				break;
+    		}
+    	}
+    }
+
+    protected function saveImagesInline($images)
+    {
+    	if(!empty($images['image']['name'])) {
+	    	// image data - name, type, size, temporary location
+	    	$imageFileInfo = pathinfo($images['image']['name']);
+
+	    	// dir for files
+	    	$targetDir = $this->uploadPath . '/'. $this->entity->getId() . '/';
+	    	\VisoftBaseModule\Controller\Plugin\AccessoryPlugin::checkDir($targetDir);
+
+	    	// receiver for the upload and transfer
+	    	$receiver = new \Zend\File\Transfer\Adapter\Http();
+	    	$receiver->setDestination($targetDir);
+	    	// set target dir and random name
+	    	$receiver->setFilters([
+	            new \Zend\Filter\File\Rename([
+	                "target" => $targetDir . 'img' . '.' . $imageFileInfo['extension'],
+	                "randomize" => true,
+	            ])
+	        ]);
+	    	// move image and get new name
+	        if($receiver->receive('image'))
+	            $imagePath = $receiver->getFileName('image');
+	        
+	        // save image with original size image
+	        if($this->entity->getPictureOriginal() !== null) {
+	        	// file_exist require full path 
+	        	$imageFullPath = getcwd() . '/public' . $this->entity->getPictureOriginal();
+	        	// if old file exists - remove
+	        	if(file_exists($imageFullPath))
+	                unlink($imageFullPath);
+	        }
+	        $this->entity->setPictureOriginal(end(explode('public', $imagePath)));
+	    } else {
+	    	$imagePath = 'public' . $this->entity->getPictureOriginal();
+	    }
+
+        // cropping coordinates
+        $xStartCrop = $this->post['xStartCrop'];
+        $yStartCrop = $this->post['yStartCrop'];
+        $heightCrop = $this->post['heightCrop'];
+        $widthCrop = $this->post['widthCrop'];
+
+        // save coordinates
+        // not needs to save coordinates in 'inline' case because form bind to entity
+
+        // create thumb
+        $thumb = $this->thumbnailer->create($imagePath, $options = [], $plugins = []);
+
+		// crop image
+        $currentDimantions = $thumb->getCurrentDimensions();
+        $scale = $currentDimantions['width'] / $this->post['widthCurrent'];
+        $thumb->crop(
+            $xStartCrop * $scale, 
+            $yStartCrop * $scale, 
+            $widthCrop * $scale, 
+            $heightCrop * $scale
+        );
+
+        // expold image path for rename
+        $explodedImagePath = explode('/', $imagePath);
+        $imageName = end($explodedImagePath); // last is image name
+        // $imageName = basename($imagePath);
+        $imageNameKey = key($explodedImagePath); // key for image name 
+
+		// save large 
+        $thumb->resize(960, 960);
+        $newImageName = 'large_' . $imageName;
+        $explodedImagePath[$imageNameKey] = $newImageName;
+        $newImagePath = implode("/", $explodedImagePath);
+        $thumb->save($newImagePath);
+        if($this->entity->getPictureL() !== null)
+            if(file_exists($this->entity->getPictureL()))
+                unlink('public' . $this->entity->getPictureL());
+        $this->entity->setPictureL(end(explode('public', $newImagePath)));
+
+        // set medium
+        $thumb->resize(480, 480);
+        $newImageName = 'medium_' . $imageName;
+        $explodedImagePath[$imageNameKey] = $newImageName;
+        $newImagePath = implode("/", $explodedImagePath);
+        $thumb->save($newImagePath);
+        if($this->entity->getPictureM() !== null)
+            if(file_exists($this->entity->getPictureM()))
+                unlink('public' . $this->entity->getPictureM());
+        $this->entity->setPictureM(end(explode('public', $newImagePath)));
+
+        // set small
+        $thumb->resize(240, 240);
+        $newImageName = 'small_' . $imageName;
+        $explodedImagePath[$imageNameKey] = $newImageName;
+        $newImagePath = implode("/", $explodedImagePath);
+        $thumb->save($newImagePath);
+        if($this->entity->getPictureS() !== null)
+            if(file_exists($this->entity->getPictureS()))
+                unlink('public' . $this->entity->getPictureS());
+        $this->entity->setPictureS(end(explode('public', $newImagePath)));
+
+        // set x-small
+        $thumb->resize(60, 60);
+        $newImageName = 'xsmall_' . $imageName;
+        $explodedImagePath[$imageNameKey] = $newImageName;
+        $newImagePath = implode("/", $explodedImagePath);
+        $thumb->save($newImagePath);
+        if($this->entity->getPictureXS() !== null)
+            if(file_exists($this->entity->getPictureXS()))
+                unlink('public' . $this->entity->getPictureXS());
+        $this->entity->setPictureXS(end(explode('public', $newImagePath)));
+
+        // set mail
+        $thumb->resize(240, 240);
+        $newImageName = 'xsmall_' . $imageName;
+        $explodedImagePath[$imageNameKey] = $newImageName;
+        $newImagePath = implode("/", $explodedImagePath);
+        $thumb->save($newImagePath);
+        if($this->entity->getPictureMail() !== null)
+            if(file_exists($this->entity->getPictureMail()))
+                unlink('public' . $this->entity->getPictureMail());
+        $this->entity->setPictureMail(end(explode('public', $newImagePath)));
+
+        // save image
+        $this->entityManager->persist($this->entity);
+        $this->entityManager->flush();
+    }
+
+    protected function saveImagesMultipleObject($images) 
+    {
     	// dir for files
     	$targetDir = $this->uploadPath . '/'. $this->entity->getId() . '/';
     	$this->checkDir($targetDir);
@@ -215,7 +383,7 @@ abstract class AbstractCrudController extends AbstractActionController
 
     		// get image path 
     		if(!empty($this->post[$element]['name'])) {
-    			// if image uploaded - transfer one and get new file path
+    			// if uploaded - move image to target dir, rename and get new file path
 	    		$imageInfo = pathinfo($this->post[$element]['name']);
 	    		$receiver->setFilters([
 	                new \Zend\Filter\File\Rename([
@@ -226,7 +394,7 @@ abstract class AbstractCrudController extends AbstractActionController
 	            $receiver->receive($element);
 	            $imagePath = $receiver->getFileName($element);
     		} else {
-    			// if image not uploaded check if image has been uploaded before
+    			// if not uploaded check if image has been uploaded before
     			if(empty($image->getOriginalSize()))
     				// stop saving image because image not uploaded and was has been uploaded before
     				continue;
@@ -331,7 +499,12 @@ abstract class AbstractCrudController extends AbstractActionController
     	}
     }
 
-    protected function 	setExtra()
+    protected function setCreateExtra()
+    {
+    	
+    }
+
+    protected function setExtra()
     {
     	
     }
@@ -383,6 +556,12 @@ abstract class AbstractCrudController extends AbstractActionController
 		return $this;
 	}
 
+	public function setImageStorage($imageStorage)
+	{
+		$this->imageStorage = $imageStorage;
+		return $this;
+	}
+
 	public function setLayouts($layouts)
 	{
 		$this->layouts = $layouts;
@@ -404,6 +583,12 @@ abstract class AbstractCrudController extends AbstractActionController
 	public function setThumbnailer($thumbnailer)
 	{
 		$this->thumbnailer = $thumbnailer;
+		return $this;
+	}
+
+	public function setSlugService($slugService)
+	{
+		$this->slugService = $slugService;
 		return $this;
 	}
 }

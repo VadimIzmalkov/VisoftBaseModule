@@ -1,9 +1,7 @@
 <?php
 namespace VisoftBaseModule\Controller\Plugin;
 
-use Zend\Mvc\Controller\Plugin\AbstractPlugin;
-
-class DownloadFile extends AbstractPlugin
+class DownloadFile extends \Zend\Mvc\Controller\Plugin\AbstractPlugin;
 {
 	public function __invoke($filePath) 
 	{

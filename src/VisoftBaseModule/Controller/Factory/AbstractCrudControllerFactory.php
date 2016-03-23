@@ -30,7 +30,6 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         
         $parentLocator = $serviceLocator->getServiceLocator();
         $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
-        $thumbnailer = $parentLocator->get('WebinoImageThumb');
         $authenticationService = $parentLocator->get('Zend\Authentication\AuthenticationService');
         $identity = $authenticationService->getIdentity();
 
@@ -70,19 +69,20 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
             // set form
             $crudController->setForms($forms);
 
-            if(isset($formParameters['inputFulters'])) {
+            if(isset($formParameters['inputFilters'])) {
+                $inputFiltersParameters = $config['inputFilters'];
                 // input filter for create action
-                if(isset($formParameters['inputFulters']['options']['create'])) {
-                    $inputFilterClass = $formParameters['inputFulters']['class'];
-                    $inputFilterType = $formParameters['inputFulters']['options']['create'];
+                if(isset($inputFiltersParameters['options']['create'])) {
+                    $inputFilterClass = $inputFiltersParameters['class'];
+                    $inputFilterType = $inputFiltersParameters['options']['create'];
                     $inputFilter = new $inputFilterClass($entityManager, $inputFilterType, $identity);
                     $inputFilters['create'] = $inputFilter;
                 }
 
                 // input filter for edit action
-                if(isset($formParameters['inputFulters']['options']['edit'])) {
-                    $inputFilterClass = $formParameters['inputFulters']['class'];
-                    $inputFilterType = $formParameters['inputFulters']['options']['edit'];
+                if(isset($inputFiltersParameters['options']['edit'])) {
+                    $inputFilterClass = $inputFiltersParameters['class'];
+                    $inputFilterType = $inputFiltersParameters['options']['edit'];
                     $inputFilter = new $inputFilterClass($entityManager, $inputFilterType, $identity);
                     $inputFilters['edit'] = $inputFilter;
                 }
@@ -91,6 +91,9 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
                 $crudController->setInputFilters($inputFilters);
             }
         }
+
+        if(isset($config['imageStorage']))
+            $crudController->setImageStorage($config['imageStorage']);
 
         if(isset($config['templates']))
             $crudController->setTemplates($config['templates']);
@@ -101,7 +104,11 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         if(isset($config['uploadPath']))
             $crudController->setUploadPath($config['uploadPath']);
 
+        $thumbnailer = $parentLocator->get('WebinoImageThumb');
         $crudController->setThumbnailer($thumbnailer);
+
+        $slugService = $parentLocator->get('SeoUrl\Slug');
+        $crudController->setSlugService($slugService);
 
         return $crudController;
     }
