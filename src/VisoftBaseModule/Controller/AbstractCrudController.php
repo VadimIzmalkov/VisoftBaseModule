@@ -26,7 +26,7 @@ abstract class AbstractCrudController extends AbstractActionController
 	protected $uploadPath = null;
 	protected $imageStorage = null;
 	
-	protected $viewModel;
+	private $viewModel = null;
 	protected $post;
 	
 	// forms
@@ -51,8 +51,14 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	public function createAction()
 	{
+        // check if form is defined in "crud_controller" specification (module.config.php)
+        // form depends on the action and the user role
+        // action defined in "crud_controller" specification
+        // the user role is 3d parameter ($identity) of the form constructor and defines the form type
+        // the object of the form creates in AbstractCrudControllerFactory
 		if(is_null($this->createForm))
 			throw new \Exception("Create form not defined", 1);
+        // action for form should be same as current action
 		$this->createForm->setAttributes(['action' => $this->request->getRequestUri()]);
 		$this->entity = new $this->entityClass();
 		$this->createForm->bind($this->entity);
@@ -65,12 +71,12 @@ abstract class AbstractCrudController extends AbstractActionController
             $this->setCreateInputFilter();
             $this->createForm->setData($this->post);
             if($this->createForm->isValid()) {
+                // die('Abstract CRUD controller. Form errors');
             	$data = $this->createForm->getData();
             	if(!is_null($this->identity()))
             		$this->entity->setCreatedBy($this->identity());
             	$this->entityManager->persist($this->entity);
             	$this->entityManager->flush();
-            	// die('ffff');
             	if(!empty($images)) 
             		$this->saveImages($images);
             	$this->setExtra();
@@ -79,19 +85,18 @@ abstract class AbstractCrudController extends AbstractActionController
 	            $this->flashMessenger()->addSuccessMessage(static::CREATE_SUCCESS_MESSAGE);
 	            $this->redirectAfterCreate();
             }
-            // var_dump($this->createForm->getMessages());
-            // die('fffff');
+            // dump the form, find an errors
+            // $errorMessages = $this->createForm->getMessages();
+            // var_dump($errorMessages);
+            // die('Abstract CRUD controller. Form errors');
+
 		}
-		$viewModel = new ViewModel();
-		if(isset($this->templates['create']))
-			$viewModel->setTemplate($this->templates['create']);
-		if(isset($this->layouts['create']))
-			$this->layout($this->layouts['create']);
-		$viewModel->setVariables([
-			'form' => $this->createForm,
-			'thisAction' => 'create',
-			'pageTitle' => static::CREATE_PAGE_TITLE,
-		]);
+        $viewModel = $this->getViewModel([
+            'form' => $this->createForm,
+            'thisAction' => 'create',
+            'pageTitle' => static::CREATE_PAGE_TITLE,
+        ]);
+		$this->addCreateViewModelVariables($viewModel);
 		return $viewModel;
 	}
 
@@ -196,19 +201,22 @@ abstract class AbstractCrudController extends AbstractActionController
 
     protected function getViewModel(array $variables = null)
     {
-    	$routeMatch = $this->getEvent()->getRouteMatch();
-    	$action = $routeMatch->getParam('action');
-		$this->viewModel = new ViewModel();
-		if(isset($this->templates[$action]))
-			$this->viewModel->setTemplate($this->templates[$action]);
-		if(isset($this->layouts[$action]))
-			$this->layout($this->layouts[$action]);
-		if(!is_null($variables))
-			$this->viewModel->setVariables($variables);
+        if(is_null($this->viewModel)) {
+        	$routeMatch = $this->getEvent()->getRouteMatch();
+        	$action = $routeMatch->getParam('action');
+    		$this->viewModel = new ViewModel();
+    		if(isset($this->templates[$action]))
+    			$this->viewModel->setTemplate($this->templates[$action]);
+    		if(isset($this->layouts[$action]))
+    			$this->layout($this->layouts[$action]);
+        }
+        if(!is_null($variables))
+            $this->viewModel->setVariables($variables);
 		return $this->viewModel;
     }
 
-    protected function addEditViewModelVariables(&$viewModel) { }
+    protected function addCreateViewModelVariables() { }
+    protected function addEditViewModelVariables() { }
 
     protected function saveImages($images) 
     {
