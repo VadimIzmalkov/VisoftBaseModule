@@ -83,7 +83,7 @@ abstract class AbstractCrudController extends AbstractActionController
             	$this->entityManager->persist($this->entity);
 	            $this->entityManager->flush();
 	            $this->flashMessenger()->addSuccessMessage(static::CREATE_SUCCESS_MESSAGE);
-	            $this->redirectAfterCreate();
+	            return $this->redirectAfterCreate();
             }
             // dump the form, find an errors
             // $errorMessages = $this->createForm->getMessages();
@@ -124,7 +124,7 @@ abstract class AbstractCrudController extends AbstractActionController
             	$this->entityManager->persist($this->entity);
 	            $this->entityManager->flush();
 	            $this->flashMessenger()->addSuccessMessage(static::EDIT_SUCCESS_MESSAGE);
-	            $this->redirectAfterEdit();
+	            return $this->redirectAfterEdit();
             }
 		} else {
 			$this->editForm->bind($this->entity);
