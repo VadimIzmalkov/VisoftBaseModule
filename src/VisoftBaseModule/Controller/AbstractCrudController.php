@@ -128,6 +128,9 @@ abstract class AbstractCrudController extends AbstractActionController
             }
 		} else {
 			$this->editForm->bind($this->entity);
+            // bind title image coordinates
+            if($this->imageStorage === 'object')
+                $this->bindImageTitleCoordinates();
 			$this->bindExtra();
 		}
 		$viewModel = $this->getViewModel([
@@ -229,7 +232,7 @@ abstract class AbstractCrudController extends AbstractActionController
     				# code...
     				break;
     			case 'object':
-    				# code...
+    				$this->saveImagesObject($images);
     				break;
     			case 'multiple-object':
     				# code...
@@ -364,6 +367,133 @@ abstract class AbstractCrudController extends AbstractActionController
         // save image
         $this->entityManager->persist($this->entity);
         $this->entityManager->flush();
+    }
+
+    protected function saveImagesObject($images) 
+    {
+        // create new image object or get exists from entity
+        if(empty($imageTitleEntity = $this->entity->getImageTitle())) {
+            $imageTitleEntity = new \VisoftBaseModule\Entity\Image();
+            $this->entity->setImageTitle($imageTitleEntity);
+        } elseif(is_array($imageTitleEntity)) {
+            // here is binding issue
+            // for "title image" the names of upload element and entity field should be different 
+            throw new \Exception("Image element and image obect has same names", 1); 
+        }
+
+        if(!empty($images['image-title-upload-element']['name'])) {
+            // image data - name, type, size, temporary location
+            $imageFileInfo = pathinfo($images['image-title-upload-element']['name']);
+
+            // transfer image and get new path
+            $imageOriginalPath = $this->transferImage('image-title-upload-element', $imageFileInfo);
+            
+            // delete previous image with original size image
+            // if(!is_null($imageOriginalPreviousPath = $imageEntity->getOriginalSize())) {
+            //     // file_exist() require full path 
+            //     $imageOriginalPreviousFullPath = getcwd() . '/public' . $imageOriginalPreviousPath;
+            //     // if old file exists - remove
+            //     if(file_exists($imageOriginalPreviousFullPath))
+            //         unlink($imageOriginalPreviousFullPath);
+            // }
+
+        } else {
+            // return beacause image not uploaded and not exists before
+            if($imageTitleEntity->getOriginalSize() === null)
+                return ;
+
+            // image not uploaded but exist and continue in order to update cropping
+            $imageOriginalPath = 'public' . $imageTitleEntity->getOriginalSize();
+        }
+
+        // cropping coordinates
+        $xStartCrop = $this->post['xStartCrop'];
+        $yStartCrop = $this->post['yStartCrop'];
+        $heightCrop = $this->post['heightCrop'];
+        $widthCrop = $this->post['widthCrop'];
+
+        // save coordinates
+        $imageTitleEntity->setXStartCrop($xStartCrop);
+        $imageTitleEntity->setYStartCrop($yStartCrop);
+        $imageTitleEntity->setHeightCrop($heightCrop);
+        $imageTitleEntity->setWidthCrop($widthCrop);
+        $imageTitleEntity->setWidthCurrent($this->post['widthCurrent']);
+        $imageTitleEntity->setHeightCurrent($this->post['heightCurrent']);
+
+        // image name
+        $explodedImagePath = explode('/', $imageOriginalPath);
+        $imageName = end($explodedImagePath); // last is image name
+        $imageNameKey = key($explodedImagePath); // key for image name value in array
+            
+        // create thumb
+        $thumb = $this->thumbnailer->create($imageOriginalPath, $options = [], $plugins = []);
+
+        // crop image
+        $currentDimantions = $thumb->getCurrentDimensions();
+        $scale = $currentDimantions['width'] / $this->post['widthCurrent'];
+        // scaled coordinates
+        $xStartCropScaled = $xStartCrop * $scale;
+        $yStartCropScaled = $yStartCrop * $scale;
+        $widthCropScaled = $widthCrop * $scale;
+        $heightCropScaled = $heightCrop * $scale;
+        // crop
+        $thumb->crop($xStartCropScaled, $yStartCropScaled, $widthCropScaled, $heightCropScaled);
+
+        // save original image
+        if(!is_null($imageTitleEntity->getOriginalSize()))
+            if(file_exists($imageTitleEntity->getOriginalSize()))
+                unlink('public' . $imageTitleEntity->getOriginalSize());
+        $imageTitleEntity->setOriginalSize(end(explode('public', $imageOriginalPath)));
+            
+        // save large 
+        $thumb->resize(960, 960);
+        $newImageName = 'large_' . $imageName;
+        $explodedImagePath[$imageNameKey] = $newImageName;
+        $newImagePath = implode("/", $explodedImagePath);
+        $thumb->save($newImagePath);
+        if($imageTitleEntity->getLSize() !== null)
+            if(file_exists($imageTitleEntity->getLSize()))
+                unlink('public' . $imageTitleEntity->getLSize());
+        $imageTitleEntity->setLSize(end(explode('public', $newImagePath)));
+
+        // save medium
+        $thumb->resize(480, 480);
+        $newImageName = 'medium_' . $imageName;
+        $explodedImagePath[$imageNameKey] = $newImageName;
+        $newImagePath = implode("/", $explodedImagePath);
+        $thumb->save($newImagePath);
+        if($imageTitleEntity->getMSize() !== null)
+            if(file_exists($imageTitleEntity->getMSize()))
+                unlink('public' . $imageTitleEntity->getMSize());
+        $imageTitleEntity->setMSize(end(explode('public', $newImagePath)));
+
+            // // set small
+            // $thumb->resize(240, 240);
+            // $newImageName = 'small_' . $imageName;
+            // $explodedImagePath[$imageNameKey] = $newImageName;
+            // $newImagePath = implode("/", $explodedImagePath);
+            // $thumb->save($newImagePath);
+            // if($image->getSSize() !== null)
+            //     if(file_exists($image->getSSize()))
+            //         unlink('public' . $image->getSSize());
+            // $image->setSSize(end(explode('public', $newImagePath)));
+
+            // // set x-small
+            // $thumb->resize(60, 60);
+            // $newImageName = 'xsmall_' . $imageName;
+            // $explodedImagePath[$imageNameKey] = $newImageName;
+            // $newImagePath = implode("/", $explodedImagePath);
+            // $thumb->save($newImagePath);
+            // if($image->getXsSize() !== null)
+            //     if(file_exists($image->getXsSize()))
+            //         unlink('public' . $image->getXsSize());
+            // $image->setXsSize(end(explode('public', $newImagePath)));
+
+            // // image ready
+            // $this->getEntity()->$setImageFunctionName($image);
+
+        // save image
+        $this->entityManager->persist($imageTitleEntity);
     }
 
     protected function saveImagesMultipleObject($images) 
@@ -599,4 +729,42 @@ abstract class AbstractCrudController extends AbstractActionController
 		$this->slugService = $slugService;
 		return $this;
 	}
+
+    private function transferImage($elementName, $imageFileInfo) 
+    {
+        // dir for files
+        $targetDir = $this->uploadPath . '/'. $this->entity->getId() . '/';
+        \VisoftBaseModule\Controller\Plugin\AccessoryPlugin::checkDir($targetDir);
+
+        // receiver of the upload
+        $receiver = new \Zend\File\Transfer\Adapter\Http();
+        $receiver->setDestination($targetDir);
+
+        // set target dir and random name
+        $receiver->setFilters([
+            new \Zend\Filter\File\Rename([
+                "target" => $targetDir . 'img' . '.' . $imageFileInfo['extension'],
+                "randomize" => true,
+            ])
+        ]);
+
+        // move image and get new name
+        if($receiver->receive($elementName))
+            return $imagePath = $receiver->getFileName($elementName);
+
+        return false;
+    }
+
+    private function bindImageTitleCoordinates() 
+    {
+        $imageTitleEntity = $this->entity->getImageTitle();
+        if(!empty($imageTitleEntity)) {
+            $this->editForm->get('xStartCrop')->setValue($imageTitleEntity->getXStartCrop());
+            $this->editForm->get('yStartCrop')->setValue($imageTitleEntity->getYStartCrop());
+            $this->editForm->get('heightCrop')->setValue($imageTitleEntity->getHeightCrop());
+            $this->editForm->get('widthCrop')->setValue($imageTitleEntity->getWidthCrop());
+            $this->editForm->get('heightCurrent')->setValue($imageTitleEntity->getHeightCurrent());
+            $this->editForm->get('widthCurrent')->setValue($imageTitleEntity->getWidthCurrent());
+        }
+    }
 }

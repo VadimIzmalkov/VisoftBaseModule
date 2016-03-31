@@ -655,7 +655,7 @@ class BaseForm extends Form
         ]);
     }
 
-    public function addFile($name, $label = null, $id = null, $required = false, $labelClass = 'label', $enctype = null)
+    public function addFile($name, $label = null, $id = null, $required = false, $labelClass = 'label', $multiple = false)
     {
         $this->add([
             'name' => $name,
@@ -663,7 +663,7 @@ class BaseForm extends Form
             'attributes' => [
                 'id' => $id,
                 'required' => $required,
-                'enctype' => $enctype,
+                'multiple' => $multiple,
             ],
             'options' => [
                 'label' => $label,
