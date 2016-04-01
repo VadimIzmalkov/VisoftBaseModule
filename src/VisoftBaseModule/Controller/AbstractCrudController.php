@@ -38,6 +38,7 @@ abstract class AbstractCrudController extends AbstractActionController
 	protected $editInputFilter = null;
 
 	//services
+    protected $crudService;
 	protected $authenticationService = null;
 	protected $slugService = null;
 	protected $thumbnailer;
@@ -51,10 +52,10 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	public function createAction()
 	{
-        // check if form is defined in "crud_controller" specification (module.config.php)
+        // check if form is defined in "crud_controller" specification (module.config.php). 
         // form depends on the action and the user role
         // action defined in "crud_controller" specification
-        // the user role is 3d parameter ($identity) of the form constructor and defines the form type
+        // For each of the roles can be configured special type of the form (3d parameter of the form constructor - $identity)
         // the object of the form creates in AbstractCrudControllerFactory
 		if(is_null($this->createForm))
 			throw new \Exception("Create form not defined", 1);

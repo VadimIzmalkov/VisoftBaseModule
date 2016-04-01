@@ -70,7 +70,7 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
             $crudController->setForms($forms);
 
             if(isset($formParameters['inputFilters'])) {
-                $inputFiltersParameters = $config['inputFilters'];
+                $inputFiltersParameters = $formParameters['inputFilters'];
                 // input filter for create action
                 if(isset($inputFiltersParameters['options']['create'])) {
                     $inputFilterClass = $inputFiltersParameters['class'];
@@ -94,6 +94,14 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
 
         if(isset($config['imageStorage']))
             $crudController->setImageStorage($config['imageStorage']);
+
+        if(isset($config['service'])) {
+            $crudService = $parentLocator->get($config['service']);
+            if($crudService instanceof \VisoftBaseModule\Service\AbstractCrudService)
+                $crudController->setCrudService($crudService);
+            else
+                throw new \Exception("CRUD service should be instance of \VisoftBaseModule\Service\AbstractCrudService", 1);
+        }
 
         if(isset($config['templates']))
             $crudController->setTemplates($config['templates']);
