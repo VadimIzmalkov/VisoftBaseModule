@@ -235,8 +235,8 @@ abstract class AbstractCrudController extends AbstractActionController
     			case 'object':
     				$this->saveImagesObject($images);
     				break;
-    			case 'multiple-object':
-    				# code...
+    			case 'multiple-objects':
+    				$this->saveImagesMultipleObjects($images);
     				break;
     			default:
     				# code...
@@ -497,7 +497,7 @@ abstract class AbstractCrudController extends AbstractActionController
         $this->entityManager->persist($imageTitleEntity);
     }
 
-    protected function saveImagesMultipleObject($images) 
+    protected function saveImagesMultipleObjects($images) 
     {
     	// dir for files
     	$targetDir = $this->uploadPath . '/'. $this->entity->getId() . '/';
@@ -512,8 +512,8 @@ abstract class AbstractCrudController extends AbstractActionController
     		preg_match_all('!\d+!', $element, $matches);
     		$indx = implode('', $matches[0]); // last character is number - $image1
     		// saving data to image entity
-    		$getImageFunctionName = 'getImage' . $indx;
-    		$setImageFunctionName = 'setImage' . $indx;
+    		$getImageFunctionName = 'getImg' . $indx;
+    		$setImageFunctionName = 'setImg' . $indx;
     		// get image from original entity
     		$image = $this->entity->$getImageFunctionName();
     		if(empty($image)) 

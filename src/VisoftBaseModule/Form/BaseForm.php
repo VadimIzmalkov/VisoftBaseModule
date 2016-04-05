@@ -258,7 +258,7 @@ class BaseForm extends Form
     public function addSelectPartner($name) 
     {
         $this->add([
-           'name' => 'partner',
+           'name' => $name,
            'type' => 'DoctrineModule\Form\Element\ObjectSelect',
            'attributes' => [
                 'class' => 'form-control',
