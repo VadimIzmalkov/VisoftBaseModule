@@ -103,8 +103,6 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	public function editAction()
 	{
-		// clone because after isValid() binded entity looses image object
-		// $this->entity = clone($this->getEntity());
 		$this->entity = $this->getEntity();
 		$this->editForm = $this->getEditForm();
 		if($this->getRequest()->isPost()) {
@@ -114,6 +112,8 @@ abstract class AbstractCrudController extends AbstractActionController
             );
             $images = $this->params()->fromFiles();
             $this->setEditInputFilter();
+            // here can be binding issue
+            // for "title image" the names of upload element and entity field should be different 
             $this->editForm->bind($this->entity);
             $this->editForm->setData($this->post);
             if($this->editForm->isValid()) {
@@ -371,33 +371,21 @@ abstract class AbstractCrudController extends AbstractActionController
     }
 
     protected function saveImagesObject($images) 
-    {
+    {        
+        $imageTitleEntity = $this->entity->getImageTitle();
+        
         // create new image object or get exists from entity
-        if(empty($imageTitleEntity = $this->entity->getImageTitle())) {
+        if(empty($imageTitleEntity)) {
             $imageTitleEntity = new \VisoftBaseModule\Entity\Image();
             $this->entity->setImageTitle($imageTitleEntity);
-        } elseif(is_array($imageTitleEntity)) {
-            // here is binding issue
-            // for "title image" the names of upload element and entity field should be different 
-            throw new \Exception("Image element and image obect has same names", 1); 
-        }
+        } 
 
         if(!empty($images['image-title-upload-element']['name'])) {
             // image data - name, type, size, temporary location
             $imageFileInfo = pathinfo($images['image-title-upload-element']['name']);
-
+            
             // transfer image and get new path
             $imageOriginalPath = $this->transferImage('image-title-upload-element', $imageFileInfo);
-            
-            // delete previous image with original size image
-            // if(!is_null($imageOriginalPreviousPath = $imageEntity->getOriginalSize())) {
-            //     // file_exist() require full path 
-            //     $imageOriginalPreviousFullPath = getcwd() . '/public' . $imageOriginalPreviousPath;
-            //     // if old file exists - remove
-            //     if(file_exists($imageOriginalPreviousFullPath))
-            //         unlink($imageOriginalPreviousFullPath);
-            // }
-
         } else {
             // return beacause image not uploaded and not exists before
             if($imageTitleEntity->getOriginalSize() === null)
@@ -468,30 +456,27 @@ abstract class AbstractCrudController extends AbstractActionController
                 unlink('public' . $imageTitleEntity->getMSize());
         $imageTitleEntity->setMSize(end(explode('public', $newImagePath)));
 
-            // // set small
-            // $thumb->resize(240, 240);
-            // $newImageName = 'small_' . $imageName;
-            // $explodedImagePath[$imageNameKey] = $newImageName;
-            // $newImagePath = implode("/", $explodedImagePath);
-            // $thumb->save($newImagePath);
-            // if($image->getSSize() !== null)
-            //     if(file_exists($image->getSSize()))
-            //         unlink('public' . $image->getSSize());
-            // $image->setSSize(end(explode('public', $newImagePath)));
+        // set small
+        $thumb->resize(240, 240);
+        $newImageName = 'small_' . $imageName;
+        $explodedImagePath[$imageNameKey] = $newImageName;
+        $newImagePath = implode("/", $explodedImagePath);
+        $thumb->save($newImagePath);
+        if($imageTitleEntity->getSSize() !== null)
+            if(file_exists($imageTitleEntity->getSSize()))
+                unlink('public' . $imageTitleEntity->getSSize());
+        $imageTitleEntity->setSSize(end(explode('public', $newImagePath)));
 
-            // // set x-small
-            // $thumb->resize(60, 60);
-            // $newImageName = 'xsmall_' . $imageName;
-            // $explodedImagePath[$imageNameKey] = $newImageName;
-            // $newImagePath = implode("/", $explodedImagePath);
-            // $thumb->save($newImagePath);
-            // if($image->getXsSize() !== null)
-            //     if(file_exists($image->getXsSize()))
-            //         unlink('public' . $image->getXsSize());
-            // $image->setXsSize(end(explode('public', $newImagePath)));
-
-            // // image ready
-            // $this->getEntity()->$setImageFunctionName($image);
+        // set x-small
+        $thumb->resize(60, 60);
+        $newImageName = 'xsmall_' . $imageName;
+        $explodedImagePath[$imageNameKey] = $newImageName;
+        $newImagePath = implode("/", $explodedImagePath);
+        $thumb->save($newImagePath);
+        if($imageTitleEntity->getXsSize() !== null)
+            if(file_exists($imageTitleEntity->getXsSize()))
+                unlink('public' . $imageTitleEntity->getXsSize());
+        $imageTitleEntity->setXsSize(end(explode('public', $newImagePath)));
 
         // save image
         $this->entityManager->persist($imageTitleEntity);
