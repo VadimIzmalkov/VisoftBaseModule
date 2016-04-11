@@ -90,7 +90,6 @@ abstract class AbstractCrudController extends AbstractActionController
             // $errorMessages = $this->createForm->getMessages();
             // var_dump($errorMessages);
             // die('Abstract CRUD controller. Form errors');
-
 		}
         $viewModel = $this->getViewModel([
             'form' => $this->createForm,
@@ -103,8 +102,13 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	public function editAction()
 	{
+        // getEntity() can be overrided and used for generate entity (if one not exists yet)
 		$this->entity = $this->getEntity();
+
+        // if form depends on some parameter (exp. entity) edit form can be custom 
 		$this->editForm = $this->getEditForm();
+
+        // start POST
 		if($this->getRequest()->isPost()) {
 			$this->post = array_merge_recursive(
                 $this->request->getPost()->toArray(),           
@@ -114,11 +118,12 @@ abstract class AbstractCrudController extends AbstractActionController
             $this->setEditInputFilter();
             // here can be binding issue
             // for "title image" the names of upload element and entity field should be different 
+            // TODO: generate exeption before binding
             $this->editForm->bind($this->entity);
             $this->editForm->setData($this->post);
             if($this->editForm->isValid()) {
             	$data = $this->editForm->getData();
-            	// can be empty if InpuFile not defined
+            	// can be empty if input file (images) has not been uploaded
             	if(!empty($images)) 
             		$this->saveImages($images);
             	$this->setExtra();
@@ -127,13 +132,16 @@ abstract class AbstractCrudController extends AbstractActionController
 	            $this->flashMessenger()->addSuccessMessage(static::EDIT_SUCCESS_MESSAGE);
 	            return $this->redirectAfterEdit();
             }
-		} else {
-			$this->editForm->bind($this->entity);
-            // bind title image coordinates
-            if($this->imageStorage === 'object')
-                $this->bindImageTitleCoordinates();
-			$this->bindExtra();
-		}
+		} 
+
+        // request not POST
+        // bind entity to form
+		$this->editForm->bind($this->entity);
+        // bind title image coordinates
+        if($this->imageStorage === 'object')
+            $this->bindImageTitleCoordinates();
+		$this->bindExtra();
+
 		$viewModel = $this->getViewModel([
 			'form' => $this->editForm,
 			'entity' => $this->entity,
@@ -197,6 +205,7 @@ abstract class AbstractCrudController extends AbstractActionController
     }
 
     // override this method if action should be changed
+    // or if form depends on parameters (entity, for example)
     protected function getEditForm()
     {
     	$this->editForm->setAttributes(['action' => $this->request->getRequestUri()]);
