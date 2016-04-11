@@ -152,6 +152,38 @@ abstract class AbstractCrudController extends AbstractActionController
 		return $viewModel;
 	}
 
+    public function deleteAction()
+    {
+        $this->entity = $this->getEntity();
+        // $paramsRoute = $this->params()->fromRoute();
+        // $id = $paramsRoute['entityId'];
+        // if($id === null)
+        //     return $this->redirect()->toRoute('administrator/default', array('controller' => $this->controllerName));
+        // $entity = $this->entityManager->getRepository(static::ENTITY_CLASS)->findOneBy(['id' => $id]);
+        // if(is_null($entity))
+        //     return $this->redirect()->toRoute('administrator/default', array('controller' => $this->controllerName));
+        // $dir = static::UPLOAD_PATH . '/'. $entity->getId() . '/';
+        $entityDir = $this->uploadPath . '/'. $this->entity->getId() . '/';
+        if(is_dir($entityDir)) {
+            $objects = scandir($entityDir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                    if (filetype($entityDir . '/' . $object) == "dir") 
+                        rmdir($dir. '/' . $object); 
+                    else 
+                        unlink($dir. '/' . $object);
+                }
+            }
+            reset($objects);
+            rmdir($dir);
+        }
+        $this->entityManager->remove($this->entity);
+        $this->entityManager->flush();
+        return $this->redirectAfterDelete();
+        // $redirect = $this->composeCreateRedirect($entity, $paramsRoute);
+        // return $this->redirect()->toRoute($redirect['route'], $redirect['params']); 
+    }
+
 	protected function setCreateInputFilter()
 	{
 		if(isset($this->createInputFilter))
@@ -181,6 +213,16 @@ abstract class AbstractCrudController extends AbstractActionController
         $parameters['controller'] = $routeMatch->getParam('__CONTROLLER__');
         $parameters['action'] = $routeMatch->getParam('action');
         $parameters['entityId'] = $this->getEntity()->getId();
+        return $this->redirect()->toRoute($route, $parameters);
+    }
+
+
+    protected function redirectAfterDelete() 
+    {
+        $routeMatch = $this->getEvent()->getRouteMatch();
+        $route = $routeMatch->getMatchedRouteName();
+        $parameters['controller'] = $routeMatch->getParam('__CONTROLLER__');
+        $parameters['action'] = 'index';
         return $this->redirect()->toRoute($route, $parameters);
     }
 
