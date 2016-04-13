@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManager;
 class BaseForm extends Form 
 {
     private $title;
+    private $formType;
 	protected $entityManager;
 
 	public function __construct(EntityManager $entityManager)
@@ -17,15 +18,11 @@ class BaseForm extends Form
         $this->entityManager = $entityManager;
     }
 
-    public function getTitle()
-    {
-        return $this->title;
-    }
+    public function getTitle() { return $this->title; }
+    public function setTitle($title) { $this->title = $title; }
 
-    public function setTitle($title)
-    {
-        $this->title = $title;
-    }
+    public function getFormType() { return $this->formType; }
+    public function setFormType($formType) { $this->formType = $formType; }
 
     public function addText($name, $label = null, $labelClass = 'label', $id = null, $required = false, $placeholder = null, $disabled = false, $readonly = false, $elementClass = 'form-control')
     {
@@ -355,13 +352,13 @@ class BaseForm extends Form
         ]);
     }
 
-    public function addSelectCity($name, $id, $required = false, $label = 'Select city')
+    public function addSelectCity($name, $id = null, $required = false, $label = 'Select city', $elementClass = 'form-control')
     {
         $this->add([
            'name' => $name,
            'type' => 'DoctrineModule\Form\Element\ObjectSelect',
            'attributes' => [
-                'class' => 'form-control',
+                'class' => $elementClass,
                 'id' => $id,
                 'required' => $required,
            ],

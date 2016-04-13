@@ -17,9 +17,9 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	protected $entityManager;
 	
-	private $entity = null;
-	protected $entityClass;
-	protected $entityRepository;
+	protected $entity = null;
+	protected $entityClass = null;
+	protected $entityRepository = null;
 
 	protected $layouts = null;
 	protected $templates = null;
@@ -45,24 +45,26 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	public function __construct($entityManager, $entityClass)
 	{
-		$this->entityClass = $entityClass;
-		$this->entityManager = $entityManager;
-		$this->entityRepository = $this->entityManager->getRepository($entityClass);
+        $this->entityManager = $entityManager;
+
+        if(!is_null($entityClass)) {
+            $this->entityClass = $entityClass;
+            $this->entityRepository = $this->entityManager->getRepository($entityClass);
+        }
 	}
 
 	public function createAction()
 	{
-        // check if form is defined in "crud_controller" specification (module.config.php). 
-        // form depends on the action and the user role
-        // action defined in "crud_controller" specification
-        // For each of the roles can be configured special type of the form (3d parameter of the form constructor - $identity)
-        // the object of the form creates in AbstractCrudControllerFactory
-		if(is_null($this->createForm))
-			throw new \Exception("Create form not defined", 1);
+        // entity
+        $this->entity = $this->getEntity();
+
+        // get form for create
+        $this->createForm = $this->getCreateForm();
         // action for form should be same as current action
-		$this->createForm->setAttributes(['action' => $this->request->getRequestUri()]);
-		$this->entity = new $this->entityClass();
+        $this->createForm->setAttributes(['action' => $this->request->getRequestUri()]);
 		$this->createForm->bind($this->entity);
+
+        // start POST
 		if($this->request->isPost()) {
 			$this->post = array_merge_recursive(
                 $this->request->getPost()->toArray(),           
@@ -184,26 +186,13 @@ abstract class AbstractCrudController extends AbstractActionController
         // return $this->redirect()->toRoute($redirect['route'], $redirect['params']); 
     }
 
-	protected function setCreateInputFilter()
-	{
-		if(isset($this->createInputFilter))
-			$this->createForm->setInputFilter($this->createInputFilter);
-	}
+
 
 	protected function setEditInputFilter()
 	{
 		if(isset($this->editInputFilter))
 			$this->editForm->setInputFilter($this->editInputFilter);
 	}
-
-    protected function redirectAfterCreate() 
-    {
-        $routeMatch = $this->getEvent()->getRouteMatch();
-        $route = $routeMatch->getMatchedRouteName();
-        $parameters['controller'] = $routeMatch->getParam('__CONTROLLER__');
-        $parameters['action'] = 'index';
-        return $this->redirect()->toRoute($route, $parameters);
-    }
 
     protected function redirectAfterEdit() 
     {
@@ -226,28 +215,64 @@ abstract class AbstractCrudController extends AbstractActionController
         return $this->redirect()->toRoute($route, $parameters);
     }
 
-    protected function redirectToRefer()
-    {
-        $scheme = $this->request->getHeader('Referer')->uri()->getScheme();
-        $host = $this->request->getHeader('Referer')->uri()->getHost();
-        $path = $this->request->getHeader('Referer')->uri()->getPath();
-        $port = $this->request->getHeader('Referer')->uri()->getPort();
-        $port = is_null($port) ? null : ':' . $port;
-        $query = $this->request->getHeader('Referer')->uri()->getQuery();
-        $redirectUrl = $scheme . '://' . $host  . $port . $path . '?' . $query;
-        return $this->redirect()->toUrl($redirectUrl);
-    }
-
     protected function getEntity()
     {
     	$routeParams = $this->params()->fromRoute();
-    	$entityId = isset($routeParams['entityId']) ? $routeParams['entityId'] : $this->entity->getId();
-    	$entity = $this->entityManager->find($this->entityClass, $entityId);
+        if(isset($routeParams['entityId'])) {
+            // ID from route
+            $entityId = $routeParams['entityId'];
+            $entity = $this->entityManager->find($this->getEntityClassName(), $entityId);
+        } elseif(is_null($this->entity)) {
+            // create entity
+            $entityClassName = $this->getEntityClassName();
+            $entity = new $entityClassName();
+        } else {
+            // just return exists entity
+            $entity = $this->entity; 
+        }
     	return $entity;
     }
 
-    // override this method if action should be changed
-    // or if form depends on parameters (entity, for example)
+    // override this method if name of the class can be depend
+    protected function getEntityClassName()
+    {
+        if($this->entityClass === null)
+            throw new \Exception("Entity class name not defined in \"crud_controller\" specification (\"module.config.php\"). Define the class name or override method \"getEntityClassName()\" for depends entity", 1);
+        return $this->entityClass;   
+    }
+
+    // override this method if form depends on parameter (entity, layout etc.)
+    protected function getCreateForm()
+    {
+        // check if form is defined in "crud_controller" config (module.config.php). 
+        // form depends on the action and the user role
+        // parameter that select actions is defined in "crud_controller" config
+        // For each of the roles can be configured special type of the form (3d parameter of the form constructor - $identity)
+        // Objet creater - "AbstractCrudControllerFactory"
+        if(is_null($this->createForm))
+            throw new \Exception("Create form name not defined in \"crud_controller\" specification (\"module.config.php\"). Define the class name or override method \"getEntityClassName()\" for depends entity", 1);
+        // $this->editForm->setAttributes(['action' => $this->request->getRequestUri()]);
+        return $this->createForm;
+    }
+
+    protected function setCreateInputFilter()
+    {
+        if(isset($this->createInputFilter))
+            $this->createForm->setInputFilter($this->createInputFilter);
+    }
+
+    protected function redirectAfterCreate() 
+    {
+        $routeMatch = $this->getEvent()->getRouteMatch();
+        $route = $routeMatch->getMatchedRouteName();
+        $parameters['controller'] = $routeMatch->getParam('__CONTROLLER__');
+        $parameters['action'] = 'index';
+        return $this->redirect()->toRoute($route, $parameters);
+    }
+
+    // override this method if action for the form should be changed
+    // or 
+    // if form depends on parameters (entity, for example)
     protected function getEditForm()
     {
     	$this->editForm->setAttributes(['action' => $this->request->getRequestUri()]);
@@ -268,6 +293,15 @@ abstract class AbstractCrudController extends AbstractActionController
         if(!is_null($variables))
             $this->viewModel->setVariables($variables);
 		return $this->viewModel;
+    }
+
+    protected function getEntityRepository()
+    {
+        if(is_null($this->entityRepository)) {
+            $entityClassName = $this->getEntityClassName();
+            $this->entityRepository = $this->entityManager->getRepository($entityClassName);
+        }
+        return $this->entityRepository;
     }
 
     protected function addCreateViewModelVariables() { }
@@ -803,5 +837,17 @@ abstract class AbstractCrudController extends AbstractActionController
             $this->editForm->get('heightCurrent')->setValue($imageTitleEntity->getHeightCurrent());
             $this->editForm->get('widthCurrent')->setValue($imageTitleEntity->getWidthCurrent());
         }
+    }
+
+    protected function redirectToRefer()
+    {
+        $scheme = $this->request->getHeader('Referer')->uri()->getScheme();
+        $host = $this->request->getHeader('Referer')->uri()->getHost();
+        $path = $this->request->getHeader('Referer')->uri()->getPath();
+        $port = $this->request->getHeader('Referer')->uri()->getPort();
+        $port = is_null($port) ? null : ':' . $port;
+        $query = $this->request->getHeader('Referer')->uri()->getQuery();
+        $redirectUrl = $scheme . '://' . $host  . $port . $path . '?' . $query;
+        return $this->redirect()->toUrl($redirectUrl);
     }
 }
