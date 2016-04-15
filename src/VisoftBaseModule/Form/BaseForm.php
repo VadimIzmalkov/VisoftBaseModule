@@ -252,6 +252,40 @@ class BaseForm extends Form
         ]);
     }
 
+    public function addSelectCompany($name, $label = "Select company", $id = null, $required = false)
+    {
+        $this->add([
+            'name' => $name,
+            'attributes' => [
+                'class' => 'form-control',
+                'id' => $id,
+                'required' => $required,
+            ],
+            'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+            'options' => array(
+                'label' => $label,
+                'label_attributes' => [
+                    'class' => 'label'
+                ],
+                'object_manager' => $this->entityManager,
+                'target_class' => 'Admin\Entity\SponsorPartner',
+                'label_generator' => function($targetEntity) {
+                    return $targetEntity->getName();
+                },
+                'display_empty_item' => true,
+                'empty_item_label' => '-- Select Company --',
+                'is_method' => true,
+                'find_method' => array(
+                    'name'   => 'findBy',
+                    'params' => array(
+                        'criteria' => array(),
+                        'orderBy'  => array('name' => 'ASC'),
+                    ),
+                ),
+            ),
+        ]);
+    }
+
     public function addSelectPartner($name) 
     {
         $this->add([
