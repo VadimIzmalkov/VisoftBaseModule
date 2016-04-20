@@ -116,7 +116,7 @@ abstract class AbstractCrudController extends AbstractActionController
                 $this->request->getPost()->toArray(),           
                 $this->request->getFiles()->toArray()
             );
-            $images = $this->params()->fromFiles();
+            $files = $this->params()->fromFiles();
             $this->setEditInputFilter();
             // here can be binding issue
             // for "title image" the names of upload element and entity field should be different 
@@ -125,9 +125,9 @@ abstract class AbstractCrudController extends AbstractActionController
             $this->editForm->setData($this->post);
             if($this->editForm->isValid()) {
             	$data = $this->editForm->getData();
-            	// can be empty if input file (images) has not been uploaded
-            	if(!empty($images)) 
-            		$this->saveImages($images);
+            	// empty if files has not been uploaded
+            	if(!empty($files)) 
+            		$this->saveFiles($files);
             	$this->setExtra();
             	$this->entityManager->persist($this->entity);
 	            $this->entityManager->flush();
@@ -287,6 +287,7 @@ abstract class AbstractCrudController extends AbstractActionController
     		$this->viewModel = new ViewModel();
     		if(isset($this->templates[$action]))
     			$this->viewModel->setTemplate($this->templates[$action]);
+            // TODO: move handling layouts to own method 
     		if(isset($this->layouts[$action]))
     			$this->layout($this->layouts[$action]);
         }
@@ -307,21 +308,21 @@ abstract class AbstractCrudController extends AbstractActionController
     protected function addCreateViewModelVariables() { }
     protected function addEditViewModelVariables() { }
 
-    protected function saveImages($images) 
+    protected function saveFiles($files) 
     {
     	if(!is_null($this->imageStorage)) {
     		switch ($this->imageStorage) {
     			case 'inline':
-    				$this->saveImagesInline($images);
+    				$this->saveImagesInline($files);
     				break;
     			case 'multiple-inline':
     				# code...
     				break;
     			case 'object':
-    				$this->saveImagesObject($images);
+    				$this->saveImagesObject($files);
     				break;
     			case 'multiple-objects':
-    				$this->saveImagesMultipleObjects($images);
+    				$this->saveImagesMultipleObjects($files);
     				break;
     			default:
     				# code...
@@ -333,7 +334,11 @@ abstract class AbstractCrudController extends AbstractActionController
     protected function saveImagesInline($images)
     {
     	if(!empty($images['image']['name'])) {
-	    	// image data - name, type, size, temporary location
+	    	// image data:
+            // - name
+            // - type
+            // - size
+            // - temporary location
 	    	$imageFileInfo = pathinfo($images['image']['name']);
 
 	    	// dir for files
