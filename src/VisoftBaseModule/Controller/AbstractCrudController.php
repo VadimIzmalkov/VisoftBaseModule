@@ -81,7 +81,7 @@ abstract class AbstractCrudController extends AbstractActionController
             	$this->entityManager->persist($this->entity);
             	$this->entityManager->flush();
             	if(!empty($images)) 
-            		$this->saveImages($images);
+            		$this->saveFiles($images);
             	$this->setExtra();
             	$this->entityManager->persist($this->entity);
 	            $this->entityManager->flush();
