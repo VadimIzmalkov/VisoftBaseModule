@@ -565,6 +565,39 @@ class BaseForm extends Form
         ]);
     }
 
+    public function addCall2ActionSelect($name)
+    {
+        $this->add([
+           'name' => $name,
+           'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+           'attributes' => [
+                'class' => 'form-control',
+                'id' => 'select-call-2-action',
+           ],
+           'options' => [
+                'label' => 'Select call to action',
+                'label_attributes' => [
+                    'class' => 'label'
+                ], 
+                'object_manager' => $this->entityManager,
+                'target_class' => 'Fryday\Entity\Call2Action',
+                'label_generator' => function($targetEntity) {
+                        return $targetEntity->getTitle();
+                },
+                'display_empty_item' => true,
+                'empty_item_label' => '-- Select call to action --',
+                'is_method' => true,
+                'find_method' => array(
+                    'name'   => 'findBy',
+                    'params' => array(
+                        'criteria' => array(),
+                        'orderBy'  => array('title' => 'ASC'),
+                    ),
+                ),
+            ], 
+        ]);
+    }
+
     public function addSelectEntites($name, $label, $targetClass, $emtyItemLabel = null, $property = 'name', $labelClass = 'label', $id = null, $elementClass = 'form-control', $isMethod = true)
     {
         if ('emtyItemLabel' === null) 
