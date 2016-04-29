@@ -2,6 +2,9 @@
 
 namespace VisoftBaseModule\Service\OAuth2\View\Helper;
 
+/**
+ * Generate URI for each OAuth2 providers
+ */
 class OAuth2UriHelper extends \Zend\View\Helper\AbstractHelper implements \Zend\ServiceManager\ServiceLocatorAwareInterface
 {
 	protected $facebookClient;

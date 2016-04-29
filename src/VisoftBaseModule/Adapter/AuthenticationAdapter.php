@@ -36,7 +36,7 @@ class AuthenticationAdapter extends DoctrineAdapter implements ServiceLocatorAwa
     			$user = $userRepository->findOneBy([$oAuth2ProviderName . 'Id' => $oAuth2ProfileInfoArray['id']]);
             // if email not registered create new account
     		if(empty($user)) {
-    			$user = $this->oAuth2Client->createUser($oAuth2ProfileInfoArray, $oAuth2ProfileInfoArray['email']);
+    			$user = $this->oAuth2Client->createUser($oAuth2ProfileInfoArray);
                 $this->oAuth2Client->setNewUserFlag(true);
                 $logMessage = 'Signed up via ' . $this->oAuth2Client->getProvider();
     			$this->getLogger()->log(\Zend\Log\Logger::INFO, $logMessage, ['user' => $user]);
@@ -50,8 +50,7 @@ class AuthenticationAdapter extends DoctrineAdapter implements ServiceLocatorAwa
     		return new AuthenticationResult($oAuth2Code, $user);
     	} else { // not OAuth2
     		$this->setup();
-            // var_dump($this->options->getIdentityProperty());
-            // die('dddd');
+            // identity property set at module.config.php (Doctrine configuration)
             $identity = $userRepository->findOneBy([$this->options->getIdentityProperty() => $this->identity]);
             if (!$identity) {
                 $this->authenticationResultInfo['code'] = AuthenticationResult::FAILURE_IDENTITY_NOT_FOUND;

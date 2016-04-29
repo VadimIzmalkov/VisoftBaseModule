@@ -10,9 +10,9 @@ use Zend\Session\Config\StandardConfig;
  * Index controller
  */
 class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionController
-
 {
     protected $authenticationService;
+    protected $userService;
 
     protected $entityManager;
 
@@ -21,7 +21,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
     protected $layouts;
     protected $redirects;
 
-    public function __construct($entityManager, $authenticationService, $options) 
+    public function __construct($entityManager, $authenticationService, $options, $userService) 
     {
         $this->moduleOptions = $options;
         $this->templates = $options->getTemplates();
@@ -29,7 +29,9 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
         $this->forms = $options->getForms();
         $this->redirects = $options->getRedirects();
         $this->entityManager = $entityManager;
+
         $this->authenticationService = $authenticationService;
+        $this->userService = $userService;
     }
 
     public function signInAction()
@@ -42,6 +44,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
         $form->setAttributes(['action' => $this->request->getRequestUri()]);
         $viewModel = new ViewModel([
             'form' => $form,
+            // TODO: remove that
             'facebookSignInUrl' => $this->social()->getSignInUrl('facebook'),
             'linkedinSignInUrl' => $this->social()->getSignInUrl('linkedin'),
         ]);
@@ -121,6 +124,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
         $form->setAttributes(['action' => $this->request->getRequestUri()]);
         $viewModel = new ViewModel([
             'form' => $form,
+            // TODO: remove that
             'facebookSignInUrl' => $this->social()->getSignInUrl('facebook'),
             'linkedinSignInUrl' => $this->social()->getSignInUrl('linkedin'),
         ]);
@@ -128,7 +132,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
             $post = $this->request->getPost();
             $form->setData($post);
             if($form->isValid()) {
-                if($this->Authentication()->signUp($post)) {
+                if($this->userService->signUp($post['email'], $post['password'], $post['fullName'])) {
                     $this->userActivityLogger()->log($this->identity(), 'Signed up');
                     $this->flashMessenger()->addInfoMessage('We just sent you an email asking you to confirm your registration. Please search for fryday@fryady.net in your inbox and click on the "Confirm my registration" button');
                     $route = $this->redirects['sign-up']['route'];

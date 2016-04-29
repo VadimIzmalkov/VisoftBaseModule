@@ -20,16 +20,9 @@ class OAuth2Controller extends BaseController
 
 	public function oAuth2Action()
 	{
-		// die('hello');
 		$cookie = $this->request->getCookie();
 		$provider = $this->params()->fromRoute('provider');
 		$code =$this->params()->fromQuery('code');
-		// var_dump($code);
-		// die('hello');
-		// detect provider
-		
-		// var_dump($provider);
-		// die('hello');
 		switch ($provider) {
 			case 'facebook':
 				$this->oAuth2Client = $this->getServiceLocator()->get('VisoftBaseModule\Service\OAuth2\FacebookClient');
@@ -47,16 +40,19 @@ class OAuth2Controller extends BaseController
 		if (strlen($code) > 10) {
 			// send request to facebook, generate token and save it to session
 			$result = $this->oAuth2Client->generateToken($this->request);
-			// var_dump($result);
-			// die('gg12');
+
 			if($result)
-                $token = $this->oAuth2Client->getSessionToken(); // token in session
+				// token in session
+                $token = $this->oAuth2Client->getSessionToken();
             else 
-                $token = $this->oAuth2Client->getError(); // last returned error (array)
+            	// last returned error (array)
+                $token = $this->oAuth2Client->getError(); 
+
             // setting OAuth2 Client
             $adapter = $this->authenticationService->getAdapter();
             $adapter->setOAuth2Client($this->oAuth2Client);
-            // perform authentication
+
+            // authenticate
             $authenticationResult = $this->authenticationService->authenticate();
 
             if (!$authenticationResult->isValid()) {

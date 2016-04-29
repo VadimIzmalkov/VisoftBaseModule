@@ -8,9 +8,9 @@ class FacebookClient extends AbstractOAuth2Client
 {
 	protected $providerName = 'facebook';
     
-    public function __construct($entityManager)
+    public function __construct($entityManager, $userService)
     {
-        parent::__construct($entityManager);
+        parent::__construct($entityManager, $userService);
     } 
 
     public function generateToken(\Zend\Http\PhpEnvironment\Request $request) 
@@ -95,34 +95,7 @@ class FacebookClient extends AbstractOAuth2Client
         return $this->options->getInfoUri() . '?access_token=' . $this->session->token->access_token;
     }
 
-    // public function createUser($oAuth2ProfileInfo, $email) 
-    // {
-    //     $userEntityInfo = $this->entityManager->getClassMetadata('VisoftBaseModule\Entity\UserInterface');
-    //     $user = new $userEntityInfo->name;
-    //     $user->setFullName($oAuth2ProfileInfo['first_name'] . " " . $oAuth2ProfileInfo['last_name']);
-    //     $user->setProviderId($this->providerName, $oAuth2ProfileInfo['id']);
-    //     $user->setAvatar($this->getAvatar($oAuth2ProfileInfo['id']));
-    //     $user->setRole($this->entityManager->getRepository('VisoftBaseModule\Entity\UserRole')->findOneBy(['name' => 'member']));
-    //     $user->setState($this->entityManager->getRepository('VisoftMailerModule\Entity\ContactState')->findOneBy(['name' => 'Confirmed']));
-    //     $user->setEmail($email);
-    //     $this->entityManager->persist($user);
-    //     $this->entityManager->flush();
-    //     return $user;
-    //     // var_dump($facebookPictureUrl);
-    //     // die('in create user');
-    // }
-
-    // public function updateUser(&$user, $userProviderId)
-    // {
-    //     if(empty($user->getProviderId($this->providerName))) // update provider ID
-    //         $user->setProviderId($this->providerName, $userProviderId);
-    //     if(empty($user->getAvatar)) // update user profile image 
-    //         $user->setAvatar($this->createAvatar($userProviderId));
-    //     $this->entityManager->persist($user);
-    //     $this->entityManager->flush();
-    // }
-
-    public function createAvatar($oAuth2ProfileInfo)
+    public function getProviderAvatar($oAuth2ProfileInfo)
     {
         $profileImageUrl = "https://graph.facebook.com/" . $oAuth2ProfileInfo['id'] . "/picture";
         $avatar = new Entity\Image();
@@ -134,9 +107,4 @@ class FacebookClient extends AbstractOAuth2Client
         $this->entityManager->persist($avatar);
         return $avatar;
     }
-
-    // public function getProfileImageUrl($userProviderId)
-    // {
-    //     return "https://graph.facebook.com/" . $userProviderId . "/picture";
-    // }
 }

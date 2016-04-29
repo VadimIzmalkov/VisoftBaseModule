@@ -16,13 +16,16 @@ abstract class AbstractOAuth2Client
     protected $error;
     protected $httpClient;
     protected $newUserFlag = false;
+    protected $userService;
 
     abstract public function getUrl();
     abstract public function generateToken(Request $request);
 
-    public function __construct($entityManager)
+    public function __construct($entityManager, $userService)
     {
         $this->entityManager = $entityManager;
+        $this->userService = $userService;
+
         $this->session = new \Zend\Session\Container('OAuth2_' . get_class($this));
         $this->httpClient = new \Zend\Http\Client(null, [
             // 'timeout' => 30, 
@@ -140,21 +143,20 @@ abstract class AbstractOAuth2Client
 
     public function createUser($oAuth2ProfileInfo) 
     {
-        // var_dump($oAuth2ProfileInfo['pictureUrls']->values[0]);
-        // die('fdsaf');
-        $userEntityInfo = $this->entityManager->getClassMetadata('VisoftBaseModule\Entity\UserInterface');
-        $user = new $userEntityInfo->name;
-        $user->setFullName($oAuth2ProfileInfo['first_name'] . " " . $oAuth2ProfileInfo['last_name']);
+        $email = $oAuth2ProfileInfo['email'];
+        $fullName = $oAuth2ProfileInfo['first_name'] . " " . $oAuth2ProfileInfo['last_name'];
+        $avatar = $this->getProviderAvatar($oAuth2ProfileInfo);
+
+        // user creates via service in order to add Notifications
+        // password NULL because registration via Social Network
+        $user = $this->userService->createUser($email, null, $fullName, $avatar);
+
+        // add provider ID
         $user->setProviderId($this->providerName, $oAuth2ProfileInfo['id']);
-        $user->setImageTitle($this->createAvatar($oAuth2ProfileInfo));
-        $user->setRole($this->entityManager->getRepository('VisoftBaseModule\Entity\UserRole')->findOneBy(['name' => 'member']));
-        $user->setState($this->entityManager->getRepository('VisoftMailerModule\Entity\ContactState')->findOneBy(['name' => 'Confirmed']));
-        $user->setEmail($oAuth2ProfileInfo['email']);
+
         $this->entityManager->persist($user);
         $this->entityManager->flush();
         return $user;
-        // var_dump($facebookPictureUrl);
-        // die('in create user');
     }
 
     public function updateUser(&$user, $oAuth2ProfileInfo)
@@ -162,7 +164,7 @@ abstract class AbstractOAuth2Client
         if(empty($user->getProviderId($this->providerName))) // update provider ID
             $user->setProviderId($this->providerName, $oAuth2ProfileInfo['id']);
         if(empty($user->getImageTitle())) // update user profile image 
-            $user->setImageTitle($this->createAvatar($oAuth2ProfileInfo));
+            $user->setImageTitle($this->getProviderAvatar($oAuth2ProfileInfo));
         $this->entityManager->persist($user);
         $this->entityManager->flush();
     }

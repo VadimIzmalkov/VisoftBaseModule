@@ -37,8 +37,9 @@ class Module
                 },
                 'VisoftBaseModule\Service\UserService' => function($serviceLocator) {
                     $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
-                    $moduleOptions = $serviceLocator->get('VisoftBaseModule\Options\ModuleOptions');
-                    return new Service\UserService($entityManager, $moduleOptions);
+                    // $moduleOptions = $serviceLocator->get('VisoftBaseModule\Options\ModuleOptions');
+                    $authenticationService = $serviceLocator->get('Zend\Authentication\AuthenticationService');
+                    return new Service\UserService($entityManager, $authenticationService);
                 },
                 'VisoftBaseModule\Options\OAuth2FacebookOptions' => function($serviceLocator){
                     $config = $serviceLocator->get('Config');
@@ -52,7 +53,8 @@ class Module
                     $config = $serviceLocator->get('Config');
                     $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
                     $oAuth2Options = $serviceLocator->get('VisoftBaseModule\Options\OAuth2FacebookOptions');
-                    $client = new Service\OAuth2\FacebookClient($entityManager);
+                    $userService = $serviceLocator->get('VisoftBaseModule\Service\UserService');
+                    $client = new Service\OAuth2\FacebookClient($entityManager, $userService);
                     $client->setOptions($oAuth2Options);
                     return $client;
                 },
@@ -60,7 +62,8 @@ class Module
                     $config = $serviceLocator->get('Config');
                     $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
                     $oAuth2Options = $serviceLocator->get('VisoftBaseModule\Options\OAuth2LinkedInOptions');
-                    $client = new Service\OAuth2\LinkedInClient($entityManager);
+                    $userService = $serviceLocator->get('VisoftBaseModule\Service\UserService');
+                    $client = new Service\OAuth2\LinkedInClient($entityManager, $userService);
                     $client->setOptions($oAuth2Options);
                     return $client;
                 },
@@ -88,7 +91,8 @@ class Module
                     $moduleOptions = $serviceLocator->get('VisoftBaseModule\Options\ModuleOptions');
                     $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
                     $authenticationService = $serviceLocator->get('Zend\Authentication\AuthenticationService');
-                    return new Service\Authentication\Controller\AuthenticationController($entityManager, $authenticationService, $moduleOptions);
+                    $userService = $serviceLocator->get('VisoftBaseModule\Service\UserService');
+                    return new Service\Authentication\Controller\AuthenticationController($entityManager, $authenticationService, $moduleOptions, $userService);
                 },
             ],
             'abstract_factories' => [
@@ -184,9 +188,9 @@ class Module
 
         $application = $e->getApplication();
         $routeMatch = $e->getRouteMatch();
-        $serviceManader = $application->getServiceManager();
-        $authenticationService = $serviceManader->get('Zend\Authentication\AuthenticationService');
-        $acl = $serviceManader->get('VisoftBaseModule\Service\Authorization\Acl\Acl');
+        $serviceManager = $application->getServiceManager();
+        $authenticationService = $serviceManager->get('Zend\Authentication\AuthenticationService');
+        $acl = $serviceManager->get('VisoftBaseModule\Service\Authorization\Acl\Acl');
         
         // everyone is guest until logging in
         $role = \VisoftBaseModule\Service\Authorization\Acl\Acl::DEFAULT_ROLE; // The default role is guest $acl
@@ -211,7 +215,7 @@ class Module
 
             $response = $e->getResponse();
             $requestedUri = $e->getRequest()->getRequestUri();
-            $config = $serviceManader->get('config');
+            $config = $serviceManager->get('config');
             $redirect_route = $config['acl']['redirect_route'];
             if(!empty($redirect_route)) {
                 // TODO: FIXIT

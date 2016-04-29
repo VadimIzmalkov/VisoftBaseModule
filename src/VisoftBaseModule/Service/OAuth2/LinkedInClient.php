@@ -8,9 +8,9 @@ class LinkedInClient extends AbstractOAuth2Client
 {
 	protected $providerName = 'linkedin';
 
-    public function __construct($entityManager)
+    public function __construct($entityManager, $userService)
     {
-        parent::__construct($entityManager);
+        parent::__construct($entityManager, $userService);
     } 
 
     public function generateToken(\Zend\Http\PhpEnvironment\Request $request) 
@@ -140,9 +140,8 @@ class LinkedInClient extends AbstractOAuth2Client
     		. '&oauth2_access_token=' . $this->session->token->access_token;
     }
 
-    public function createAvatar($oAuth2ProfileInfo)
+    public function getProviderAvatar($oAuth2ProfileInfo)
     {
-    	var_dump($oAuth2ProfileInfo);
         $originalPictureUrl = $oAuth2ProfileInfo['pictureUrls']->values[0];
         $smallPictureUrl = $oAuth2ProfileInfo['pictureUrl'];
         $avatar = new Entity\Image();
