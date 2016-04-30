@@ -40,6 +40,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
             $route = $this->redirects['authenticated']['route'];
             return $this->redirect()->toRoute($route);
         }
+
         $form = new $this->forms['sign-in']($this->entityManager, 'sign-in');
         $form->setAttributes(['action' => $this->request->getRequestUri()]);
         $viewModel = new ViewModel([
@@ -52,6 +53,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
             $post = $this->request->getPost();
             $form->setData($post);
             if ($form->isValid()) {
+
                 $data = $form->getData();
                 $adapter = $this->authenticationService->getAdapter();
                 $email = $this->params()->fromPost('email');

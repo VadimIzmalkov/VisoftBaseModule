@@ -2,10 +2,6 @@
 
 namespace VisoftBaseModule\Service;
 
-use Doctrine\ORM\EntityManager;
-
-use VisoftBaseModule\Options\ModuleOptions;
-
 /**
  * Class for general user purpose
  * - Registration (sign-up),
@@ -16,16 +12,10 @@ class UserService implements UserServiceInterface
 {
 	protected $entityManager;
 	protected $authenticationService;
-	// protected $moduleOptions;
 
-	public function __construct(
-		\Doctrine\ORM\EntityManager $entityManager,
-		// \VisoftBaseModule\Options\ModuleOptions $moduleOptions
-		$authenticationService
-	)
+	public function __construct($entityManager, $authenticationService)
 	{
 		$this->entityManager = $entityManager;
-		// $this->moduleOptions = $moduleOptions;
 		$this->authenticationService = $authenticationService;
 	}
 
@@ -53,6 +43,10 @@ class UserService implements UserServiceInterface
         	$user->setPassword(\VisoftBaseModule\Service\RegistrationService::encryptPassword($password));
         $this->entityManager->persist($user);
         $this->entityManager->flush();
+
+        // create notification 
+        $this->notify($user);
+
         return $user;
 	}
 
@@ -86,8 +80,10 @@ class UserService implements UserServiceInterface
         return false;
 	}
 
-	public function getOptions()
+	// override this method if needs to create notification of new user registered 
+	// notification service should be implemented separately
+	public function notify($user)
 	{
-		return $this->moduleOptions;
+		return true;
 	}
 }
