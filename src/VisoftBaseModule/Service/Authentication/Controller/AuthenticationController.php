@@ -147,6 +147,27 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
         $this->layout($this->layouts['sign-up']);
         return $viewModel;
     }
+
+    public function forgotPasswordAction()
+    {
+        $form = new $this->forms['forgot-password']($this->entityManager, 'forgot-password');
+        $form->setAttributes(['action' => $this->request->getRequestUri()]);
+        $viewModel = new ViewModel([
+            'form' => $form,
+        ]);
+        $this->layout($this->layouts['forgot-password']);
+        if ($this->request->isPost()) {
+            $post = $this->request->getPost();
+            $form->setData($post);
+            if($form->isValid()) {
+                $viewModel->setTemplate($this->templates['forgot-password-sent']);
+                return $viewModel;
+            }
+        }
+        $viewModel->setTemplate($this->templates['forgot-password']);
+        return $viewModel;
+    }
+
         // $authenticationService = $serviceManader->get('Zend\Authentication\AuthenticationService');
         // if ($user = $this->identity()) {
         //     // var_dump($this->options->getLoginRedirectRoute());
@@ -236,17 +257,17 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
         // return $viewModel;
     // }
 
-    public function confirmEmailAction()
-    {
-        $token = $this->params()->fromRoute('token');
-        $user = $this->entityManager->getRepository($this->options->getUserClass())->findOneBy(['registrationToken' => $token]);
-        $user->setState($this->entityManager->getRepository('VisoftMailerModule\Entity\ContactState')->findOneBy(['name' => 'Confirmed']));
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-        $viewModel = new ViewModel([]);
-        // TODO: confirm email template should be as an option
-        return $viewModel->setTemplate($this->templates['confirm-email']);       
-    }
+    // public function confirmEmailAction()
+    // {
+    //     $token = $this->params()->fromRoute('token');
+    //     $user = $this->entityManager->getRepository($this->options->getUserClass())->findOneBy(['registrationToken' => $token]);
+    //     $user->setState($this->entityManager->getRepository('VisoftMailerModule\Entity\ContactState')->findOneBy(['name' => 'Confirmed']));
+    //     $this->entityManager->persist($user);
+    //     $this->entityManager->flush();
+    //     $viewModel = new ViewModel([]);
+    //     // TODO: confirm email template should be as an option
+    //     return $viewModel->setTemplate($this->templates['confirm-email']);       
+    // }
 
     public function signOutAction()
     {

@@ -5,6 +5,8 @@ class DownloadFile extends \Zend\Mvc\Controller\Plugin\AbstractPlugin
 {
 	public function __invoke($filePath) 
 	{
+		// file path should be full
+		// /var/www/html/zf2_project_name/public/file.txt
 		if (file_exists($filePath)) {
 			$response = new \Zend\Http\Response\Stream();
 	        $response->setStream(fopen($filePath, 'r'));
