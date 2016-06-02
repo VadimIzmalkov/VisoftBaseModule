@@ -475,7 +475,7 @@ class BaseForm extends Form
         ]);
     }
 
-    public function addCitiesMultiCheckbox($name, $id = null, $label = 'Select city')
+    public function addCitiesMultiCheckbox($name, $id = null, $label = 'Select city', $labelClass = 'checkbox fryday-checkbox col-md-3 col-sm-4 col-xs-6')
     {
         $this->add([
             'name' => $name,
@@ -486,7 +486,7 @@ class BaseForm extends Form
             'options' => array(
                 'label' => $label,
                 'label_attributes' => array(
-                    'class'  => 'checkbox fryday-checkbox col-md-3 col-sm-4 col-xs-6'
+                    'class'  => $labelClass,
                 ),
                 'object_manager' => $this->entityManager,
                 'target_class' => 'Fryday\Entity\City',
