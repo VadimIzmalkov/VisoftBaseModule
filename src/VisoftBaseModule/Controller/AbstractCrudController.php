@@ -104,6 +104,10 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	public function editAction()
 	{
+        // check additional permission 
+        // example: member can edit only his own company
+        $this->checkPermissions();
+
         // getEntity() can be overrided and used for generate entity (if one not exists yet)
 		$this->entity = $this->getEntity();
 
@@ -213,6 +217,11 @@ abstract class AbstractCrudController extends AbstractActionController
         $parameters['controller'] = $routeMatch->getParam('__CONTROLLER__');
         $parameters['action'] = 'index';
         return $this->redirect()->toRoute($route, $parameters);
+    }
+
+    protected function checkPermissions()
+    {
+        
     }
 
     protected function getEntity()
