@@ -26,7 +26,7 @@ abstract class AbstractCrudController extends AbstractActionController
 	protected $uploadPath = null;
 	protected $imageStorage = null;
 	
-	private $viewModel = null;
+	protected $viewModel = null;
 	protected $post;
 	
 	// forms
@@ -147,15 +147,17 @@ abstract class AbstractCrudController extends AbstractActionController
         if($this->imageStorage === 'object')
             $this->bindImageTitleCoordinates();
 		$this->bindExtra();
-
-		$viewModel = $this->getViewModel([
+        
+		$this->viewModel = $this->getViewModel([
 			'form' => $this->editForm,
 			'entity' => $this->entity,
 			'thisAction' => 'edit',
 			'pageTitle' => static::EDIT_PAGE_TITLE,
 		]);
-		$this->addEditViewModelVariables($viewModel);
-		return $viewModel;
+        // die('111');
+		$this->addEditViewModelVariables();
+        // die('111');
+		return $this->viewModel;
 	}
 
     public function deleteAction()
