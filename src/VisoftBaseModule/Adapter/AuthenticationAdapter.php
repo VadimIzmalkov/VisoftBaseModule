@@ -17,6 +17,7 @@ class AuthenticationAdapter extends DoctrineAdapter implements ServiceLocatorAwa
 {
     protected $entityManager;
 	protected $oAuth2Client;
+    protected $activityService = null;
     protected $logger;
 
     public function authenticate()
@@ -38,12 +39,20 @@ class AuthenticationAdapter extends DoctrineAdapter implements ServiceLocatorAwa
     		if(empty($user)) {
     			$user = $this->oAuth2Client->createUser($oAuth2ProfileInfoArray);
                 $this->oAuth2Client->setNewUserFlag(true);
+
+                $this->getActivityService()->toggle('sign_up', $user, null, $this->oAuth2Client->getProvider());
+
+                // TODO: remove that
                 $logMessage = 'Signed up via ' . $this->oAuth2Client->getProvider();
     			$this->getLogger()->log(\Zend\Log\Logger::INFO, $logMessage, ['user' => $user]);
     		} else {
                 // update remote ID and avatar (if needs)  
     			$this->oAuth2Client->updateUser($user, $oAuth2ProfileInfoArray);
                 $this->oAuth2Client->setNewUserFlag(false);
+
+                $this->getActivityService()->toggle('sign_in', $user, $user, $this->oAuth2Client->getProvider());
+
+                // TODO: remove that
                 $logMessage = 'Signed in via ' . $this->oAuth2Client->getProvider();
     			$this->getLogger()->log(\Zend\Log\Logger::INFO, $logMessage, ['user' => $user]);
     		}
@@ -112,5 +121,19 @@ class AuthenticationAdapter extends DoctrineAdapter implements ServiceLocatorAwa
             $this->setEntityManager($this->getServiceLocator()->get('Doctrine\ORM\EntityManager'));
         }
         return $this->entityManager;
+    }
+
+    protected function setActivityService($activityService)
+    {
+        $this->activityService = $activityService;
+        return $this;
+    }
+
+    protected function getActivityService()
+    {
+        if (null === $this->activityService) {
+            $this->setActivityService($this->getServiceLocator()->get('VisoftBaseModule\Service\ActivityService'));
+        }
+        return $this->activityService;
     }
 }

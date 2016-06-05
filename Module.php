@@ -71,8 +71,16 @@ class Module
                     $config = $serviceLocator->get('Config');
                     return new Service\Authorization\Acl\Acl($config);
                 },
-
+                'VisoftBaseModule\Service\ActivityService' => function($serviceLocator) {
+                    $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
+                    // $moduleOptions = $serviceLocator->get('VisoftBaseModule\Options\ModuleOptions');
+                    // $authenticationService = $serviceLocator->get('Zend\Authentication\AuthenticationService');
+                    return new Service\ActivityService($entityManager);
+                },
             ],
+            // 'invokables' => [
+            //     'VisoftBaseModule\Service\ActivityService' => 'VisoftBaseModule\Service\ActivityService',
+            // ],
         ];
     }
 
@@ -124,11 +132,17 @@ class Module
                 },
                 'accessoryPlugin' => function($serviceLocator) {
                     return new Controller\Plugin\AccessoryPlugin();
-                }
+                },
+                'activityPlugin' => function($serviceLocator) {
+                    $parentLocator = $serviceLocator->getServiceLocator();
+                    $activityService = $parentLocator->get('VisoftBaseModule\Service\ActivityService');
+                    return new Controller\Plugin\ActivityPlugin($activityService);
+                },
             ),
             'invokables' => [
                 'checkDir' => 'VisoftBaseModule\Controller\Plugin\CheckDir',
                 'downloadFile' => 'VisoftBaseModule\Controller\Plugin\DownloadFile',
+                // 'activityPlugin' => 'VisoftBaseModule\Controller\Plugin\ActivityPlugin',
             ],
         );
     }

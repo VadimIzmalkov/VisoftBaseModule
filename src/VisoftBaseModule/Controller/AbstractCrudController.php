@@ -7,11 +7,11 @@ use Zend\Mvc\Controller\AbstractActionController,
 
 abstract class AbstractCrudController extends AbstractActionController
 {
-	// page titles
+	// page titles. Can be overrided in child class
 	const CREATE_PAGE_TITLE = 'Create entity';
 	const EDIT_PAGE_TITLE = 'Edit entity';
 	
-	// messages
+	// messages. Can be overrided in child class
 	const CREATE_SUCCESS_MESSAGE = 'Entity successfully created';
 	const EDIT_SUCCESS_MESSAGE = 'Entity successfully updated';
 
@@ -86,6 +86,7 @@ abstract class AbstractCrudController extends AbstractActionController
             	$this->entityManager->persist($this->entity);
 	            $this->entityManager->flush();
 	            $this->flashMessenger()->addSuccessMessage(static::CREATE_SUCCESS_MESSAGE);
+                $this->toggleCreateActivity();
 	            return $this->redirectAfterCreate();
             }
             // dump the form, find an errors
@@ -105,10 +106,10 @@ abstract class AbstractCrudController extends AbstractActionController
 	public function editAction()
 	{
         // check additional permission 
-        // example: member can edit only his own company
+        // examples: member can edit only his own companies, blog posts
         $this->checkPermissions();
 
-        // getEntity() can be overrided and used for generate entity (if one not exists yet)
+        // getEntity() can be overrided and used to generate entity (if one not exists yet)
 		$this->entity = $this->getEntity();
 
         // if form depends on some parameter (exp. entity) edit form can be custom 
@@ -136,6 +137,7 @@ abstract class AbstractCrudController extends AbstractActionController
             	$this->entityManager->persist($this->entity);
 	            $this->entityManager->flush();
 	            $this->flashMessenger()->addSuccessMessage(static::EDIT_SUCCESS_MESSAGE);
+                $this->toggleEditActivity();
 	            return $this->redirectAfterEdit();
             }
 		} 
@@ -154,9 +156,8 @@ abstract class AbstractCrudController extends AbstractActionController
 			'thisAction' => 'edit',
 			'pageTitle' => static::EDIT_PAGE_TITLE,
 		]);
-        // die('111');
+
 		$this->addEditViewModelVariables();
-        // die('111');
 		return $this->viewModel;
 	}
 
@@ -318,6 +319,9 @@ abstract class AbstractCrudController extends AbstractActionController
 
     protected function addCreateViewModelVariables() { }
     protected function addEditViewModelVariables() { }
+
+    protected function toggleCreateActivity() { }
+    protected function toggleEditActivity() { }
 
     protected function saveFiles($files) 
     {

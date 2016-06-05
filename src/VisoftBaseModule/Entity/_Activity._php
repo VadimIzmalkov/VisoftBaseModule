@@ -5,10 +5,10 @@ namespace VisoftBaseModule\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Table(name="visoft_base_users_activity_logs")
+ * @ORM\Table(name="visoft_base_users_activities")
  * @ORM\Entity
  */
-class UserActivityLog
+class Activity
 {
     /**
      * @var integer

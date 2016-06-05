@@ -5,7 +5,7 @@ namespace VisoftBaseModule\Service;
 use Zend\Crypt\Password\Bcrypt;
 use Doctrine\ORM\EntityManager;
 
-class RegistrationService extends AbstractService
+class RegistrationService
 {
 	protected $entityManager;
 	protected $authenticationService;

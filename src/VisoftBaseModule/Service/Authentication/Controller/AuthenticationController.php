@@ -135,7 +135,10 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
             $form->setData($post);
             if($form->isValid()) {
                 if($this->userService->signUp($post['email'], $post['password'], $post['fullName'])) {
+                    
+                    // toggle "Sign-up" activity
                     $this->userActivityLogger()->log($this->identity(), 'Signed up');
+
                     $this->flashMessenger()->addInfoMessage('We just sent you an email asking you to confirm your registration. Please search for fryday@fryady.net in your inbox and click on the "Confirm my registration" button');
                     $route = $this->redirects['sign-up']['route'];
                     $parameters = $this->redirects['sign-up']['parameters'];
