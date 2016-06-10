@@ -151,6 +151,71 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
         return $viewModel;
     }
 
+    // public function oAuth2Action()
+    // {
+    //     $cookie = $this->request->getCookie();
+    //     $provider = $this->params()->fromRoute('provider');
+    //     $code = $this->params()->fromQuery('code');
+    //     switch ($provider) {
+    //         case 'facebook':
+    //             $this->oAuth2Client = $this->getServiceLocator()->get('VisoftBaseModule\Service\OAuth2\FacebookClient');
+    //             break;
+    //         case 'linkedin':
+    //             $this->oAuth2Client = $this->getServiceLocator()->get('VisoftBaseModule\Service\OAuth2\LinkedInClient');
+    //             break;
+    //         default:
+    //             throw new \Exception("Provider not defined", 1);
+    //             break;
+    //     }
+        
+    //     // 
+    //     $this->oAuth2Client->generateAccessToken($code);
+
+    //     if (strlen($code) > 10) {
+    //         // send request to social provider for generating token and save it to session
+    //         $result = $this->oAuth2Client->generateToken($this->request);
+
+    //         if($result)
+    //             // token in session
+    //             $token = $this->oAuth2Client->getSessionToken();
+    //         else 
+    //             // last returned error (array)
+    //             $token = $this->oAuth2Client->getError(); 
+
+    //         // setting OAuth2 Client
+    //         // $adapter = $this->authenticationService->getAdapter();
+    //         // $adapter->setOAuth2Client($this->oAuth2Client);
+
+    //         // authenticate
+    //         $authenticationResult = $this->authenticationService->authenticate();
+
+    //         if (!$authenticationResult->isValid()) {
+    //             foreach ($authenticationResult->getMessages() as $message)
+    //                 echo "$message\n";
+    //             echo 'no valid';
+    //             die('authentication problems');
+    //         } else {
+    //             echo 'valid';
+    //             $identity = $authenticationResult->getIdentity();
+    //             $this->authenticationService->getStorage()->write($identity);
+    //         }
+
+    //         // redirect
+    //         if(isset($cookie->requestedUri)) {
+    //             // redirect to requested page
+    //             $requestedUri = $cookie->requestedUri;
+    //             $redirectUri = $this->getRequest()->getUri()->getScheme() . '://' . $this->getRequest()->getUri()->getHost() . $requestedUri;
+    //             return $this->redirect()->toUrl($redirectUri);
+    //         } else {
+    //             if($this->oAuth2Client->getNewUserFlag())
+    //                 $redirectRoute = $this->redirects['sign-up']['route'];
+    //             else 
+    //                 $redirectRoute = $this->redirects['sign-in']['route'];
+    //             return $this->redirect()->toRoute($redirectRoute);
+    //         }
+    //     }
+    // }
+
     public function forgotPasswordAction()
     {
         $form = new $this->forms['forgot-password']($this->entityManager, 'forgot-password');
@@ -169,6 +234,77 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
         }
         $viewModel->setTemplate($this->templates['forgot-password']);
         return $viewModel;
+    }
+
+    // sign-in / sign-up via social networks
+    // public function oAuth2Action()
+    // {
+    //     $provider = $this->params()->fromRoute('provider');
+
+    //     $authorizationCode = $this->params()->fromQuery('code');
+    //     $state = $this->params()->fromQuery('state');
+
+    //     switch ($provider) {
+    //         case 'facebook':
+    //             $this->oAuth2Provider = $this->getServiceLocator()->get('VisoftBaseModule\OAuth2\FacebookProvider');
+    //             break;
+    //         case 'linkedin':
+    //             // $this->oAuth2Client = $this->getServiceLocator()->get('VisoftBaseModule\Service\OAuth2\LinkedInClient');
+    //             break;
+    //         default:
+    //             throw new \Exception("Provider not defined", 1);
+    //             break;
+    //     }
+
+    //     // initializate provider with authorization code and state (state used for mitigating CSRF attack)
+    //     $this->oAuth2Provider->setGrant($authorizationCode, $state);
+
+    //     // get user's details from social network
+    //     // $userProfileInfo = $this->oAuth2Provider->getUserProfileInfo();
+
+    //     // find user by social or create new if not exists
+    //     $user = $this->oAuth2Provider->getUser();
+
+    //     // check user password
+    //     $password = $user->getPassword();
+    //     if(isset($password)) {
+    //         //sign-in user
+    //         return $this->userService->signIn($user->getEmail(), $user->getPassword());
+    //     } 
+    //     $route = $this->redirects['enter-password']['route'];
+    //     $entityId = $user
+    //     return $this->redirect 
+
+        
+        
+    //     $viewModel = new ViewModel([
+    //         'form' => $form,
+    //     ]);
+    //     $viewModel->setTemplate($this->templates['enter-password']);
+    //     $this->layout($this->layouts['enter-password']);
+    //     return $viewModel;
+    // }
+
+    public function enterPasswordAction()
+    {
+        $form = new $this->forms['enter-password']($this->entityManager, 'enter-password');
+        $form->setAttributes(['action' => $this->request->getRequestUri()]);
+        $form->get('userId')->setValue($user->getId());
+        if($this->request->isPost()) {
+            $post = $this->params()->fromPost();
+            $userId = $post['userId'];
+            $user = $this->entityManager->find('VisoftBaseModule\Entity\UserInterface', $userId);
+            $user->setPassword(\VisoftBaseModule\Service\UserService::encryptPassword($post['password']));
+
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+
+            // sign-in user
+            return $this->userService->signIn($user->getEmail(), $user->getPassword());
+            // $route = $this->redirects['sign-in']['route'];
+            // $parameters = $this->redirects['sign-in']['parameters'];
+            // return $this->redirect()->toRoute($route);
+        }
     }
 
         // $authenticationService = $serviceManader->get('Zend\Authentication\AuthenticationService');

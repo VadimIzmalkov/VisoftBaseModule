@@ -68,7 +68,7 @@ class BaseForm extends Form
         ]);
     }
 
-    public function addHidden($name, $id, $value = null, $attributes)
+    public function addHidden($name, $id = null, $value = null, $attributes = null)
     {
         $this->add([
             'name' => $name,
@@ -471,6 +471,31 @@ class BaseForm extends Form
                 'target_class' => 'Fryday\Entity\Industry',
                 'display_empty_item' => true,
                 'empty_item_label' => '-- Select Industry --',
+            ], 
+        ]);
+    }
+
+    public function addInterestSelect($name, $label = 'Why you are ineterested in Fryday', $id = null)
+    {
+        $this->add([
+           'name' => $name,
+           'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+           'attributes' => [
+                'class' => 'form-control',
+                'id' => $id,
+           ],
+           'options' => [
+                'label' => $label,
+                'label_attributes' => [
+                    'class' => 'label',
+                ], 
+                'label_generator' => function($targetEntity) {
+                    return $targetEntity->getName();
+                },
+                'object_manager' => $this->entityManager,
+                'target_class' => 'Fryday\Entity\Interest',
+                'display_empty_item' => true,
+                'empty_item_label' => '-- Why you are interest in Fryday --',
             ], 
         ]);
     }

@@ -77,6 +77,33 @@ class Module
                     // $authenticationService = $serviceLocator->get('Zend\Authentication\AuthenticationService');
                     return new Service\ActivityService($entityManager);
                 },
+                'VisoftBaseModule\OAuth2\OAuth2Client' => function($serviceLocator) {
+                    $config = $serviceLocator->get('Config');
+                    $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
+                    // $oAuth2Options = $serviceLocator->get('VisoftBaseModule\Options\OAuth2FacebookOptions');
+                    $userService = $serviceLocator->get('VisoftBaseModule\Service\UserService');
+                    // $client = new OAuth2\FacebookProvider()//($entityManager, $userService);
+                    // $client->setOptions($oAuth2Options);
+                    return new OAuth2\OAuth2Client($entityManager, $userService);
+                },
+                'VisoftBaseModule\OAuth2\FacebookProvider' => function($serviceLocator) {
+                    $config = $serviceLocator->get('Config');
+                    $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
+                    $oAuth2Options = $serviceLocator->get('VisoftBaseModule\Options\OAuth2FacebookOptions');
+                    $userService = $serviceLocator->get('VisoftBaseModule\Service\UserService');
+                    // $client = new OAuth2\FacebookProvider()//($entityManager, $userService);
+                    // $client->setOptions($oAuth2Options);
+                    return new OAuth2\FacebookProvider($oAuth2Options, $entityManager, $userService);
+                },
+                'VisoftBaseModule\OAuth2\LinkedinProvider' => function($serviceLocator) {
+                    $config = $serviceLocator->get('Config');
+                    $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
+                    $oAuth2Options = $serviceLocator->get('VisoftBaseModule\Options\OAuth2LinkedInOptions');
+                    $userService = $serviceLocator->get('VisoftBaseModule\Service\UserService');
+                    // $client = new OAuth2\FacebookProvider()//($entityManager, $userService);
+                    // $client->setOptions($oAuth2Options);
+                    return new OAuth2\LinkedinProvider($oAuth2Options, $entityManager, $userService);
+                },
             ],
             // 'invokables' => [
             //     'VisoftBaseModule\Service\ActivityService' => 'VisoftBaseModule\Service\ActivityService',
@@ -101,6 +128,15 @@ class Module
                     $authenticationService = $serviceLocator->get('Zend\Authentication\AuthenticationService');
                     $userService = $serviceLocator->get('VisoftBaseModule\Service\UserService');
                     return new Service\Authentication\Controller\AuthenticationController($entityManager, $authenticationService, $moduleOptions, $userService);
+                },
+                'VisoftBaseModule\Controller\Authentication' => function(ControllerManager $controllerManager) {
+                    $serviceLocator = $controllerManager->getServiceLocator();
+                    $moduleOptions = $serviceLocator->get('VisoftBaseModule\Options\ModuleOptions');
+                    $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
+                    $authenticationService = $serviceLocator->get('Zend\Authentication\AuthenticationService');
+                    $userService = $serviceLocator->get('VisoftBaseModule\Service\UserService');
+                    $oAuth2Client = $serviceLocator->get('VisoftBaseModule\OAuth2\oAuth2Client');
+                    return new Controller\AuthenticationController($entityManager, $authenticationService, $moduleOptions, $userService, $oAuth2Client);
                 },
             ],
             'abstract_factories' => [
@@ -178,13 +214,20 @@ class Module
                     return $navigation;
                 },
 
+                // 'oauth2uri' => function(\Zend\View\HelperPluginManager $pluginManager) {
+                //     $serviceLocator = $pluginManager->getServiceLocator();
+                //     $socialClients['facebook'] = $serviceLocator->get('VisoftBaseModule\Service\OAuth2\FacebookClient');
+                //     $socialClients['linkedin'] = $serviceLocator->get('VisoftBaseModule\Service\OAuth2\LinkedInClient');
+                //     $helper = new Service\OAuth2\View\Helper\OAuth2UriHelper($socialClients);
+                //     return $helper;
+                // },
+
                 'oauth2uri' => function(\Zend\View\HelperPluginManager $pluginManager) {
                     $serviceLocator = $pluginManager->getServiceLocator();
-                    $socialClients['facebook'] = $serviceLocator->get('VisoftBaseModule\Service\OAuth2\FacebookClient');
-                    $socialClients['linkedin'] = $serviceLocator->get('VisoftBaseModule\Service\OAuth2\LinkedInClient');
-                    $helper = new Service\OAuth2\View\Helper\OAuth2UriHelper($socialClients);
-                    return $helper;
-                }
+                    $socialClients['facebook'] = $serviceLocator->get('VisoftBaseModule\OAuth2\FacebookProvider');
+                    $socialClients['linkedin'] = $serviceLocator->get('VisoftBaseModule\OAuth2\LinkedinProvider');
+                    return new OAuth2\View\Helper\OAuth2AutnticationUrlHelper($socialClients);
+                },
             ),
         );
     }
