@@ -61,15 +61,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                 // find user in database or create new
             	$user = $this->userService->createUser($email, $password, $fullName);
 
-                // contact for confirmation email
-                $contact = [
-                    'email' => $email,
-                    'fullName' => $fullName,
-                    'registrationToken' => $user->getRegistrationToken(),
-                ];
-
                 // send confirmation email
-                $contactsArray = [$contact];
                 $emailTemplate = 'email-templates/email-confirmation';
                 $parametersArray = [
                     'confirmUrl' => $this->url()->fromRoute('fryday/account/default', [
@@ -78,8 +70,15 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                     ], ['query' => ['registration-token' => $user->getRegistrationToken()]]),
                 ];
                 $subject = 'Confirm your registration';
+                // contact for confirmation email
+                $contact = [
+                    'email' => $email,
+                    'fullName' => $fullName,
+                    'registrationToken' => $user->getRegistrationToken(),
+                ];
                 $status = $this->mailerPlugin()->send($contactsArray, $emailTemplate, $parametersArray, $subject, 'email-confirmation','bulk');
-
+                $contactsArray = [$contact];
+                
                 // show message 
             	$this->flashMessenger()->addInfoMessage('We just sent you an email asking you to confirm your registration. Please search for fryday@fryady.net in your inbox and click on the "Confirm my registration" button');
 
