@@ -328,7 +328,8 @@ abstract class AbstractCrudController extends AbstractActionController
     	if(!is_null($this->imageStorage)) {
     		switch ($this->imageStorage) {
     			case 'inline':
-    				$this->saveImagesInline($files);
+                    $image = array_shift($files);
+    				$this->saveImagesInline($image);
     				break;
     			case 'multiple-inline':
     				# code...
@@ -346,15 +347,15 @@ abstract class AbstractCrudController extends AbstractActionController
     	}
     }
 
-    protected function saveImagesInline($images)
+    protected function saveImagesInline($image)
     {
-    	if(!empty($images['image']['name'])) {
+    	if(!empty($image['name'])) {
 	    	// image data:
             // - name
             // - type
             // - size
             // - temporary location
-	    	$imageFileInfo = pathinfo($images['image']['name']);
+	    	$imageFileInfo = pathinfo($image['name']);
 
 	    	// dir for files
 	    	$targetDir = $this->uploadPath . '/'. $this->entity->getId() . '/';
@@ -386,6 +387,15 @@ abstract class AbstractCrudController extends AbstractActionController
 	    } else {
 	    	$imagePath = 'public' . $this->entity->getPictureOriginal();
 	    }
+
+        // avoiding division by ziro on $scale parameter
+        // TODO: check whole post:
+        // - $this->post['xStartCrop']
+        // - $this->post['yStartCrop']
+        // - $this->post['heightCrop']
+        // - $this->post['widthCrop']
+        if(empty($this->post['widthCurrent']))
+            return false;
 
         // cropping coordinates
         $xStartCrop = $this->post['xStartCrop'];
