@@ -6,9 +6,19 @@ class FacebookProvider extends AbstractProvider
 {
 	const PROVIDER_NAME = 'facebook';
 
+    private $logger;
+
 	public function __construct($options, $entityManager, $userService)
 	{
 		parent::__construct($options, $entityManager, $userService);
+
+        // init logger
+        $logFileDir = getcwd() . '/data/VisoftBaseModule/log/';
+        $logFilePath = $logFileDir . 'oauth2-provider-' . static::PROVIDER_NAME . '.log';
+        \VisoftBaseModule\Controller\Plugin\AccessoryPlugin::checkDir($logFileDir);
+        $this->logger = new \Zend\Log\Logger;
+        $writer = new \Zend\Log\Writer\Stream($logFilePath);
+        $this->logger->addWriter($writer);
 	}
 
 	protected function generateAccessToken()
@@ -24,8 +34,9 @@ class FacebookProvider extends AbstractProvider
 	    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $timeout);
 	    $responseContent = curl_exec($curl);
 	    curl_close($curl);
-	    
-	    // parse_str($responseContent, $parsedContent);
+
+        // log access token
+        $this->logger->info('Access token response: ' . $responseContent);
 
         $response = \Zend\Json\Decoder::decode($responseContent);
 
@@ -42,6 +53,9 @@ class FacebookProvider extends AbstractProvider
             ->setMethod(\Zend\Http\PhpEnvironment\Request::METHOD_GET)
             ->setUri($this->getUserProfileInfoUri($accessToken))
             ->send();
+
+        // log access token
+        $this->logger->info('User profile response: ' . $response->getBody());
 
         $userProfileInfoObject = \Zend\Json\Decoder::decode($response->getBody());
 

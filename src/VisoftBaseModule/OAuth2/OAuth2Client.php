@@ -19,7 +19,7 @@ class OAuth2Client implements \Zend\ServiceManager\ServiceLocatorAwareInterface
 
         // init logger
         $logFileDir = getcwd() . '/data/VisoftBaseModule/log/';
-        $logFilePath = $logFileDir . 'oauth2.log';
+        $logFilePath = $logFileDir . 'oauth2-client.log';
         \VisoftBaseModule\Controller\Plugin\AccessoryPlugin::checkDir($logFileDir);
         $this->logger = new \Zend\Log\Logger;
         $writer = new \Zend\Log\Writer\Stream($logFilePath);
