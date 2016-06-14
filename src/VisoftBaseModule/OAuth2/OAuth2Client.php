@@ -10,10 +10,20 @@ class OAuth2Client implements \Zend\ServiceManager\ServiceLocatorAwareInterface
 	private $oAuth2Provider = null;
     protected $isNewUser = false;
 
+    private $logger;
+
 	public function __construct($entityManager, $userService)
 	{
         $this->entityManager = $entityManager;
 		$this->userService = $userService;
+
+        // init logger
+        $logFileDir = getcwd() . '/data/VisoftBaseModule/log/';
+        $logFilePath = $logFileDir . 'oauth2.log';
+        \VisoftBaseModule\Controller\Plugin\AccessoryPlugin::checkDir($logFileDir);
+        $this->logger = new \Zend\Log\Logger;
+        $writer = new \Zend\Log\Writer\Stream($logFilePath);
+        $this->logger->addWriter($writer);
 	}
 
 	public function setProvider($providerName)
@@ -39,6 +49,8 @@ class OAuth2Client implements \Zend\ServiceManager\ServiceLocatorAwareInterface
         }
         $this->oAuth2Provider->authorizationCode = $authorizationCode;
         $this->oAuth2Provider->providerState = $providerState;
+
+        $this->logger->info('Set grant: (c): ' . $authorizationCode . ', (s): ' . $providerState);
     }
 
 	// find user in database and update, or if not exists - create
@@ -53,6 +65,9 @@ class OAuth2Client implements \Zend\ServiceManager\ServiceLocatorAwareInterface
         $email = $userProfileInfo['email'];
         $fullName = $userProfileInfo['fullName'];
         $providerId = $userProfileInfo['providerId'];
+
+        // log recieved data
+        $this->logger->info('Get profile: (e): ' . $email . ', (fN): ' . $fullName . ', (pId): ' . $providerId);
 
         // check if user exists
         $identity = $this->entityManager->getRepository('VisoftBaseModule\Entity\UserInterface')->findOneBy(['email' => $email]);
