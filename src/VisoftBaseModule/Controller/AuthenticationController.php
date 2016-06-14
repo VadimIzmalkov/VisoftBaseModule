@@ -83,7 +83,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
             	$this->flashMessenger()->addInfoMessage('We just sent you an email asking you to confirm your registration. Please search for fryday@fryady.net in your inbox and click on the "Confirm my registration" button');
 
                 // trigger sign up activity
-                $this->getEventManager()->trigger('signUp', null, array('provider' => 'email'));
+                $this->getEventManager()->trigger('signUp', null, array('provider' => 'email', 'identity' => $user));
 
             	$route = $this->redirects['after-sign-up-email']['route'];
             	$parameters = $this->redirects['after-sign-up-email']['parameters'];
@@ -128,8 +128,10 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
 	                $redirectUri = $this->getRequest()->getUri()->getScheme() . '://' . $this->getRequest()->getUri()->getHost() . $requestedUri;
 	                return $this->redirect()->toUrl($redirectUri);
 	            } else {
-	            	if($this->oAuth2Client->isNewUser())
+	            	if($this->oAuth2Client->isNewUser()) {
+                        $this->getEventManager()->trigger('signUp', null, array('provider' => $provider));
 	            		$redirectRoute = $this->redirects['after-sign-up-social']['route'];
+                    }
 	            	else {
                         // trigger sign in activity
                         $this->getEventManager()->trigger('signIn', null, array('provider' => $provider));

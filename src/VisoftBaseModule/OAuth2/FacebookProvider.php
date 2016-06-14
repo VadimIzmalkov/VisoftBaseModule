@@ -21,7 +21,7 @@ class FacebookProvider extends AbstractProvider
         $writer = new \Zend\Log\Writer\Stream($logFilePath);
         $this->logger->addWriter($writer);
 
-        // init Facebook provider
+        // init Facebook SDK
         $this->facebookSDK = new \Facebook\Facebook([
             'app_id' => $options->getClientId(), // Replace {app-id} with your app id
             'app_secret' => $options->getClientSecret(),
@@ -92,7 +92,7 @@ class FacebookProvider extends AbstractProvider
 
         return $accessToken->getValue();
 
-        // die('11111');
+
   //       if(($this->providerState !== $this->session->state) || empty($this->session->state)) {
   //           exit('Invalid state');
   //       }
@@ -124,14 +124,14 @@ class FacebookProvider extends AbstractProvider
         $accessToken = $this->generateAccessToken($this->authorizationCode, $this->providerState);
 
         try {
-          // Returns a `Facebook\FacebookResponse` object
-          $response = $this->facebookSDK->get('/me?fields=id,name,email', $accessToken);
-        } catch(Facebook\Exceptions\FacebookResponseException $e) {
-          echo 'Graph returned an error: ' . $e->getMessage();
-          exit;
-        } catch(Facebook\Exceptions\FacebookSDKException $e) {
-          echo 'Facebook SDK returned an error: ' . $e->getMessage();
-          exit;
+            // Returns a `Facebook\FacebookResponse` object
+            $response = $this->facebookSDK->get('/me?fields=id,name,email', $accessToken);
+        } catch(\Facebook\Exceptions\FacebookResponseException $e) {
+            echo 'Graph returned an error: ' . $e->getMessage();
+            exit;
+        } catch(\Facebook\Exceptions\FacebookSDKException $e) {
+            echo 'Facebook SDK returned an error: ' . $e->getMessage();
+            exit;
         }
 
         $user = $response->getGraphUser();
@@ -140,11 +140,6 @@ class FacebookProvider extends AbstractProvider
         $userProfileInfo['fullName'] = $user['name'];
         $userProfileInfo['providerId'] = $user['id'];
 
-        // var_dump($user);
-
-        // echo 'Name: ' . $user['name'];
-
-        // die('123');
         // generate access token using the authorization code grant
         // $accessToken = $this->generateAccessToken($this->authorizationCode, $this->providerState);
 
@@ -206,6 +201,7 @@ class FacebookProvider extends AbstractProvider
 
     protected function getUserProfileInfoUri($accessToken)
     {
+        // TODO: Should be added 'fields=id,name,email' to URi
         return $this->options->getInfoUri() . '?access_token=' . $accessToken;
     }
 

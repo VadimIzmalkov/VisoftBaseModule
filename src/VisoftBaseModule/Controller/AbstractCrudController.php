@@ -510,6 +510,15 @@ abstract class AbstractCrudController extends AbstractActionController
             $imageOriginalPath = 'public' . $imageTitleEntity->getOriginalSize();
         }
 
+        // avoiding division by ziro on $scale parameter
+        // TODO: check whole post:
+        // - $this->post['xStartCrop']
+        // - $this->post['yStartCrop']
+        // - $this->post['heightCrop']
+        // - $this->post['widthCrop']
+        if(empty($this->post['widthCurrent']))
+            return false;
+        
         // cropping coordinates
         $xStartCrop = $this->post['xStartCrop'];
         $yStartCrop = $this->post['yStartCrop'];
