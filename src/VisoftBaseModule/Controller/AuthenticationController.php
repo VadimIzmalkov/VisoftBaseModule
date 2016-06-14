@@ -82,20 +82,12 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                 // show message 
             	$this->flashMessenger()->addInfoMessage('We just sent you an email asking you to confirm your registration. Please search for fryday@fryady.net in your inbox and click on the "Confirm my registration" button');
 
+                // trigger sign up activity
+                $this->getEventManager()->trigger('signUp', null, array('provider' => 'email'));
+
             	$route = $this->redirects['after-sign-up-email']['route'];
             	$parameters = $this->redirects['after-sign-up-email']['parameters'];
                 return $this->redirect()->toRoute($route, $parameters);
-
-                // if($this->userService->signUp($post['email'], $post['password'], $post['fullName'])) {
-                    
-                //     // toggle "Sign-up" activity
-                //     $this->userActivityLogger()->log($this->identity(), 'Signed up');
-
-                //     $this->flashMessenger()->addInfoMessage('We just sent you an email asking you to confirm your registration. Please search for fryday@fryady.net in your inbox and click on the "Confirm my registration" button');
-                //     $route = $this->redirects['sign-up']['route'];
-                //     $parameters = $this->redirects['sign-up']['parameters'];
-                //     return $this->redirect()->toRoute($route, $parameters);
-                // }
             }
         }
         $viewModel->setTemplate($this->templates['sign-up']);
@@ -128,15 +120,21 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
             	$cookie = $this->request->getCookie();
             	// redirect
 	            if(isset($cookie->requestedUri)) {
-	            	// redirect to requested page
+                    // trigger sign in activity
+                    $this->getEventManager()->trigger('signIn', null, array('provider' => $provider));
+	            	
+                    // redirect to requested page
 	                $requestedUri = $cookie->requestedUri;
 	                $redirectUri = $this->getRequest()->getUri()->getScheme() . '://' . $this->getRequest()->getUri()->getHost() . $requestedUri;
 	                return $this->redirect()->toUrl($redirectUri);
 	            } else {
 	            	if($this->oAuth2Client->isNewUser())
 	            		$redirectRoute = $this->redirects['after-sign-up-social']['route'];
-	            	else 
+	            	else {
+                        // trigger sign in activity
+                        $this->getEventManager()->trigger('signIn', null, array('provider' => $provider));
 	            		$redirectRoute = $this->redirects['sign-in']['route'];
+                    }
 	                return $this->redirect()->toRoute($redirectRoute);
 	            }
             } else {

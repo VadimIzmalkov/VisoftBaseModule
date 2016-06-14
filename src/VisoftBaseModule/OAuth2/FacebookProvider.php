@@ -25,9 +25,11 @@ class FacebookProvider extends AbstractProvider
 	    $responseContent = curl_exec($curl);
 	    curl_close($curl);
 	    
-	    parse_str($responseContent, $parsedContent);
+	    // parse_str($responseContent, $parsedContent);
 
-	    return $parsedContent['access_token'];
+        $response = \Zend\Json\Decoder::decode($responseContent);
+
+	    return $response->access_token;
 	}
 
     public function getUserProfileInfo()
@@ -72,7 +74,7 @@ class FacebookProvider extends AbstractProvider
 
     protected function getAccessTokenUrl()
     {
-        $url = 'https://graph.facebook.com/v2.1/oauth/access_token?' 
+        $url = 'https://graph.facebook.com/v2.3/oauth/access_token?' 
             . 'client_id='      . $this->options->getClientId()
             . '&redirect_uri='  . urlencode($this->options->getRedirectUri())
             . '&client_secret=' . $this->options->getClientSecret()
