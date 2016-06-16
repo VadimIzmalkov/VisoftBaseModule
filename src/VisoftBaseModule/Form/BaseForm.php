@@ -286,7 +286,7 @@ class BaseForm extends Form
         ]);
     }
 
-    public function addSelectPartner($name) 
+    public function addSelectPartner($name, $label = 'Select Partner') 
     {
         $this->add([
            'name' => $name,
@@ -296,7 +296,7 @@ class BaseForm extends Form
                 'id' => 'partner-select',
            ],
            'options' => [
-                'label' => 'Select Partner',
+                'label' => $label,
                 'label_attributes' => [
                     'class' => 'label'
                 ], 

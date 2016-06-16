@@ -516,7 +516,13 @@ abstract class AbstractCrudController extends AbstractActionController
         // - $this->post['yStartCrop']
         // - $this->post['heightCrop']
         // - $this->post['widthCrop']
-        if(empty($this->post['widthCurrent']))
+        if(empty($this->post['xStartCrop']) || 
+            empty($this->post['yStartCrop']) ||
+            empty($this->post['widthCrop']) ||
+            empty($this->post['heightCrop']) ||
+            empty($this->post['widthCurrent']) ||
+            empty($this->post['heightCurrent'])
+        )
             return false;
         
         // cropping coordinates
