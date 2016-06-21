@@ -71,12 +71,12 @@ class Module
                     $config = $serviceLocator->get('Config');
                     return new Service\Authorization\Acl\Acl($config);
                 },
-                'VisoftBaseModule\Service\ActivityService' => function($serviceLocator) {
-                    $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
-                    // $moduleOptions = $serviceLocator->get('VisoftBaseModule\Options\ModuleOptions');
-                    // $authenticationService = $serviceLocator->get('Zend\Authentication\AuthenticationService');
-                    return new Service\ActivityService($entityManager);
-                },
+                // 'VisoftBaseModule\Service\ActivityService' => function($serviceLocator) {
+                //     $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
+                //     // $moduleOptions = $serviceLocator->get('VisoftBaseModule\Options\ModuleOptions');
+                //     // $authenticationService = $serviceLocator->get('Zend\Authentication\AuthenticationService');
+                //     return new Service\ActivityService($entityManager);
+                // },
                 'VisoftBaseModule\OAuth2\OAuth2Client' => function($serviceLocator) {
                     $config = $serviceLocator->get('Config');
                     $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
