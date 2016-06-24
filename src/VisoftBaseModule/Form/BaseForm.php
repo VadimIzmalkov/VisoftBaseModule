@@ -157,6 +157,37 @@ class BaseForm extends Form
         ]);
     }
 
+    public function addSelectVenueRepresentative($name, $id = null, $label = "Select Venue", $required = false, $cityIds = null)
+    {
+        $this->add([
+            'name' => $name,
+            'attributes' => [
+                'class' => 'form-control',
+                'id' => $id,
+                'required' => $required,
+            ],
+            'type' => 'DoctrineModule\Form\Element\ObjectSelect',
+            'options' => array(
+                'label' => $label,
+                'label_attributes' => [
+                    'class' => 'label',
+                ],
+                'object_manager' => $this->entityManager,
+                'target_class' => 'Admin\Entity\VenuePartner',
+                'property' => 'name',
+                'display_empty_item' => true,
+                'empty_item_label' => '-- Select Venue --',
+                'is_method' => true,
+                'find_method' => array(
+                    'name'   => 'findByCitiesId',
+                    'params' => array(
+                        'cityIds' => $cityIds,
+                    ),
+                ),
+            ),
+        ]); 
+    }
+
     public function addSelectVenue($name, $id = null, $label = "Select Venue", $required = false)
     {
         $this->add([
