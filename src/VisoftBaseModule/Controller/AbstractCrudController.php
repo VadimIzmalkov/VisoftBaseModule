@@ -62,10 +62,10 @@ abstract class AbstractCrudController extends AbstractActionController
         $this->createForm = $this->getCreateForm();
         // action for form should be same as current action
         $this->createForm->setAttributes(['action' => $this->request->getRequestUri()]);
-		$this->createForm->bind($this->entity);
 
         // start POST
 		if($this->request->isPost()) {
+            $this->createForm->bind($this->entity);
 			$this->post = array_merge_recursive(
                 $this->request->getPost()->toArray(),           
                 $this->request->getFiles()->toArray()
