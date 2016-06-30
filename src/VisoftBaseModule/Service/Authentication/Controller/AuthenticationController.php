@@ -99,6 +99,10 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                     //     $sessionManager->rememberMe($time);
                     // }
                     // $this->getLogger()->log(\Zend\Log\Logger::INFO, 'Signed in', ['user' => $this->identity()]);
+
+                    // trigger sign up activity
+                    $this->getEventManager()->trigger('signIn', null, array('provider' => 'email', 'identity' => $identity));
+
                     if(isset($cookie->requestedUri)) {
                         $requestedUri = $cookie->requestedUri;
                         $redirectUri = $this->getRequest()->getUri()->getScheme() . '://' . $this->getRequest()->getUri()->getHost() . $requestedUri;
