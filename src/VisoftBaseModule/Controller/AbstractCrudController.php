@@ -14,6 +14,7 @@ abstract class AbstractCrudController extends AbstractActionController
 	// messages. Can be overrided in child class
 	const CREATE_SUCCESS_MESSAGE = 'Entity successfully created';
 	const EDIT_SUCCESS_MESSAGE = 'Entity successfully updated';
+    const DELETE_SUCCESS_MESSAGE = 'Entity successfully deleted';
 
 	protected $entityManager;
 	
@@ -178,17 +179,18 @@ abstract class AbstractCrudController extends AbstractActionController
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
                     if (filetype($entityDir . '/' . $object) == "dir") 
-                        rmdir($dir. '/' . $object); 
+                        rmdir($entityDir . '/' . $object); 
                     else 
-                        unlink($dir. '/' . $object);
+                        unlink($entityDir . '/' . $object);
                 }
             }
             reset($objects);
-            rmdir($dir);
+            rmdir($entityDir);
         }
         $this->entityManager->remove($this->entity);
         $this->entityManager->flush();
-        return $this->redirectAfterDelete();
+        $this->flashMessenger()->addSuccessMessage(static::DELETE_SUCCESS_MESSAGE);
+        return $this->redirectToRefer();
         // $redirect = $this->composeCreateRedirect($entity, $paramsRoute);
         // return $this->redirect()->toRoute($redirect['route'], $redirect['params']); 
     }
