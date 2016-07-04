@@ -87,7 +87,7 @@ abstract class AbstractCrudController extends AbstractActionController
             	$this->entityManager->persist($this->entity);
 	            $this->entityManager->flush();
 	            $this->flashMessenger()->addSuccessMessage(static::CREATE_SUCCESS_MESSAGE);
-                $this->toggleCreateActivity();
+                $this->triggerCreateActivity();
 	            return $this->redirectAfterCreate();
             }
             // dump the form, find an errors
@@ -322,7 +322,11 @@ abstract class AbstractCrudController extends AbstractActionController
     protected function addCreateViewModelVariables() { }
     protected function addEditViewModelVariables() { }
 
-    protected function toggleCreateActivity() { }
+    protected function triggerCreateActivity() 
+    { 
+        $this->getEventManager()->trigger('entityCreated', null, ['entity' => $this->entity, 'identity' => $this->identity()]);
+    }
+
     protected function toggleEditActivity() { }
 
     protected function saveFiles($files) 
