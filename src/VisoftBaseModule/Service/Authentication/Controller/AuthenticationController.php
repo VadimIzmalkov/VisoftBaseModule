@@ -420,7 +420,20 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
             $sessionManager = new SessionManager();
             $sessionManager->forgetMe();
         }
-        return $this->redirect()->toRoute($this->redirects['sign-out']['route']);
+        // return $this->redirect()->toRoute($this->redirects['sign-out']['route']);
+        return $this->redirectToRefer();
+    }
+
+    protected function redirectToRefer()
+    {
+        $scheme = $this->request->getHeader('Referer')->uri()->getScheme();
+        $host = $this->request->getHeader('Referer')->uri()->getHost();
+        $path = $this->request->getHeader('Referer')->uri()->getPath();
+        $port = $this->request->getHeader('Referer')->uri()->getPort();
+        $port = is_null($port) ? null : ':' . $port;
+        $query = $this->request->getHeader('Referer')->uri()->getQuery();
+        $redirectUrl = $scheme . '://' . $host  . $port . $path . '?' . $query;
+        return $this->redirect()->toUrl($redirectUrl);
     }
 
     /**

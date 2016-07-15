@@ -526,7 +526,7 @@ class BaseForm extends Form
                 'object_manager' => $this->entityManager,
                 'target_class' => 'Fryday\Entity\Interest',
                 'display_empty_item' => true,
-                'empty_item_label' => '-- Why you are interest in Fryday --',
+                'empty_item_label' => '-- Why you are interested in Fryday --',
             ], 
         ]);
     }
