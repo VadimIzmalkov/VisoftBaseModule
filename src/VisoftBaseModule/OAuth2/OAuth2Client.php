@@ -74,7 +74,17 @@ class OAuth2Client implements \Zend\ServiceManager\ServiceLocatorAwareInterface
         if(empty($identity)) {
             $identity = $this->userService->createOAuth2User($email);
             $this->isNewUser = true;
+
+        // TODO: fix this dependency (depend on role)
+        } elseif($identity->getRole()->getName() === 'subscriber') {
+            $this->isNewUser = true;
+            $user->setRole($this->entityManager->find('VisoftBaseModule\Entity\UserRole', 3));
         }
+
+        // solution for fix
+        // $this->isNewUser = $this->userService->createOAuth2User($email); // true - new user, false - old user
+        // $identity = $this->entityManager->getRepository('VisoftBaseModule\Entity\UserInterface')->findOneBy(['email' => $email]);
+
 
         // set user as active
         if(!$identity->getActive())
