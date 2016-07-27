@@ -389,7 +389,8 @@ abstract class AbstractCrudController extends AbstractActionController
 	        	if(file_exists($imageFullPath))
 	                unlink($imageFullPath);
 	        }
-	        $this->entity->setPictureOriginal(end(explode('public', $imagePath)));
+            $imagePathExploded = explode('public', $imagePath);
+	        $this->entity->setPictureOriginal(end($imagePathExploded));
 	    } else {
 	    	$imagePath = 'public' . $this->entity->getPictureOriginal();
 	    }
@@ -440,7 +441,8 @@ abstract class AbstractCrudController extends AbstractActionController
         if($this->entity->getPictureL() !== null)
             if(file_exists($this->entity->getPictureL()))
                 unlink('public' . $this->entity->getPictureL());
-        $this->entity->setPictureL(end(explode('public', $newImagePath)));
+        $newImagePathExploded = explode('public', $newImagePath);
+        $this->entity->setPictureL(end($newImagePathExploded));
 
         // set medium
         $thumb->resize(480, 480);
@@ -451,7 +453,8 @@ abstract class AbstractCrudController extends AbstractActionController
         if($this->entity->getPictureM() !== null)
             if(file_exists($this->entity->getPictureM()))
                 unlink('public' . $this->entity->getPictureM());
-        $this->entity->setPictureM(end(explode('public', $newImagePath)));
+        $newImagePathExploded = explode('public', $newImagePath);
+        $this->entity->setPictureM(end($newImagePathExploded));
 
         // set small
         $thumb->resize(240, 240);
@@ -462,7 +465,8 @@ abstract class AbstractCrudController extends AbstractActionController
         if($this->entity->getPictureS() !== null)
             if(file_exists($this->entity->getPictureS()))
                 unlink('public' . $this->entity->getPictureS());
-        $this->entity->setPictureS(end(explode('public', $newImagePath)));
+        $newImagePathExploded = explode('public', $newImagePath);
+        $this->entity->setPictureS(end($newImagePathExploded));
 
         // set x-small
         $thumb->resize(60, 60);
@@ -473,7 +477,8 @@ abstract class AbstractCrudController extends AbstractActionController
         if($this->entity->getPictureXS() !== null)
             if(file_exists($this->entity->getPictureXS()))
                 unlink('public' . $this->entity->getPictureXS());
-        $this->entity->setPictureXS(end(explode('public', $newImagePath)));
+        $newImagePathExploded = explode('public', $newImagePath);
+        $this->entity->setPictureXS(end($newImagePathExploded));
 
         // set mail
         $thumb->resize(240, 240);
@@ -484,7 +489,8 @@ abstract class AbstractCrudController extends AbstractActionController
         if($this->entity->getPictureMail() !== null)
             if(file_exists($this->entity->getPictureMail()))
                 unlink('public' . $this->entity->getPictureMail());
-        $this->entity->setPictureMail(end(explode('public', $newImagePath)));
+        $newImagePathExploded = explode('public', $newImagePath);
+        $this->entity->setPictureMail(end($newImagePathExploded));
 
         // save image
         $this->entityManager->persist($this->entity);

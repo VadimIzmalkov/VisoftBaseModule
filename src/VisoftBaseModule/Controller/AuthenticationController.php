@@ -77,7 +77,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                     'registrationToken' => $user->getRegistrationToken(),
                 ];
                 $contactsArray = [$contact];
-                $status = $this->mailerPlugin()->send($contactsArray, $emailTemplate, $parametersArray, $subject, 'email-confirmation','bulk');
+                $status = $this->mailerPlugin()->send($contactsArray, $emailTemplate, $parametersArray, $subject, 'email-confirmation', 'individual');
                 
                 // show message 
             	$this->flashMessenger()->addInfoMessage('We just sent you an email asking you to confirm your registration. Please search for fryday@fryady.net in your inbox and click on the "Confirm my registration" button');
