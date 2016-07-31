@@ -556,72 +556,78 @@ abstract class AbstractCrudController extends AbstractActionController
         $imageName = end($explodedImagePath); // last is image name
         $imageNameKey = key($explodedImagePath); // key for image name value in array
             
-        // create thumb
-        $thumb = $this->thumbnailer->create($imageOriginalPath, $options = [], $plugins = []);
+        if(file_exists($imageOriginalPath)) {
+            // create thumb
+            $thumb = $this->thumbnailer->create($imageOriginalPath, $options = [], $plugins = []);
 
-        // crop image
-        $currentDimantions = $thumb->getCurrentDimensions();
-        $scale = $currentDimantions['width'] / $this->post['widthCurrent'];
-        // scaled coordinates
-        $xStartCropScaled = $xStartCrop * $scale;
-        $yStartCropScaled = $yStartCrop * $scale;
-        $widthCropScaled = $widthCrop * $scale;
-        $heightCropScaled = $heightCrop * $scale;
-        // crop
-        $thumb->crop($xStartCropScaled, $yStartCropScaled, $widthCropScaled, $heightCropScaled);
+            // crop image
+            $currentDimantions = $thumb->getCurrentDimensions();
+            $scale = $currentDimantions['width'] / $this->post['widthCurrent'];
+            // scaled coordinates
+            $xStartCropScaled = $xStartCrop * $scale;
+            $yStartCropScaled = $yStartCrop * $scale;
+            $widthCropScaled = $widthCrop * $scale;
+            $heightCropScaled = $heightCrop * $scale;
+            // crop
+            $thumb->crop($xStartCropScaled, $yStartCropScaled, $widthCropScaled, $heightCropScaled);
 
-        // save original image
-        if(!is_null($imageTitleEntity->getOriginalSize()))
-            if(file_exists($imageTitleEntity->getOriginalSize()))
-                unlink('public' . $imageTitleEntity->getOriginalSize());
-        $imageTitleEntity->setOriginalSize(end(explode('public', $imageOriginalPath)));
-            
-        // save large 
-        $thumb->resize(960, 960);
-        $newImageName = 'large_' . $imageName;
-        $explodedImagePath[$imageNameKey] = $newImageName;
-        $newImagePath = implode("/", $explodedImagePath);
-        $thumb->save($newImagePath);
-        if($imageTitleEntity->getLSize() !== null)
-            if(file_exists($imageTitleEntity->getLSize()))
-                unlink('public' . $imageTitleEntity->getLSize());
-        $imageTitleEntity->setLSize(end(explode('public', $newImagePath)));
+            // save original image
+            if(!is_null($imageTitleEntity->getOriginalSize()))
+                if(file_exists($imageTitleEntity->getOriginalSize()))
+                    unlink('public' . $imageTitleEntity->getOriginalSize());
+            $imageTitleEntity->setOriginalSize(end(explode('public', $imageOriginalPath)));
+                
+            // save large 
+            $thumb->resize(960, 960);
+            $newImageName = 'large_' . $imageName;
+            $explodedImagePath[$imageNameKey] = $newImageName;
+            $newImagePath = implode("/", $explodedImagePath);
+            $thumb->save($newImagePath);
+            if($imageTitleEntity->getLSize() !== null)
+                if(file_exists($imageTitleEntity->getLSize()))
+                    unlink('public' . $imageTitleEntity->getLSize());
+            $newImagePathExploded = explode('public', $newImagePath);
+            $imageTitleEntity->setLSize(end(explode('public', $newImagePathExploded)));
 
-        // save medium
-        $thumb->resize(480, 480);
-        $newImageName = 'medium_' . $imageName;
-        $explodedImagePath[$imageNameKey] = $newImageName;
-        $newImagePath = implode("/", $explodedImagePath);
-        $thumb->save($newImagePath);
-        if($imageTitleEntity->getMSize() !== null)
-            if(file_exists($imageTitleEntity->getMSize()))
-                unlink('public' . $imageTitleEntity->getMSize());
-        $imageTitleEntity->setMSize(end(explode('public', $newImagePath)));
+            // save medium
+            $thumb->resize(480, 480);
+            $newImageName = 'medium_' . $imageName;
+            $explodedImagePath[$imageNameKey] = $newImageName;
+            $newImagePath = implode("/", $explodedImagePath);
+            $thumb->save($newImagePath);
+            if($imageTitleEntity->getMSize() !== null)
+                if(file_exists($imageTitleEntity->getMSize()))
+                    unlink('public' . $imageTitleEntity->getMSize());
+            $newImagePathExploded = explode('public', $newImagePath);
+            $imageTitleEntity->setMSize(end(explode('public', $newImagePathExploded)));
 
-        // set small
-        $thumb->resize(240, 240);
-        $newImageName = 'small_' . $imageName;
-        $explodedImagePath[$imageNameKey] = $newImageName;
-        $newImagePath = implode("/", $explodedImagePath);
-        $thumb->save($newImagePath);
-        if($imageTitleEntity->getSSize() !== null)
-            if(file_exists($imageTitleEntity->getSSize()))
-                unlink('public' . $imageTitleEntity->getSSize());
-        $imageTitleEntity->setSSize(end(explode('public', $newImagePath)));
+            // set small
+            $thumb->resize(240, 240);
+            $newImageName = 'small_' . $imageName;
+            $explodedImagePath[$imageNameKey] = $newImageName;
+            $newImagePath = implode("/", $explodedImagePath);
+            $thumb->save($newImagePath);
+            if($imageTitleEntity->getSSize() !== null)
+                if(file_exists($imageTitleEntity->getSSize()))
+                    unlink('public' . $imageTitleEntity->getSSize());
+            $newImagePathExploded = explode('public', $newImagePath);
+            $imageTitleEntity->setSSize(end($newImagePathExploded));
 
-        // set x-small
-        $thumb->resize(60, 60);
-        $newImageName = 'xsmall_' . $imageName;
-        $explodedImagePath[$imageNameKey] = $newImageName;
-        $newImagePath = implode("/", $explodedImagePath);
-        $thumb->save($newImagePath);
-        if($imageTitleEntity->getXsSize() !== null)
-            if(file_exists($imageTitleEntity->getXsSize()))
-                unlink('public' . $imageTitleEntity->getXsSize());
-        $imageTitleEntity->setXsSize(end(explode('public', $newImagePath)));
+            // set x-small
+            $thumb->resize(60, 60);
+            $newImageName = 'xsmall_' . $imageName;
+            $explodedImagePath[$imageNameKey] = $newImageName;
+            $newImagePath = implode("/", $explodedImagePath);
+            $thumb->save($newImagePath);
+            if($imageTitleEntity->getXsSize() !== null)
+                if(file_exists($imageTitleEntity->getXsSize()))
+                    unlink('public' . $imageTitleEntity->getXsSize());
+            $newImagePathExploded = explode('public', $newImagePath);
+            $imageTitleEntity->setXsSize(end(explode('public', $newImagePathExploded)));
 
-        // save image
-        $this->entityManager->persist($imageTitleEntity);
+            // save image
+            $this->entityManager->persist($imageTitleEntity);
+        }
     }
 
     protected function saveImagesMultipleObjects($images) 
