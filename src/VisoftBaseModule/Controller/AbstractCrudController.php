@@ -413,88 +413,90 @@ abstract class AbstractCrudController extends AbstractActionController
         // save coordinates
         // not needs to save coordinates in 'inline' case because form bind to entity
 
-        // create thumb
-        $thumb = $this->thumbnailer->create($imagePath, $options = [], $plugins = []);
+        if(file_exists($imagePath)) {
+            // create thumb
+            $thumb = $this->thumbnailer->create($imagePath, $options = [], $plugins = []);
 
-		// crop image
-        $currentDimantions = $thumb->getCurrentDimensions();
-        $scale = $currentDimantions['width'] / $this->post['widthCurrent'];
-        $thumb->crop(
-            $xStartCrop * $scale, 
-            $yStartCrop * $scale, 
-            $widthCrop * $scale, 
-            $heightCrop * $scale
-        );
+    		// crop image
+            $currentDimantions = $thumb->getCurrentDimensions();
+            $scale = $currentDimantions['width'] / $this->post['widthCurrent'];
+            $thumb->crop(
+                $xStartCrop * $scale, 
+                $yStartCrop * $scale, 
+                $widthCrop * $scale, 
+                $heightCrop * $scale
+            );
 
-        // expold image path for rename
-        $explodedImagePath = explode('/', $imagePath);
-        $imageName = end($explodedImagePath); // last is image name
-        // $imageName = basename($imagePath);
-        $imageNameKey = key($explodedImagePath); // key for image name 
+            // expold image path for rename
+            $explodedImagePath = explode('/', $imagePath);
+            $imageName = end($explodedImagePath); // last is image name
+            // $imageName = basename($imagePath);
+            $imageNameKey = key($explodedImagePath); // key for image name 
 
-		// save large 
-        $thumb->resize(960, 960);
-        $newImageName = 'large_' . $imageName;
-        $explodedImagePath[$imageNameKey] = $newImageName;
-        $newImagePath = implode("/", $explodedImagePath);
-        $thumb->save($newImagePath);
-        if($this->entity->getPictureL() !== null)
-            if(file_exists($this->entity->getPictureL()))
-                unlink('public' . $this->entity->getPictureL());
-        $newImagePathExploded = explode('public', $newImagePath);
-        $this->entity->setPictureL(end($newImagePathExploded));
+    		// save large 
+            $thumb->resize(960, 960);
+            $newImageName = 'large_' . $imageName;
+            $explodedImagePath[$imageNameKey] = $newImageName;
+            $newImagePath = implode("/", $explodedImagePath);
+            $thumb->save($newImagePath);
+            if($this->entity->getPictureL() !== null)
+                if(file_exists($this->entity->getPictureL()))
+                    unlink('public' . $this->entity->getPictureL());
+            $newImagePathExploded = explode('public', $newImagePath);
+            $this->entity->setPictureL(end($newImagePathExploded));
 
-        // set medium
-        $thumb->resize(480, 480);
-        $newImageName = 'medium_' . $imageName;
-        $explodedImagePath[$imageNameKey] = $newImageName;
-        $newImagePath = implode("/", $explodedImagePath);
-        $thumb->save($newImagePath);
-        if($this->entity->getPictureM() !== null)
-            if(file_exists($this->entity->getPictureM()))
-                unlink('public' . $this->entity->getPictureM());
-        $newImagePathExploded = explode('public', $newImagePath);
-        $this->entity->setPictureM(end($newImagePathExploded));
+            // set medium
+            $thumb->resize(480, 480);
+            $newImageName = 'medium_' . $imageName;
+            $explodedImagePath[$imageNameKey] = $newImageName;
+            $newImagePath = implode("/", $explodedImagePath);
+            $thumb->save($newImagePath);
+            if($this->entity->getPictureM() !== null)
+                if(file_exists($this->entity->getPictureM()))
+                    unlink('public' . $this->entity->getPictureM());
+            $newImagePathExploded = explode('public', $newImagePath);
+            $this->entity->setPictureM(end($newImagePathExploded));
 
-        // set small
-        $thumb->resize(240, 240);
-        $newImageName = 'small_' . $imageName;
-        $explodedImagePath[$imageNameKey] = $newImageName;
-        $newImagePath = implode("/", $explodedImagePath);
-        $thumb->save($newImagePath);
-        if($this->entity->getPictureS() !== null)
-            if(file_exists($this->entity->getPictureS()))
-                unlink('public' . $this->entity->getPictureS());
-        $newImagePathExploded = explode('public', $newImagePath);
-        $this->entity->setPictureS(end($newImagePathExploded));
+            // set small
+            $thumb->resize(240, 240);
+            $newImageName = 'small_' . $imageName;
+            $explodedImagePath[$imageNameKey] = $newImageName;
+            $newImagePath = implode("/", $explodedImagePath);
+            $thumb->save($newImagePath);
+            if($this->entity->getPictureS() !== null)
+                if(file_exists($this->entity->getPictureS()))
+                    unlink('public' . $this->entity->getPictureS());
+            $newImagePathExploded = explode('public', $newImagePath);
+            $this->entity->setPictureS(end($newImagePathExploded));
 
-        // set x-small
-        $thumb->resize(60, 60);
-        $newImageName = 'xsmall_' . $imageName;
-        $explodedImagePath[$imageNameKey] = $newImageName;
-        $newImagePath = implode("/", $explodedImagePath);
-        $thumb->save($newImagePath);
-        if($this->entity->getPictureXS() !== null)
-            if(file_exists($this->entity->getPictureXS()))
-                unlink('public' . $this->entity->getPictureXS());
-        $newImagePathExploded = explode('public', $newImagePath);
-        $this->entity->setPictureXS(end($newImagePathExploded));
+            // set x-small
+            $thumb->resize(60, 60);
+            $newImageName = 'xsmall_' . $imageName;
+            $explodedImagePath[$imageNameKey] = $newImageName;
+            $newImagePath = implode("/", $explodedImagePath);
+            $thumb->save($newImagePath);
+            if($this->entity->getPictureXS() !== null)
+                if(file_exists($this->entity->getPictureXS()))
+                    unlink('public' . $this->entity->getPictureXS());
+            $newImagePathExploded = explode('public', $newImagePath);
+            $this->entity->setPictureXS(end($newImagePathExploded));
 
-        // set mail
-        $thumb->resize(240, 240);
-        $newImageName = 'xsmall_' . $imageName;
-        $explodedImagePath[$imageNameKey] = $newImageName;
-        $newImagePath = implode("/", $explodedImagePath);
-        $thumb->save($newImagePath);
-        if($this->entity->getPictureMail() !== null)
-            if(file_exists($this->entity->getPictureMail()))
-                unlink('public' . $this->entity->getPictureMail());
-        $newImagePathExploded = explode('public', $newImagePath);
-        $this->entity->setPictureMail(end($newImagePathExploded));
+            // set mail
+            $thumb->resize(240, 240);
+            $newImageName = 'xsmall_' . $imageName;
+            $explodedImagePath[$imageNameKey] = $newImageName;
+            $newImagePath = implode("/", $explodedImagePath);
+            $thumb->save($newImagePath);
+            if($this->entity->getPictureMail() !== null)
+                if(file_exists($this->entity->getPictureMail()))
+                    unlink('public' . $this->entity->getPictureMail());
+            $newImagePathExploded = explode('public', $newImagePath);
+            $this->entity->setPictureMail(end($newImagePathExploded));
 
-        // save image
-        $this->entityManager->persist($this->entity);
-        $this->entityManager->flush();
+            // save image
+            $this->entityManager->persist($this->entity);
+            $this->entityManager->flush();
+        }
     }
 
     protected function saveImagesObject($images) 

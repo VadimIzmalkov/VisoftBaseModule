@@ -704,7 +704,7 @@ class BaseForm extends Form
                 ),
                 'use_hidden_element' => true,
                 'checked_value' => 1,
-                'unchecked_value' => 'no',
+                'unchecked_value' => 0,
             ],
         ]);
     }
