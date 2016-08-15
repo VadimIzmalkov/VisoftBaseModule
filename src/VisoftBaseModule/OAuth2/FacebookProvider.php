@@ -171,12 +171,13 @@ class FacebookProvider extends AbstractProvider
 		// return $userProfileInfo;
   //   }
 
-    public function getAuthenticationUrl()
+    public function getAuthenticationUrl($fromUrl = null)
     {
         $redirectLoginHelper = $this->facebookSDK->getRedirectLoginHelper();
 
         $permissions = $this->options->getScope();//['email']; // Optional permissions
-        $callbackUri = $this->options->getRedirectUri();
+        // $callbackUri = $this->options->getRedirectUri();
+        $callbackUri = is_null($fromUrl) ? $this->options->getRedirectUri() : $this->options->getRedirectUri() . '?from=' . $fromUrl;
         $loginUrl = $redirectLoginHelper->getLoginUrl($callbackUri, $permissions);
 
         return $loginUrl;

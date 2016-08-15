@@ -36,6 +36,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
         $this->redirects = $options->getRedirects();
     }
 
+    // Action just send emails with email confirmation
     public function signUpAction()
     {
         if ($this->doctineAuthenticationService->hasIdentity()) {
@@ -95,11 +96,158 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
         return $viewModel;
     }
 
+    public function signInAction()
+    {
+        if ($this->doctineAuthenticationService->hasIdentity()) {
+            $route = $this->redirects['authenticated']['route'];
+            return $this->redirect()->toRoute($route);
+        }
+
+        $form = new $this->forms['sign-in']($this->entityManager, 'sign-in');
+        $form->setAttributes(['action' => $this->request->getRequestUri()]);
+        $viewModel = new ViewModel([
+            'form' => $form,
+            // TODO: remove that
+            // 'facebookSignInUrl' => $this->social()->getSignInUrl('facebook'),
+            // 'linkedinSignInUrl' => $this->social()->getSignInUrl('linkedin'),
+        ]);
+        if ($this->request->isPost()) {
+            $post = $this->request->getPost();
+            $form->setData($post);
+            if ($form->isValid()) {
+
+                $data = $form->getData();
+                $adapter = $this->doctineAuthenticationService->getAdapter();
+                $email = $this->params()->fromPost('email');
+                // $password = 
+                $user = $this->entityManager->getRepository('VisoftBaseModule\Entity\UserInterface')->findOneBy(['email' => $email]);
+                if(empty($user)) {
+                    $this->flashMessenger()->addMessage('The username or email is not valid!');
+                    return $this->redirect()->toRoute('sign-in'); 
+                }
+                $adapter->setIdentityValue($user->getEmail());
+                $adapter->setCredentialValue($this->params()->fromPost('password'));
+                $authenticationResult = $this->doctineAuthenticationService->authenticate();
+
+                // var_dump($user->getEmail());
+                // var_dump($this->params()->fromPost('password'));
+
+                // var_dump($authenticationResult);
+                // var_dump($authenticationResult->isValid());
+                // $user->setPassword('123');
+                // $this->entityManager->persist($user);
+                // $this->entityManager->flush();
+
+                // $passEncrypted = \VisoftBaseModule\Service\RegistrationService::encryptPassword('123');
+                // var_dump($passEncrypted);
+                // var_dump(\VisoftBaseModule\Service\RegistrationService::verifyHashedPasswordTest($passEncrypted, '123'));
+
+                // $user->setPassword('123');
+                // $this->entityManager->persist($user);
+                // $this->entityManager->flush();
+                // var_dump(\VisoftBaseModule\Service\RegistrationService::verifyHashedPassword($user, '123'));
+
+                // // var_dump($bcrypt->verify('123', $passEncrypted));
+                // // var_dump($bcrypt->verify('123', $user->getPassword()));
+                // die('dddd');
+
+                if ($authenticationResult->isValid()) {
+                    $identity = $authenticationResult->getIdentity();
+                    $this->doctineAuthenticationService->getStorage()->write($identity);
+                    
+                    // if ($this->params()->fromPost('rememberMe')) {
+                    //     $time = 1209600; // 14 days (1209600/3600 = 336 hours => 336/24 = 14 days)
+                    //     $sessionManager = new SessionManager();
+                    //     $sessionManager->rememberMe($time);
+                    // }
+                    // $this->getLogger()->log(\Zend\Log\Logger::INFO, 'Signed in', ['user' => $this->identity()]);
+
+                    // trigger sign up activity
+                    $this->getEventManager()->trigger('signIn', null, array('provider' => 'email', 'identity' => $identity));
+
+                    $cookie = $this->request->getCookie();
+                    if(isset($cookie->requestedUri)) {
+                        // get URL for redirect to after "Sign Up"
+                        $requestedUri = $cookie->requestedUri;
+                        $redirectUri = $this->getRequest()->getUri()->getScheme() . '://' . $this->getRequest()->getUri()->getHost() . $requestedUri;
+
+                        // delete cookie
+                        $cookie = new \Zend\Http\Header\SetCookie('requestedUri', '', strtotime('-1 Year', time()), '/');
+
+                        return $this->redirect()->toUrl($redirectUri);
+                    }  else {
+                        $route = $this->redirects['sign-in']['route'];
+                        // $parameters = $this->redirects['sign-in']['parameters'];
+                        return $this->redirect()->toRoute($route);
+                    }
+                }
+            }
+        }
+        $viewModel->setTemplate($this->templates['sign-in']);
+        $this->layout($this->layouts['sign-in']);
+        return $viewModel;
+    }
+
+    public function signOutAction()
+    {
+        // $auth = $this->getServiceLocator()->get('Zend\Authentication\AuthenticationService');
+        if ($this->doctineAuthenticationService->hasIdentity()) {
+            $this->doctineAuthenticationService->clearIdentity();
+            $sessionManager = new \Zend\Session\SessionManager();
+            $sessionManager->forgetMe();
+        }
+        // return $this->redirect()->toRoute($this->redirects['sign-out']['route']);
+        return $this->redirectToRefer();
+    }
+
+    public function forgotPasswordAction()
+    {
+        $form = new $this->forms['forgot-password']($this->entityManager, 'forgot-password');
+        $form->setAttributes(['action' => $this->request->getRequestUri()]);
+        $viewModel = new ViewModel([
+            'form' => $form,
+        ]);
+        $this->layout($this->layouts['forgot-password']);
+        if ($this->request->isPost()) {
+            $post = $this->request->getPost();
+            $form->setData($post);
+            if($form->isValid()) {
+                $viewModel->setTemplate($this->templates['forgot-password-sent']);
+                return $viewModel;
+            }
+        }
+        $viewModel->setTemplate($this->templates['forgot-password']);
+        return $viewModel;
+    }
+
+    // public function enterPasswordAction()
+    // {
+    //     $form = new $this->forms['enter-password']($this->entityManager, 'enter-password');
+    //     $form->setAttributes(['action' => $this->request->getRequestUri()]);
+    //     $form->get('userId')->setValue($user->getId());
+    //     if($this->request->isPost()) {
+    //         $post = $this->params()->fromPost();
+    //         $userId = $post['userId'];
+    //         $user = $this->entityManager->find('VisoftBaseModule\Entity\UserInterface', $userId);
+    //         $user->setPassword(\VisoftBaseModule\Service\UserService::encryptPassword($post['password']));
+
+    //         $this->entityManager->persist($user);
+    //         $this->entityManager->flush();
+
+    //         // sign-in user
+    //         return $this->userService->signIn($user->getEmail(), $user->getPassword());
+    //         // $route = $this->redirects['sign-in']['route'];
+    //         // $parameters = $this->redirects['sign-in']['parameters'];
+    //         // return $this->redirect()->toRoute($route);
+    //     }
+    // }
+
 	public function oAuth2Action()
 	{
 		$provider = $this->params()->fromRoute('provider');
 		$authorizationCode = $this->params()->fromQuery('code');
 		$state = $this->params()->fromQuery('state');
+        $fromUrl = $this->params()->fromQuery('from');
 
 		if(strlen($authorizationCode) > 10) {
 			// setting up OAuth2 client
@@ -126,18 +274,27 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                     // redirect to requested page
 	                $requestedUri = $cookie->requestedUri;
 	                $redirectUri = $this->getRequest()->getUri()->getScheme() . '://' . $this->getRequest()->getUri()->getHost() . $requestedUri;
+
+                    // delete cookie
+                    $cookie = new \Zend\Http\Header\SetCookie('requestedUri', '', strtotime('-1 Year', time()), '/');
+
 	                return $this->redirect()->toUrl($redirectUri);
 	            } else {
 	            	if($this->oAuth2Client->isNewUser()) {
                         $this->getEventManager()->trigger('signUp', null, array('provider' => $provider));
 	            		$redirectRoute = $this->redirects['after-sign-up-social']['route'];
+                        return $this->redirect()->toRoute($redirectRoute);
                     }
 	            	else {
                         // trigger sign in activity
                         $this->getEventManager()->trigger('signIn', null, array('provider' => $provider));
-	            		$redirectRoute = $this->redirects['sign-in']['route'];
-                    }
-	                return $this->redirect()->toRoute($redirectRoute);
+                        if(empty($fromUrl)) {
+                            $redirectRoute = $this->redirects['sign-in']['route'];
+                            return $this->redirect()->toRoute($redirectRoute);
+                        } else {
+                            $this->redirect()->toUrl($fromUrl);
+                        }
+                    }  
 	            }
             } else {
             	// TODO: handle this error in correct way
@@ -148,4 +305,16 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
 			exit('VisoftBaseModule.Invalid.OAuth2.Code');
 		}
 	}
+
+    protected function redirectToRefer()
+    {
+        $scheme = $this->request->getHeader('Referer')->uri()->getScheme();
+        $host = $this->request->getHeader('Referer')->uri()->getHost();
+        $path = $this->request->getHeader('Referer')->uri()->getPath();
+        $port = $this->request->getHeader('Referer')->uri()->getPort();
+        $port = is_null($port) ? null : ':' . $port;
+        $query = $this->request->getHeader('Referer')->uri()->getQuery();
+        $redirectUrl = $scheme . '://' . $host  . $port . $path . '?' . $query;
+        return $this->redirect()->toUrl($redirectUrl);
+    }
 }

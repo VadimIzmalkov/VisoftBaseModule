@@ -49,34 +49,28 @@ class Module
                     $config = $serviceLocator->get('Config');
                     return new Options\OAuth2Options(isset($config['oauth2']['linkedin']) ? $config['oauth2']['linkedin'] : []);
                 },
-                'VisoftBaseModule\Service\OAuth2\FacebookClient' => function($serviceLocator) {
-                    $config = $serviceLocator->get('Config');
-                    $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
-                    $oAuth2Options = $serviceLocator->get('VisoftBaseModule\Options\OAuth2FacebookOptions');
-                    $userService = $serviceLocator->get('VisoftBaseModule\Service\UserService');
-                    $client = new Service\OAuth2\FacebookClient($entityManager, $userService);
-                    $client->setOptions($oAuth2Options);
-                    return $client;
-                },
-                'VisoftBaseModule\Service\OAuth2\LinkedInClient' => function($serviceLocator) {
-                    $config = $serviceLocator->get('Config');
-                    $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
-                    $oAuth2Options = $serviceLocator->get('VisoftBaseModule\Options\OAuth2LinkedInOptions');
-                    $userService = $serviceLocator->get('VisoftBaseModule\Service\UserService');
-                    $client = new Service\OAuth2\LinkedInClient($entityManager, $userService);
-                    $client->setOptions($oAuth2Options);
-                    return $client;
-                },
+                // 'VisoftBaseModule\Service\OAuth2\FacebookClient' => function($serviceLocator) {
+                //     $config = $serviceLocator->get('Config');
+                //     $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
+                //     $oAuth2Options = $serviceLocator->get('VisoftBaseModule\Options\OAuth2FacebookOptions');
+                //     $userService = $serviceLocator->get('VisoftBaseModule\Service\UserService');
+                //     $client = new Service\OAuth2\FacebookClient($entityManager, $userService);
+                //     $client->setOptions($oAuth2Options);
+                //     return $client;
+                // },
+                // 'VisoftBaseModule\Service\OAuth2\LinkedInClient' => function($serviceLocator) {
+                //     $config = $serviceLocator->get('Config');
+                //     $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
+                //     $oAuth2Options = $serviceLocator->get('VisoftBaseModule\Options\OAuth2LinkedInOptions');
+                //     $userService = $serviceLocator->get('VisoftBaseModule\Service\UserService');
+                //     $client = new Service\OAuth2\LinkedInClient($entityManager, $userService);
+                //     $client->setOptions($oAuth2Options);
+                //     return $client;
+                // },
                 'VisoftBaseModule\Service\Authorization\Acl\Acl' => function($serviceLocator) {
                     $config = $serviceLocator->get('Config');
                     return new Service\Authorization\Acl\Acl($config);
                 },
-                // 'VisoftBaseModule\Service\ActivityService' => function($serviceLocator) {
-                //     $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
-                //     // $moduleOptions = $serviceLocator->get('VisoftBaseModule\Options\ModuleOptions');
-                //     // $authenticationService = $serviceLocator->get('Zend\Authentication\AuthenticationService');
-                //     return new Service\ActivityService($entityManager);
-                // },
                 'VisoftBaseModule\OAuth2\OAuth2Client' => function($serviceLocator) {
                     $config = $serviceLocator->get('Config');
                     $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
@@ -154,12 +148,12 @@ class Module
                     $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
                     return new Service\Log\Controller\Plugin\UserActivityLogger($entityManager);
                 },
-                'Social' => function($serviceLocator) {
-                    $parentLocator = $serviceLocator->getServiceLocator();
-                    $socialClients['facebook'] = $parentLocator->get('VisoftBaseModule\Service\OAuth2\FacebookClient');
-                    $socialClients['linkedin'] = $parentLocator->get('VisoftBaseModule\Service\OAuth2\LinkedInClient');
-                    return new Controller\Plugin\Social($socialClients);
-                },
+                // 'Social' => function($serviceLocator) {
+                //     $parentLocator = $serviceLocator->getServiceLocator();
+                //     $socialClients['facebook'] = $parentLocator->get('VisoftBaseModule\Service\OAuth2\FacebookClient');
+                //     $socialClients['linkedin'] = $parentLocator->get('VisoftBaseModule\Service\OAuth2\LinkedInClient');
+                //     return new Controller\Plugin\Social($socialClients);
+                // },
                 'Authentication' => function($serviceLocator) {
                     $parentLocator = $serviceLocator->getServiceLocator();
                     $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
