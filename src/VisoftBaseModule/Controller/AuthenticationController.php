@@ -293,8 +293,12 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                     // trigger sign in activity
                     $this->getEventManager()->trigger('signIn', null, array('provider' => $provider));
                         if(empty($fromUrl)) {
-                            $redirectRoute = $this->redirects['sign-in']['route'];
-                            return $this->redirect()->toRoute($redirectRoute);
+                            $route = $this->redirects['sign-in']['route'];
+                            $parameters = $this->redirects['sign-in']['parameters'];
+                            $query = $this->redirects['sign-in']['query'];
+                            return $this->redirect()->toRoute($route, $parameters, ['query' => $query]);
+                            // $redirectRoute = $this->redirects['sign-in']['route'];
+                            // return $this->redirect()->toRoute($redirectRoute);
                         } else {
                             $this->redirect()->toUrl($fromUrl);
                         }
