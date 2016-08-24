@@ -172,13 +172,15 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                         $redirectUri = $this->getRequest()->getUri()->getScheme() . '://' . $this->getRequest()->getUri()->getHost() . $requestedUri;
 
                         // delete cookie
-                        $cookie = new \Zend\Http\Header\SetCookie('requestedUri', '', strtotime('-1 Year', time()), '/');
+                        $newCookie = new \Zend\Http\Header\SetCookie('requestedUri', $requestedUri, time(), '/');
+                        $this->getResponse()->getHeaders()->addHeader($newCookie);
 
                         return $this->redirect()->toUrl($redirectUri);
                     }  else {
                         $route = $this->redirects['sign-in']['route'];
-                        // $parameters = $this->redirects['sign-in']['parameters'];
-                        return $this->redirect()->toRoute($route);
+                        $parameters = $this->redirects['sign-in']['parameters'];
+                        $query = $this->redirects['sign-in']['query'];
+                        return $this->redirect()->toRoute($route, $parameters, ['query' => $query]);
                     }
                 }
             }
@@ -267,27 +269,29 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
 
             	$cookie = $this->request->getCookie();
             	// redirect
-	            if(isset($cookie->requestedUri)) {
-                    // trigger sign in activity
-                    $this->getEventManager()->trigger('signIn', null, array('provider' => $provider));
-	            	
-                    // redirect to requested page
-	                $requestedUri = $cookie->requestedUri;
-	                $redirectUri = $this->getRequest()->getUri()->getScheme() . '://' . $this->getRequest()->getUri()->getHost() . $requestedUri;
-
-                    // delete cookie
-                    $cookie = new \Zend\Http\Header\SetCookie('requestedUri', '', strtotime('-1 Year', time()), '/');
-
-	                return $this->redirect()->toUrl($redirectUri);
-	            } else {
-	            	if($this->oAuth2Client->isNewUser()) {
-                        $this->getEventManager()->trigger('signUp', null, array('provider' => $provider));
-	            		$redirectRoute = $this->redirects['after-sign-up-social']['route'];
-                        return $this->redirect()->toRoute($redirectRoute);
-                    }
-	            	else {
+	            
+            	if($this->oAuth2Client->isNewUser()) {
+                    $this->getEventManager()->trigger('signUp', null, array('provider' => $provider));
+            		$redirectRoute = $this->redirects['after-sign-up-social']['route'];
+                    return $this->redirect()->toRoute($redirectRoute);
+                } else {
+                    if(isset($cookie->requestedUri)) {
                         // trigger sign in activity
                         $this->getEventManager()->trigger('signIn', null, array('provider' => $provider));
+                        
+                        // redirect to requested page
+                        $requestedUri = $cookie->requestedUri;
+                        $redirectUri = $this->getRequest()->getUri()->getScheme() . '://' . $this->getRequest()->getUri()->getHost() . $requestedUri;
+
+                        // delete cookie
+                        $newCookie = new \Zend\Http\Header\SetCookie('requestedUri', $requestedUri, time(), '/');
+                        $this->getResponse()->getHeaders()->addHeader($newCookie);
+
+                        return $this->redirect()->toUrl($redirectUri);
+                    } else {
+                    // die('123');
+                    // trigger sign in activity
+                    $this->getEventManager()->trigger('signIn', null, array('provider' => $provider));
                         if(empty($fromUrl)) {
                             $redirectRoute = $this->redirects['sign-in']['route'];
                             return $this->redirect()->toRoute($redirectRoute);
