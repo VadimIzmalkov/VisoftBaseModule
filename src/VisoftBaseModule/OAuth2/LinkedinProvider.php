@@ -24,12 +24,15 @@ class LinkedinProvider extends AbstractProvider
     		->setParameterPost([
     			'grant_type' 	=> 'authorization_code',
     			'code'          => $this->authorizationCode,
-    			'redirect_uri'	=> $this->options->getRedirectUri(),
+    			'redirect_uri'	=> $this->redirectUri, //'http://frydayoffline.net/authentication/o-auth2/linkedin/apply-to-become-a-representative/', //$this->options->getRedirectUri(),
     			'client_id'		=> $this->options->getClientId(),
     			'client_secret' => $this->options->getClientSecret()
     		]);
     	$response = $this->httpClient->send();
     	$token = \Zend\Json\Decoder::decode($response->getBody());
+
+        // var_dump($token);
+        // die('123');
 
     	return $token->access_token;
 	}
@@ -63,14 +66,37 @@ class LinkedinProvider extends AbstractProvider
         return $userProfileInfo;
     }
 
-    public function getAuthenticationUrl()
+    public function getAuthenticationUrl($referCode = null)
     {
+        $callbackUri = $this->options->getRedirectUri();
+        if(!empty($referCode)) {
+            $callbackUri = rtrim($callbackUri, '/') . '/';
+            $callbackUri .= $referCode . '/';
+        }
+        // var_dump($redirectUri);
+        // if(!empty($query)) {
+        //     $redirectUri .= '?';
+        //     $first = true;
+        //     foreach ($query as $parameter => $value) {
+        //         if(!$first) 
+        //             $redirectUri .= '&';
+        //         $redirectUri .= $parameter . '=' . $value;
+        //         $first = false;
+        //     }
+        // }
+        // var_dump($callbackUri);
+        // var_dump(urlencode($redirectUri));
+        // die('123');
+
         $url = $this->options->getAuthUri() . '?'
         	. 'response_type=code'
-            . '&redirect_uri='  	. $this->options->getRedirectUri()
             . '&client_id='    		. $this->options->getClientId()
             . '&state='        		. $this->generateState()
-            . $this->getScope(',');
+            . $this->getScope(',')
+            . '&redirect_uri='      . $callbackUri;
+
+        // var_dump($url);
+        // die('123');        
         return $url;
     }
 

@@ -41,7 +41,7 @@ class OAuth2Client implements \Zend\ServiceManager\ServiceLocatorAwareInterface
 		}
 	}
 
-    public function setGrant($authorizationCode, $providerState)
+    public function setGrant($authorizationCode, $providerState, $redirectUri = null)
     {
         if(is_null($this->oAuth2Provider)) {
             // TODO: fix handling this error
@@ -49,6 +49,7 @@ class OAuth2Client implements \Zend\ServiceManager\ServiceLocatorAwareInterface
         }
         $this->oAuth2Provider->authorizationCode = $authorizationCode;
         $this->oAuth2Provider->providerState = $providerState;
+        $this->oAuth2Provider->redirectUri = $redirectUri;
 
         $this->logger->info('Set grant: (c): ' . $authorizationCode . ', (s): ' . $providerState);
     }

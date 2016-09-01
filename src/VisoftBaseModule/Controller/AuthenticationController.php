@@ -249,12 +249,15 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
 		$provider = $this->params()->fromRoute('provider');
 		$authorizationCode = $this->params()->fromQuery('code');
 		$state = $this->params()->fromQuery('state');
-        $fromUrl = $this->params()->fromQuery('from');
 
 		if(strlen($authorizationCode) > 10) {
 			// setting up OAuth2 client
 			$this->oAuth2Client->setProvider($provider);
-			$this->oAuth2Client->setGrant($authorizationCode, $state);
+            
+            // for LinkedIn redirect uri should be the same as when generating Authentication Url (with all parameters, not as in config file)
+            $serverUrl = $this->getRequest()->getUri()->getScheme() . '://' . $this->getRequest()->getUri()->getHost();
+            $redirectUrl = $serverUrl . parse_url($this->request->getRequestUri(), PHP_URL_PATH);
+			$this->oAuth2Client->setGrant($authorizationCode, $state, $redirectUrl);
 
 			// injecting OAuth2 client into Doctine authentication adapter
 			$adapter = $this->doctineAuthenticationService->getAdapter();
@@ -268,12 +271,19 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
             	$this->doctineAuthenticationService->getStorage()->write($identity);
 
             	$cookie = $this->request->getCookie();
-            	// redirect
+            	
+                // refer-code for redirect
+                $referCode = $this->params()->fromRoute('refer-code');
+                $queryRedirect = empty($referCode) ? [] : ['refer-code' => $referCode];
+                // this parameter tells that user authenticate via O2Auth 
+                $queryRedirect['action'] = 'o2auth';
 	            
             	if($this->oAuth2Client->isNewUser()) {
+                    // trigger sign up activity
                     $this->getEventManager()->trigger('signUp', null, array('provider' => $provider));
-            		$redirectRoute = $this->redirects['after-sign-up-social']['route'];
-                    return $this->redirect()->toRoute($redirectRoute);
+
+            		$route = $this->redirects['after-sign-up-social']['route'];
+                    return $this->redirect()->toRoute($redirectRoute, [], ['query' => $queryRedirect]);
                 } else {
                     if(isset($cookie->requestedUri)) {
                         // trigger sign in activity
@@ -289,19 +299,11 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
 
                         return $this->redirect()->toUrl($redirectUri);
                     } else {
-                    // die('123');
-                    // trigger sign in activity
-                    $this->getEventManager()->trigger('signIn', null, array('provider' => $provider));
-                        if(empty($fromUrl)) {
-                            $route = $this->redirects['sign-in']['route'];
-                            $parameters = $this->redirects['sign-in']['parameters'];
-                            $query = $this->redirects['sign-in']['query'];
-                            return $this->redirect()->toRoute($route, $parameters, ['query' => $query]);
-                            // $redirectRoute = $this->redirects['sign-in']['route'];
-                            // return $this->redirect()->toRoute($redirectRoute);
-                        } else {
-                            $this->redirect()->toUrl($fromUrl);
-                        }
+                        // trigger sign in activity
+                        $this->getEventManager()->trigger('signIn', null, array('provider' => $provider));
+
+                        $route = $this->redirects['sign-in']['route'];
+                        return $this->redirect()->toRoute($route, [], ['query' => $queryRedirect]);
                     }  
 	            }
             } else {

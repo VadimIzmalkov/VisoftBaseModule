@@ -14,6 +14,7 @@ abstract class AbstractProvider
 	// grant
 	public $authorizationCode = null;
 	public $providerState;
+    public $redirectUri;
 
 	const PROVIDER_NAME = 'abstractProvider';
 

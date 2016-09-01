@@ -6,11 +6,13 @@ use Zend\Form\Form;
 
 use Doctrine\ORM\EntityManager;
 
-class BaseForm extends Form 
+class BaseForm extends Form implements \Zend\ServiceManager\ServiceLocatorAwareInterface
 {
     private $title;
     private $formType;
+
 	protected $entityManager;
+    protected $serviceLocator;
 
 	public function __construct(EntityManager $entityManager)
 	{
@@ -93,6 +95,7 @@ class BaseForm extends Form
                 'class' => $elementClass,
                 'disabled' => $disabled,
                 'required' => $required,
+                'placeholder' => $placeholder,
             ],
             'options' => [
                 'label' => $label,
@@ -805,5 +808,13 @@ class BaseForm extends Form
                 'value' => $value,
             ],
         ));             
+    }
+
+    public function setServiceLocator(\Zend\ServiceManager\ServiceLocatorInterface $serviceLocator) {
+        $this->serviceLocator = $serviceLocator;
+    }
+
+    public function getServiceLocator() {
+        return $this->serviceLocator;
     }
 }

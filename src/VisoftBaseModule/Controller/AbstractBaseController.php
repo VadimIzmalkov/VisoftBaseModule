@@ -20,6 +20,7 @@ abstract class AbstractBaseController extends \Zend\Mvc\Controller\AbstractActio
         return $this->entityManager;
     }
 
+    // TODO: move to controller plugin
     protected function redirectToRefer()
     {
         $scheme = $this->request->getHeader('Referer')->uri()->getScheme();
