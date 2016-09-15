@@ -178,7 +178,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                         return $this->redirect()->toUrl($redirectUri);
                     }  else {
                         $route = $this->redirects['sign-in']['route'];
-                        $parameters = $this->redirects['sign-in']['parameters'];
+                        $parameters = isset($this->redirects['sign-in']['parameters']) ? $this->redirects['sign-in']['parameters'] : [];
                         $query = $this->redirects['sign-in']['query'];
                         return $this->redirect()->toRoute($route, $parameters, ['query' => $query]);
                     }
