@@ -100,7 +100,7 @@ abstract class AbstractCrudController extends AbstractActionController
             'thisAction' => 'create',
             'pageTitle' => static::CREATE_PAGE_TITLE,
         ]);
-		$this->addCreateViewModelVariables($viewModel);
+		$this->addCreateViewModelVariables();
 		return $viewModel;
 	}
 
@@ -129,6 +129,11 @@ abstract class AbstractCrudController extends AbstractActionController
             // TODO: generate exeption before binding
             $this->editForm->bind($this->entity);
             $this->editForm->setData($this->post);
+
+            // var_dump($this->post);
+            // var_dump($files);
+            // die('123');
+
             if($this->editForm->isValid()) {
             	$data = $this->editForm->getData();
             	// empty if files has not been uploaded
@@ -503,6 +508,9 @@ abstract class AbstractCrudController extends AbstractActionController
     {        
         $imageTitleEntity = $this->entity->getImageTitle();
         
+        // var_dump($imageTitleEntity);
+        // die('123');
+
         // create new image object or get exists from entity
         if(empty($imageTitleEntity)) {
             $imageTitleEntity = new \VisoftBaseModule\Entity\Image();
@@ -530,13 +538,13 @@ abstract class AbstractCrudController extends AbstractActionController
         // - $this->post['yStartCrop']
         // - $this->post['heightCrop']
         // - $this->post['widthCrop']
-        if(empty($this->post['xStartCrop']) || 
-            empty($this->post['yStartCrop']) ||
-            empty($this->post['widthCrop']) ||
-            empty($this->post['heightCrop']) ||
-            empty($this->post['widthCurrent']) ||
-            empty($this->post['heightCurrent'])
-        )
+        // value can be 0, do not use empty() 
+        if(($this->post['xStartCrop'] == '') || 
+            ($this->post['yStartCrop'] == '') ||
+            ($this->post['widthCrop'] == '') ||
+            ($this->post['heightCrop'] == '') ||
+            ($this->post['widthCurrent'] == '') ||
+            ($this->post['heightCurrent'] == ''))
             return false;
         
         // cropping coordinates
@@ -577,7 +585,8 @@ abstract class AbstractCrudController extends AbstractActionController
             if(!is_null($imageTitleEntity->getOriginalSize()))
                 if(file_exists($imageTitleEntity->getOriginalSize()))
                     unlink('public' . $imageTitleEntity->getOriginalSize());
-            $imageTitleEntity->setOriginalSize(end(explode('public', $imageOriginalPath)));
+            $imageOriginalPathExlopded = explode('public', $imageOriginalPath);
+            $imageTitleEntity->setOriginalSize(end($imageOriginalPathExlopded));
                 
             // save large 
             $thumb->resize(960, 960);
@@ -589,7 +598,7 @@ abstract class AbstractCrudController extends AbstractActionController
                 if(file_exists($imageTitleEntity->getLSize()))
                     unlink('public' . $imageTitleEntity->getLSize());
             $newImagePathExploded = explode('public', $newImagePath);
-            $imageTitleEntity->setLSize(end(explode('public', $newImagePathExploded)));
+            $imageTitleEntity->setLSize(end($newImagePathExploded));
 
             // save medium
             $thumb->resize(480, 480);
@@ -601,7 +610,7 @@ abstract class AbstractCrudController extends AbstractActionController
                 if(file_exists($imageTitleEntity->getMSize()))
                     unlink('public' . $imageTitleEntity->getMSize());
             $newImagePathExploded = explode('public', $newImagePath);
-            $imageTitleEntity->setMSize(end(explode('public', $newImagePathExploded)));
+            $imageTitleEntity->setMSize(end($newImagePathExploded));
 
             // set small
             $thumb->resize(240, 240);
@@ -625,7 +634,7 @@ abstract class AbstractCrudController extends AbstractActionController
                 if(file_exists($imageTitleEntity->getXsSize()))
                     unlink('public' . $imageTitleEntity->getXsSize());
             $newImagePathExploded = explode('public', $newImagePath);
-            $imageTitleEntity->setXsSize(end(explode('public', $newImagePathExploded)));
+            $imageTitleEntity->setXsSize(end($newImagePathExploded));
 
             // save image
             $this->entityManager->persist($imageTitleEntity);
