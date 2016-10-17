@@ -106,6 +106,24 @@ class BaseForm extends Form implements \Zend\ServiceManager\ServiceLocatorAwareI
         ]);
     }
 
+    public function addTextareaCkeditor($name, $label, $rows = 5)
+    {
+        $this->add([
+            'name' => $name,
+            'type' => 'Zend\Form\Element\Textarea',
+            'attributes' => [
+                'rows' => $rows,
+                'class' => 'form-control ckeditor',
+            ],
+            'options' => [
+                'label' => $label,
+                'label_attributes' => array(
+                    'class' => 'label',
+                ),
+            ]
+        ]);
+    }
+
     public function addMultiCheckboxEntities($name, $targetClass, $property = 'name', $labelClass = null, $id = null, $isMethod = true, $label = null)
     {
         $this->add([
