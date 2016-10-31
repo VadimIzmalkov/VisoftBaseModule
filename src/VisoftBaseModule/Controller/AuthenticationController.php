@@ -198,8 +198,8 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
             $sessionManager = new \Zend\Session\SessionManager();
             $sessionManager->forgetMe();
         }
-        // return $this->redirect()->toRoute($this->redirects['sign-out']['route']);
-        return $this->redirectToRefer();
+        return $this->redirect()->toRoute($this->redirects['sign-out']['route']);
+        // return $this->redirectToRefer();
     }
 
     public function forgotPasswordAction()
@@ -274,7 +274,8 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
             	
                 // refer-code for redirect
                 $referCode = $this->params()->fromRoute('refer-code');
-                $queryRedirect = empty($referCode) ? [] : ['refer-code' => $referCode];
+
+                $queryRedirect['refer-code'] = $referCode;
                 // this parameter tells that user authenticate via O2Auth 
                 $queryRedirect['action'] = 'o2auth';
 	            

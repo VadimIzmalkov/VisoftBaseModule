@@ -178,7 +178,9 @@ class FacebookProvider extends AbstractProvider
         $permissions = $this->options->getScope();//['email']; // Optional permissions
         $callbackUri = $this->options->getRedirectUri();
         if(!empty($referCode)) {
+            // add / if not added:
             $callbackUri = rtrim($callbackUri, '/') . '/';
+            
             $callbackUri .= $referCode . '/';
         }
         // if(!empty($query)) {
