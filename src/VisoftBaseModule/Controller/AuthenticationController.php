@@ -283,7 +283,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                     $this->getEventManager()->trigger('signUp', null, array('provider' => $provider));
 
             		$route = $this->redirects['after-sign-up-social']['route'];
-                    return $this->redirect()->toRoute($redirectRoute, [], ['query' => $queryRedirect]);
+                    return $this->redirect()->toRoute($route, [], ['query' => $queryRedirect]);
                 } else {
                     if(isset($cookie->requestedUri)) {
                         // trigger sign in activity
