@@ -198,7 +198,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
             $sessionManager = new \Zend\Session\SessionManager();
             $sessionManager->forgetMe();
         }
-        return $this->redirect()->toRoute($this->redirects['sign-out']['route']);
+        return $this->redirect()->toRoute($this->redirects['after-sign-out']['route']);
         // return $this->redirectToRefer();
     }
 
@@ -221,28 +221,6 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
         $viewModel->setTemplate($this->templates['forgot-password']);
         return $viewModel;
     }
-
-    // public function enterPasswordAction()
-    // {
-    //     $form = new $this->forms['enter-password']($this->entityManager, 'enter-password');
-    //     $form->setAttributes(['action' => $this->request->getRequestUri()]);
-    //     $form->get('userId')->setValue($user->getId());
-    //     if($this->request->isPost()) {
-    //         $post = $this->params()->fromPost();
-    //         $userId = $post['userId'];
-    //         $user = $this->entityManager->find('VisoftBaseModule\Entity\UserInterface', $userId);
-    //         $user->setPassword(\VisoftBaseModule\Service\UserService::encryptPassword($post['password']));
-
-    //         $this->entityManager->persist($user);
-    //         $this->entityManager->flush();
-
-    //         // sign-in user
-    //         return $this->userService->signIn($user->getEmail(), $user->getPassword());
-    //         // $route = $this->redirects['sign-in']['route'];
-    //         // $parameters = $this->redirects['sign-in']['parameters'];
-    //         // return $this->redirect()->toRoute($route);
-    //     }
-    // }
 
 	public function oAuth2Action()
 	{

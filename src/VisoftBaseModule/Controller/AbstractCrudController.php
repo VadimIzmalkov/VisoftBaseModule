@@ -44,6 +44,9 @@ abstract class AbstractCrudController extends AbstractActionController
 	protected $slugService = null;
 	protected $thumbnailer;
 
+    // redirects
+    protected $redirectAfterCreate = null;
+
 	public function __construct($entityManager, $entityClass)
 	{
         $this->entityManager = $entityManager;
@@ -282,10 +285,15 @@ abstract class AbstractCrudController extends AbstractActionController
 
     protected function redirectAfterCreate() 
     {
-        $routeMatch = $this->getEvent()->getRouteMatch();
-        $route = $routeMatch->getMatchedRouteName();
-        $parameters['controller'] = $routeMatch->getParam('__CONTROLLER__');
-        $parameters['action'] = 'index';
+        if($this->redirectAfterCreate === NULL) {
+            $routeMatch = $this->getEvent()->getRouteMatch();
+            $route = $routeMatch->getMatchedRouteName();
+            $parameters['controller'] = $routeMatch->getParam('__CONTROLLER__');
+            $parameters['action'] = 'index';
+        } else {
+            $route = $this->redirectAfterCreate['route'];
+            $parameters = $this->redirectAfterCreate['parameters'];
+        }        
         return $this->redirect()->toRoute($route, $parameters);
     }
 

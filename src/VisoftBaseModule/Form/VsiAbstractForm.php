@@ -10,6 +10,41 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 
 	public function getTitle() { return $this->title; }
 
+	protected function addElementText($parameters)
+	{
+		$this->add([
+		    'type' => Element\Text::class,
+		    'name' => $parameters['name'] ?? 'input',
+		    'options' => [ 
+		        'label' => $parameters['label'] ?? NULL,
+		        'label_attributes' => [
+                    'class' => $parameters['labelClass'] ?? NULL,
+                ],
+		    ],
+		    'attributes' => [
+		    	'class' => 'form-control',
+            ]
+		]);
+	}
+
+	protected function addElementTextarea($parameters)
+	{
+		$this->add([
+		    'type' => Element\Textarea::class,
+		    'name' => $parameters['name'] ?? 'e-mail',
+		    'options' => [
+		    	'rows' => $parameters['rows'] ?? 5,
+		        'label' => $parameters['label'] ?? NULL,
+		        'label_attributes' => [
+                    'class' => $parameters['labelClass'] ?? NULL,
+                ],
+		    ],
+		    'attributes' => [
+		    	'class' => 'form-control',
+            ]
+		]);
+	}
+
 	protected function addElementEmail($parameters)
 	{
 		$this->add([
@@ -17,6 +52,9 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		    'name' => $parameters['name'] ?? 'e-mail',
 		    'options' => [ 
 		        'label' => $parameters['label'] ?? 'Email Address',
+		        'label_attributes' => [
+                    'class' => $parameters['labelClass'] ?? NULL,
+                ],
 		    ],
 		    'attributes' => [
 		    	'class' => 'form-control',
@@ -44,7 +82,7 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		    'type' => Element\Submit::class,
 		    'name' => $parameters['name'] ?? 'submit',
 		    'attributes' => [
-		    	'class' => 'btn btn-default btn-block',
+		    	'class' => $parameters['class'] ?? 'btn',
 		    	'value' => $parameters['value'] ?? 'Submit'
             ]
 		]);

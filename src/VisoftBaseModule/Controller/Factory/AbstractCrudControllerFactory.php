@@ -45,7 +45,6 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
                 $controllerClass .= 'Controller';
         $entityClass = isset($config['entityClass']) ? $config['entityClass'] : null;
         $uploadPath = isset($config['uploadPath']) ? $config['uploadPath'] : null;
-
         $crudController = new $controllerClass($entityManager, $entityClass);
 
         if(isset($config['forms'])) {
