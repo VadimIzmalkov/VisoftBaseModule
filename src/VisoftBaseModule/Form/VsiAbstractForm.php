@@ -10,15 +10,29 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 
 	public function getTitle() { return $this->title; }
 
+	private function arrayExchange($parametersInput) 
+	{
+		$parametersOutput['name'] = isset($parametersInput['name']) ? $parametersInput['name'] : NULL;
+		$parametersOutput['label'] = isset($parametersInput['label']) ? $parametersInput['label'] : NULL;
+		$parametersOutput['labelClass'] = isset($parametersInput['labelClass']) ? $parametersInput['labelClass'] : NULL;
+		$parametersOutput['rows'] = isset($parametersInput['rows']) ? $parametersInput['rows'] : 5;
+		$parametersOutput['class'] = isset($parametersInput['class']) ? $parametersInput['class'] : NULL;
+		$parametersOutput['value'] = isset($parametersInput['value']) ? $parametersInput['value'] : 'Submit';
+
+		return $parametersOutput;
+	}
+
 	protected function addElementText($parameters)
 	{
+		$parameters = $this->arrayExchange($parameters);
+
 		$this->add([
 		    'type' => Element\Text::class,
-		    'name' => $parameters['name'] ?? 'input',
+		    'name' => $parameters['name'],
 		    'options' => [ 
-		        'label' => $parameters['label'] ?? NULL,
+		        'label' => $parameters['label'],
 		        'label_attributes' => [
-                    'class' => $parameters['labelClass'] ?? NULL,
+                    'class' => $parameters['labelClass'],
                 ],
 		    ],
 		    'attributes' => [
@@ -29,14 +43,16 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 
 	protected function addElementTextarea($parameters)
 	{
+		$parameters = $this->arrayExchange($parameters);
+
 		$this->add([
 		    'type' => Element\Textarea::class,
-		    'name' => $parameters['name'] ?? 'e-mail',
+		    'name' => $parameters['name'],
 		    'options' => [
-		    	'rows' => $parameters['rows'] ?? 5,
-		        'label' => $parameters['label'] ?? NULL,
+		    	'rows' => $parameters['rows'],
+		        'label' => $parameters['label'],
 		        'label_attributes' => [
-                    'class' => $parameters['labelClass'] ?? NULL,
+                    'class' => $parameters['labelClass'],
                 ],
 		    ],
 		    'attributes' => [
@@ -47,13 +63,15 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 
 	protected function addElementEmail($parameters)
 	{
+		$parameters = $this->arrayExchange($parameters);
+
 		$this->add([
 		    'type' => Element\Email::class,
-		    'name' => $parameters['name'] ?? 'e-mail',
+		    'name' => $parameters['name'],
 		    'options' => [ 
-		        'label' => $parameters['label'] ?? 'Email Address',
+		        'label' => $parameters['label'],
 		        'label_attributes' => [
-                    'class' => $parameters['labelClass'] ?? NULL,
+                    'class' => $parameters['labelClass'],
                 ],
 		    ],
 		    'attributes' => [
@@ -64,11 +82,13 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 
 	protected function addElementPassword($parameters)
 	{
+		$parameters = $this->arrayExchange($parameters);
+
 		$this->add([
 		    'type' => Element\Password::class,
-		    'name' => $parameters['name'] ?? 'password',
+		    'name' => $parameters['name'],
 		    'options' => [
-		        'label' => $parameters['label'] ?? 'Password',
+		        'label' => $parameters['label'],
 		    ],
 		    'attributes' => [
 		    	'class' => 'form-control',
@@ -78,12 +98,14 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 
 	protected function addElementSubmit($parameters)
 	{
+		$parameters = $this->arrayExchange($parameters);
+
 		$this->add([
 		    'type' => Element\Submit::class,
-		    'name' => $parameters['name'] ?? 'submit',
+		    'name' => $parameters['name'],
 		    'attributes' => [
-		    	'class' => $parameters['class'] ?? 'btn',
-		    	'value' => $parameters['value'] ?? 'Submit'
+		    	'class' => $parameters['class'],
+		    	'value' => $parameters['value'],
             ]
 		]);
 	}
