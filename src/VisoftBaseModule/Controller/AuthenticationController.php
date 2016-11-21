@@ -123,7 +123,10 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                 $user = $this->entityManager->getRepository('VisoftBaseModule\Entity\UserInterface')->findOneBy(['email' => $email]);
                 if(empty($user)) {
                     $this->flashMessenger()->addMessage('The username or email is not valid!');
-                    return $this->redirect()->toRoute('sign-in'); 
+                    $route = $this->redirects['authentication-faild']['route'];
+                    $parameters = isset($this->redirects['authentication-faild']['parameters']) ? $this->redirects['sign-in']['parameters'] : [];
+                    $query = $this->redirects['authentication-faild']['query'];
+                    return $this->redirect()->toRoute($route, $parameters, ['query' => $query]);
                 }
                 $adapter->setIdentityValue($user->getEmail());
                 $adapter->setCredentialValue($this->params()->fromPost('password'));

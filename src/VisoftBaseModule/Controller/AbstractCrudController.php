@@ -496,7 +496,7 @@ abstract class AbstractCrudController extends AbstractActionController
 
             // set mail
             $thumb->resize(240, 240);
-            $newImageName = 'xsmall_' . $imageName;
+            $newImageName = 'mail_' . $imageName;
             $explodedImagePath[$imageNameKey] = $newImageName;
             $newImagePath = implode("/", $explodedImagePath);
             $thumb->save($newImagePath);
