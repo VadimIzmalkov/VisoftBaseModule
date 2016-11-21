@@ -659,7 +659,7 @@ class BaseForm extends Form implements \Zend\ServiceManager\ServiceLocatorAwareI
                 'object_manager' => $this->entityManager,
                 'target_class' => 'Fryday\Entity\Call2Action',
                 'label_generator' => function($targetEntity) {
-                        return $targetEntity->getTitle();
+                        return $targetEntity->getName();
                 },
                 'display_empty_item' => true,
                 'empty_item_label' => '-- Select call to action --',
