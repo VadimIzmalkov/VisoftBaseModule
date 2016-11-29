@@ -133,10 +133,6 @@ abstract class AbstractCrudController extends AbstractActionController
             $this->editForm->bind($this->entity);
             $this->editForm->setData($this->post);
 
-            // var_dump($this->post);
-            // var_dump($files);
-            // die('123');
-
             if($this->editForm->isValid()) {
             	$data = $this->editForm->getData();
             	// empty if files has not been uploaded
@@ -272,7 +268,7 @@ abstract class AbstractCrudController extends AbstractActionController
         // For each of the roles can be configured special type of the form (3d parameter of the form constructor - $identity)
         // Objet creater - "AbstractCrudControllerFactory"
         if(is_null($this->createForm))
-            throw new \Exception("Create form name not defined in \"crud_controller\" specification (\"module.config.php\"). Define the class name or override method \"getEntityClassName()\" for depends entity", 1);
+            throw new \Exception("Create form not defined", 1);
         // $this->editForm->setAttributes(['action' => $this->request->getRequestUri()]);
         return $this->createForm;
     }
@@ -302,6 +298,9 @@ abstract class AbstractCrudController extends AbstractActionController
     // if form depends on parameters (entity, for example)
     protected function getEditForm()
     {
+        if(is_null($this->editForm))
+            throw new \Exception("Edit form not defined", 1);
+            
     	$this->editForm->setAttributes(['action' => $this->request->getRequestUri()]);
     	return $this->editForm;
     }
