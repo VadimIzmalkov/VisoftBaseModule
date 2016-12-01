@@ -130,12 +130,13 @@ abstract class AbstractCrudController extends AbstractActionController
             // here can be binding issue
             // for "title image" the names of upload element and entity field should be different 
             // TODO: generate exeption before binding
-            $this->editForm->bind($this->entity);
+            
             $this->editForm->setData($this->post);
 
+            $this->editForm->bind($this->entity);
             if($this->editForm->isValid()) {
             	$data = $this->editForm->getData();
-            	// empty if files has not been uploaded
+
             	if(!empty($files)) 
             		$this->saveFiles($files);
             	$this->setExtra();
@@ -512,11 +513,11 @@ abstract class AbstractCrudController extends AbstractActionController
     }
 
     protected function saveImagesObject($images) 
-    {        
+    {  
         $imageTitleEntity = $this->entity->getImageTitle();
-        
-        // var_dump($imageTitleEntity);
-        // die('123');
+
+        if($images['image-title-upload-element']['error'] !== 0 && empty($imageTitleEntity)) 
+            return;      
 
         // create new image object or get exists from entity
         if(empty($imageTitleEntity)) {
