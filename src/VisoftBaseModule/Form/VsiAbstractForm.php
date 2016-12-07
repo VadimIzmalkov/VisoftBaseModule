@@ -21,13 +21,15 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 
 	private function arrayExchange($parametersInput) 
 	{
-		$parametersOutput['name'] = isset($parametersInput['name']) ? $parametersInput['name'] : NULL;
-		$parametersOutput['label'] = isset($parametersInput['label']) ? $parametersInput['label'] : NULL;
-		$parametersOutput['labelClass'] = isset($parametersInput['labelClass']) ? $parametersInput['labelClass'] : 'label';
-		$parametersOutput['rows'] = isset($parametersInput['rows']) ? $parametersInput['rows'] : 5;
-		$parametersOutput['class'] = isset($parametersInput['class']) ? $parametersInput['class'] : 'form-control';
-		$parametersOutput['value'] = isset($parametersInput['value']) ? $parametersInput['value'] : 'Submit';
-		$parametersOutput['disabled'] = isset($parametersInput['disabled']) ? $parametersInput['disabled'] : false;
+		$parametersOutput['id']				= isset($parametersInput['id']) ? $parametersInput['id'] : NULL;
+		$parametersOutput['name'] 			= isset($parametersInput['name']) ? $parametersInput['name'] : NULL;
+		$parametersOutput['label'] 			= isset($parametersInput['label']) ? $parametersInput['label'] : NULL;
+		$parametersOutput['placeholder']	= isset($parametersInput['placeholder']) ? $parametersInput['placeholder'] : NULL;
+		$parametersOutput['labelClass'] 	= isset($parametersInput['labelClass']) ? $parametersInput['labelClass'] : 'label';
+		$parametersOutput['rows'] 			= isset($parametersInput['rows']) ? $parametersInput['rows'] : 5;
+		$parametersOutput['class'] 			= isset($parametersInput['class']) ? $parametersInput['class'] : 'form-control';
+		$parametersOutput['value'] 			= isset($parametersInput['value']) ? $parametersInput['value'] : 'Submit';
+		$parametersOutput['disabled'] 		= isset($parametersInput['disabled']) ? $parametersInput['disabled'] : false;
 
 		return $parametersOutput;
 	}
@@ -48,8 +50,26 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		    'attributes' => [
 		    	'class' => $parameters['class'],
 		    	'disabled' => $parameters['disabled'],
+		    	'id' => $parameters['id'],
+		    	'placeholder' => $parameters['placeholder']
             ]
 		]);
+	}
+
+	protected function addHidden($parameters)
+	{
+		$parameters = $this->arrayExchange($parameters);
+
+		$this->add([
+			'type' => Element\Hidden::class,
+            'name' => $parameters['name'],
+            'attributes' => [
+                'id' => $parameters['id'],
+                'value' => $parameters['value'],
+                // $attributes,
+                // 'data-geo' => 'country'
+            ],
+        ]);
 	}
 
 	protected function addElementTextarea($parameters)
@@ -68,6 +88,7 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		    'attributes' => [
 		    	'class' => $parameters['class'],
 		    	'rows' => $parameters['rows'],
+		    	'placeholder' => $parameters['placeholder']
             ]
 		]);
 	}
@@ -117,6 +138,7 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		    'attributes' => [
 		    	'class' => $parameters['class'],
 		    	'value' => $parameters['value'],
+		    	'id' => $parameters['id'],
             ]
 		]);
 	}
