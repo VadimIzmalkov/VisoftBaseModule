@@ -13,12 +13,23 @@ class AuthenticationAdapter extends \DoctrineModule\Authentication\Adapter\Objec
     	if(is_object($this->oAuth2Client)) {
     		// authentication with social networks
     		$identity = $this->oAuth2Client->getIdentity();
-    		if (!$identity) {
+            $isBlocked = $identity->getIsBlocked();
+            // var_dump();
+            // die('123');
+    		if (!$identity) { // || $identity->getIsBlocked()) {
 	            $this->authenticationResultInfo['code']       = AuthenticationResult::FAILURE_CREDENTIAL_INVALID;
 	            $this->authenticationResultInfo['messages'][] = 'Authentication with OAuth2 protocol failed';
 
 	            return $this->createAuthenticationResult();
-	        }
+	        } elseif($identity->getIsBlocked()) {
+
+                // user not active or not confirmed email
+                $this->authenticationResultInfo['code'] = AuthenticationResult::FAILURE_UNCATEGORIZED;
+                $this->authenticationResultInfo['identity'] = $identity;
+                $this->authenticationResultInfo['messages'][] = 'A record is not active or not confirmed email';
+                // die('123');
+                return $this->createAuthenticationResult();
+            }
 	        return new AuthenticationResult(AuthenticationResult::SUCCESS, $identity);
     	} else {
     		// authentication with email and password
@@ -28,12 +39,12 @@ class AuthenticationAdapter extends \DoctrineModule\Authentication\Adapter\Objec
                 ->getObjectRepository()
                 ->findOneBy(array($options->getIdentityProperty() => $this->identity));
 
-            if (!$identity) {
+            if (!$identity ) {
                 $this->authenticationResultInfo['code']       = AuthenticationResult::FAILURE_IDENTITY_NOT_FOUND;
                 $this->authenticationResultInfo['messages'][] = 'A record with the supplied identity could not be found.';
 
                 return $this->createAuthenticationResult();
-            } elseif($identity->getActive() !== true) {
+            } elseif(($identity->getActive() !== true) || $identity->getIsBlocked()) {
                 // user not active or not confirmed email
                 $this->authenticationResultInfo['code']       = AuthenticationResult::FAILURE_UNCATEGORIZED;
                 $this->authenticationResultInfo['messages'][] = 'A record is not active or not confirmed email';

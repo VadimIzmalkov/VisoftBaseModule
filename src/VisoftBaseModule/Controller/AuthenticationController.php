@@ -246,7 +246,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
 
 			// authenticate
             $authenticationResult = $this->doctineAuthenticationService->authenticate();
-
+            // die('123');
             if($authenticationResult->isValid()) {
             	$identity = $authenticationResult->getIdentity();
             	$this->doctineAuthenticationService->getStorage()->write($identity);
