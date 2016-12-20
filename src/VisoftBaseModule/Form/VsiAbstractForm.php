@@ -30,6 +30,7 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		$parametersOutput['class'] 			= isset($parametersInput['class']) ? $parametersInput['class'] : 'form-control';
 		$parametersOutput['value'] 			= isset($parametersInput['value']) ? $parametersInput['value'] : 'Submit';
 		$parametersOutput['disabled'] 		= isset($parametersInput['disabled']) ? $parametersInput['disabled'] : false;
+		$parametersOutput['required'] 		= isset($parametersInput['required']) ? $parametersInput['required'] : false;
 
 		return $parametersOutput;
 	}
@@ -51,7 +52,8 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		    	'class' => $parameters['class'],
 		    	'disabled' => $parameters['disabled'],
 		    	'id' => $parameters['id'],
-		    	'placeholder' => $parameters['placeholder']
+		    	'placeholder' => $parameters['placeholder'],
+		    	'required' => $parameters['required'],
             ]
 		]);
 	}
@@ -88,7 +90,8 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		    'attributes' => [
 		    	'class' => $parameters['class'],
 		    	'rows' => $parameters['rows'],
-		    	'placeholder' => $parameters['placeholder']
+		    	'placeholder' => $parameters['placeholder'],
+		    	'required' => $parameters['required'],
             ]
 		]);
 	}
@@ -108,6 +111,7 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		    ],
 		    'attributes' => [
 		    	'class' => 'form-control',
+		    	'required' => $parameters['required'],
             ]
 		]);
 	}
