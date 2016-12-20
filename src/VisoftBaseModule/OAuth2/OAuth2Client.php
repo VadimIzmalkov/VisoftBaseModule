@@ -79,6 +79,7 @@ class OAuth2Client implements \Zend\ServiceManager\ServiceLocatorAwareInterface
         // TODO: fix this dependency (depend on role)
         } elseif($identity->getRole()->getName() === 'subscriber') {
             $this->isNewUser = true;
+            $identity->setRegistrationDate(new \DateTime());
             $identity->setRole($this->entityManager->find('VisoftBaseModule\Entity\UserRole', 3));
         }
 
