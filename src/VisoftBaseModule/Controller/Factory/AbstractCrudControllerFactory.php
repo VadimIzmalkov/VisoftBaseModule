@@ -111,11 +111,20 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         if(isset($config['uploadPath']))
             $crudController->setUploadPath($config['uploadPath']);
 
+        // var_dump($parentLocator);
         $thumbnailer = $parentLocator->get('WebinoImageThumb');
+        // var_dump($thumbnailer);
+        // die('1231313131');
         $crudController->setThumbnailer($thumbnailer);
 
         $slugService = $parentLocator->get('SeoUrl\Slug');
         $crudController->setSlugService($slugService);
+
+        $accountService = $parentLocator->get('Fryday\Service\AccountService');
+        $crudController->accountService = $accountService;
+
+        $formElementManager = $parentLocator->get('FormElementManager');
+        $crudController->formElementManager = $formElementManager;
 
         return $crudController;
     }

@@ -827,9 +827,9 @@ abstract class AbstractCrudController extends AbstractActionController
 
 	public function getAuthenticationService()
 	{
-		if(is_null($this->authenticationService))
-			return $this->getServiceLocator()->get('Zend\Authentication\AuthenticationService');
-		else
+		// if(is_null($this->authenticationService))
+		// 	return $this->getServiceLocator()->get('Zend\Authentication\AuthenticationService');
+		// else
 			return $this->$authenticationService;
 	}
 

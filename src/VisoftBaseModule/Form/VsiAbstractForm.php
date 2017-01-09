@@ -19,8 +19,14 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 	public function getIdentity() { return $this->identity; }
 	public function setIdentity($identity) { $this->identity = $identity; }
 
-	private function arrayExchange($parametersInput) 
+    public function __construct($name = NULL, $options = NULL)
+    {
+        parent::__construct($name, $options);
+    }
+
+	protected function arrayExchange($parametersInput) 
 	{
+
 		$parametersOutput['id']				= isset($parametersInput['id']) ? $parametersInput['id'] : NULL;
 		$parametersOutput['name'] 			= isset($parametersInput['name']) ? $parametersInput['name'] : NULL;
 		$parametersOutput['label'] 			= isset($parametersInput['label']) ? $parametersInput['label'] : NULL;
@@ -31,11 +37,13 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		$parametersOutput['value'] 			= isset($parametersInput['value']) ? $parametersInput['value'] : 'Submit';
 		$parametersOutput['disabled'] 		= isset($parametersInput['disabled']) ? $parametersInput['disabled'] : false;
 		$parametersOutput['required'] 		= isset($parametersInput['required']) ? $parametersInput['required'] : false;
+		$parametersOutput['value-options'] 	= isset($parametersInput['value-options']) ? $parametersInput['value-options'] : NULL;
+		$parametersOutput['empty-option'] 	= isset($parametersInput['empty-option']) ? $parametersInput['empty-option'] : NULL;
 
 		return $parametersOutput;
 	}
 
-	protected function addElementText($parameters)
+	public function addElementText($parameters)
 	{
 		$parameters = $this->arrayExchange($parameters);
 
@@ -58,7 +66,7 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		]);
 	}
 
-	protected function addHidden($parameters)
+	public function addHidden($parameters)
 	{
 		$parameters = $this->arrayExchange($parameters);
 
@@ -96,7 +104,7 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		]);
 	}
 
-	protected function addElementEmail($parameters)
+	public function addElementEmail($parameters)
 	{
 		$parameters = $this->arrayExchange($parameters);
 
@@ -110,13 +118,14 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
                 ],
 		    ],
 		    'attributes' => [
-		    	'class' => 'form-control',
+		    	'class' => $parameters['class'],
+		    	'placeholder' => $parameters['placeholder'],
 		    	'required' => $parameters['required'],
             ]
 		]);
 	}
 
-	protected function addElementPassword($parameters)
+	public function addElementPassword($parameters)
 	{
 		$parameters = $this->arrayExchange($parameters);
 
@@ -127,12 +136,35 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		        'label' => $parameters['label'],
 		    ],
 		    'attributes' => [
-		    	'class' => 'form-control',
+		    	'class' => $parameters['class'],
+		    	'placeholder' => $parameters['placeholder'],
             ]
 		]);
 	}
 
-	protected function addElementSubmit($parameters)
+	protected function addElementSelect($parameters)
+	{
+		$parameters = $this->arrayExchange($parameters);
+
+		$this->add([
+		    'type' => Element\Select::class,
+		    'name' => $parameters['name'],
+		    'attributes' => [
+		    	'id' => $parameters['id'],
+		    	'class' => $parameters['class'],
+            ],
+		    'options' => [
+		    	'empty_option' => $parameters['empty-option'],
+		        'value_options' => $parameters['value-options'],
+		        'label' => $parameters['label'],
+		        'label_attributes' => [
+                    'class' => $parameters['labelClass'],
+                ],
+		    ],
+		]);
+	}
+
+	public function addElementSubmit($parameters)
 	{
 		$parameters = $this->arrayExchange($parameters);
 

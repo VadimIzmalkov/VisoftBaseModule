@@ -78,7 +78,9 @@ class Module
                     $userService = $serviceLocator->get('VisoftBaseModule\Service\UserService');
                     // $client = new OAuth2\FacebookProvider()//($entityManager, $userService);
                     // $client->setOptions($oAuth2Options);
-                    return new OAuth2\OAuth2Client($entityManager, $userService);
+                    $providers['facebookOAuth2Provider'] = $serviceLocator->get('VisoftBaseModule\OAuth2\FacebookProvider');
+                    $providers['linkedInOAuth2Provider'] = $serviceLocator->get('VisoftBaseModule\OAuth2\LinkedinProvider');
+                    return new OAuth2\OAuth2Client($entityManager, $userService, $providers);
                 },
                 'VisoftBaseModule\OAuth2\FacebookProvider' => function($serviceLocator) {
                     $config = $serviceLocator->get('Config');

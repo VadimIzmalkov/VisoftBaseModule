@@ -2,17 +2,22 @@
 
 namespace VisoftBaseModule\OAuth2;
 
-class OAuth2Client implements \Zend\ServiceManager\ServiceLocatorAwareInterface
+class OAuth2Client// implements \Zend\ServiceManager\ServiceLocatorAwareInterface
 {
-	protected $serviceLocator;
+	// protected $serviceLocator;
+    private $facebookOAuth2Provider;
+    private $linkedInOAuth2Provider;
+
+    private $oAuth2Provider = null;
+
 	private $userService;
     private $entityManager;
-	private $oAuth2Provider = null;
+	
     protected $isNewUser = false;
 
     private $logger;
 
-	public function __construct($entityManager, $userService)
+	public function __construct($entityManager, $userService, $providers)
 	{
         $this->entityManager = $entityManager;
 		$this->userService = $userService;
@@ -24,16 +29,19 @@ class OAuth2Client implements \Zend\ServiceManager\ServiceLocatorAwareInterface
         $this->logger = new \Zend\Log\Logger;
         $writer = new \Zend\Log\Writer\Stream($logFilePath);
         $this->logger->addWriter($writer);
+
+        $this->facebookOAuth2Provider = isset($providers['facebookOAuth2Provider']) ? $providers['facebookOAuth2Provider'] : NULL;
+        $this->linkedInOAuth2Provider = isset($providers['linkedInOAuth2Provider']) ? $providers['linkedInOAuth2Provider'] : NULL;
 	}
 
 	public function setProvider($providerName)
 	{
 		switch ($providerName) {
 			case 'facebook':
-				$this->oAuth2Provider = $this->serviceLocator->get('VisoftBaseModule\OAuth2\FacebookProvider');
+				$this->oAuth2Provider = $this->facebookOAuth2Provider;
 				break;
 			case 'linkedin':
-				$this->oAuth2Provider = $this->serviceLocator->get('VisoftBaseModule\OAuth2\LinkedinProvider');
+				$this->oAuth2Provider = $this->linkedInOAuth2Provider;
 				break;
 			default:
 				throw new \Exception("Provider not defined", 1);
@@ -114,11 +122,11 @@ class OAuth2Client implements \Zend\ServiceManager\ServiceLocatorAwareInterface
         return $this->isNewUser;
     }
 
-	public function setServiceLocator(\Zend\ServiceManager\ServiceLocatorInterface $serviceLocator) {
-    	$this->serviceLocator = $serviceLocator;
-  	}
+	// public function setServiceLocator(\Zend\ServiceManager\ServiceLocatorInterface $serviceLocator) {
+ //    	$this->serviceLocator = $serviceLocator;
+ //  	}
 
-  	public function getServiceLocator() {
-    	return $this->serviceLocator;
-  	}
+ //  	public function getServiceLocator() {
+ //    	return $this->serviceLocator;
+ //  	}
 }
