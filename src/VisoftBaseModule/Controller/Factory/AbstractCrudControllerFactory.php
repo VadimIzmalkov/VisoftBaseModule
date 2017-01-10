@@ -126,6 +126,12 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         $formElementManager = $parentLocator->get('FormElementManager');
         $crudController->formElementManager = $formElementManager;
 
+        $googleService = $parentLocator->get('Fryday\Service\GoogleService');
+        $crudController->googleService = $googleService;
+
+        $userService = $parentLocator->get('VisoftBaseModule\Service\UserService');
+        $crudController->userService = $userService;
+
         return $crudController;
     }
     /**
