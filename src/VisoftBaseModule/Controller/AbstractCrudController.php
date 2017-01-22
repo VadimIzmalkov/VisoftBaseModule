@@ -129,7 +129,7 @@ abstract class AbstractCrudController extends AbstractActionController
             $this->setEditInputFilter();
             // here can be binding issue
             // for "title image" the names of upload element and entity field should be different 
-            // TODO: generate exeption before binding
+            // TODO: generate exception before binding
             
             $this->editForm->setData($this->post);
 

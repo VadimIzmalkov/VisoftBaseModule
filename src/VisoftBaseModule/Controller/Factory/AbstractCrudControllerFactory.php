@@ -132,6 +132,12 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         $userService = $parentLocator->get('VisoftBaseModule\Service\UserService');
         $crudController->userService = $userService;
 
+        $contactService = $parentLocator->get('VisoftMailerModule\Service\ContactService');
+        $crudController->contactService = $contactService;
+
+        $processingService = $parentLocator->get('VisoftBaseModule\Service\ProcessingService');
+        $crudController->processingService = $processingService;
+
         return $crudController;
     }
     /**
