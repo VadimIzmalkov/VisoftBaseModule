@@ -883,7 +883,7 @@ abstract class AbstractCrudController extends AbstractActionController
 		return $this;
 	}
 
-    private function transferImage($elementName, $imageFileInfo) 
+    protected function transferImage($elementName, $imageFileInfo) 
     {
         // dir for files
         $targetDir = $this->uploadPath . '/'. $this->entity->getId() . '/';
