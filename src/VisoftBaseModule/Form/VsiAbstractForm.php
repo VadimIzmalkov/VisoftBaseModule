@@ -164,6 +164,26 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		]);
 	}
 
+	public function addFileElement($parameters)
+	{
+		$parameters = $this->arrayExchange($parameters);
+
+		$this->add([
+            'name' => $parameters['name'],
+            'type' => Element\File::class,
+            'attributes' => [
+                'id' => $parameters['id'],
+                'required' => $parameters['required'],
+            ],
+            'options' => [
+                'label' => $parameters['label'],
+                'label_attributes' => [
+                	'class' => $parameters['labelClass'],
+                ],
+            ]
+        ]);
+	}
+
 	public function addElementSubmit($parameters)
 	{
 		$parameters = $this->arrayExchange($parameters);
