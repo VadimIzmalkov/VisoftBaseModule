@@ -80,7 +80,9 @@ class OAuth2Client// implements \Zend\ServiceManager\ServiceLocatorAwareInterfac
 
         
         if($this->oAuth2Provider::PROVIDER_NAME === 'facebook') {
-            $identity = $this->entityManager->getRepository('VisoftBaseModule\Entity\UserInterface')->findOneBy(['facebookId' => $providerId, 'email' => $email]);
+            $identity = $this->entityManager->getRepository('VisoftBaseModule\Entity\UserInterface')->findOneBy(['facebookId' => $providerId]);
+            if(empty($identity)) 
+                $identity = $this->entityManager->getRepository('VisoftBaseModule\Entity\UserInterface')->findOneBy(['email' => $email]);
         } else {
             $identity = $this->entityManager->getRepository('VisoftBaseModule\Entity\UserInterface')->findOneBy(['email' => $email]);
         }
