@@ -136,7 +136,7 @@ class FacebookProvider extends AbstractProvider
 
         $user = $response->getGraphUser();
 
-        $userProfileInfo['email'] = $user['email'];
+        $userProfileInfo['email'] = isset($user['email']) ? $user['email'] : NULL;
         $userProfileInfo['fullName'] = $user['name'];
         $userProfileInfo['providerId'] = $user['id'];
 

@@ -246,7 +246,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
 
 			// authenticate
             $authenticationResult = $this->doctineAuthenticationService->authenticate();
-            // die('123');
+
             if($authenticationResult->isValid()) {
             	$identity = $authenticationResult->getIdentity();
             	$this->doctineAuthenticationService->getStorage()->write($identity);
@@ -289,7 +289,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                     }  
 	            }
             } else {
-            	// TODO: handle this error in correct way
+            	// if($authenticationResult)
 				exit('VisoftBaseModule.Invalid.OAuth2.AuthenticationResult');
             }
 		} else {

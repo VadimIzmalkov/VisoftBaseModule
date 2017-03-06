@@ -13,16 +13,15 @@ class AuthenticationAdapter extends \DoctrineModule\Authentication\Adapter\Objec
     	if(is_object($this->oAuth2Client)) {
     		// authentication with social networks
     		$identity = $this->oAuth2Client->getIdentity();
+
             $isBlocked = $identity->getIsBlocked();
-            // var_dump();
-            // die('123');
+            
     		if (!$identity) { // || $identity->getIsBlocked()) {
 	            $this->authenticationResultInfo['code']       = AuthenticationResult::FAILURE_CREDENTIAL_INVALID;
 	            $this->authenticationResultInfo['messages'][] = 'Authentication with OAuth2 protocol failed';
 
 	            return $this->createAuthenticationResult();
 	        } elseif($identity->getIsBlocked()) {
-
                 // user not active or not confirmed email
                 $this->authenticationResultInfo['code'] = AuthenticationResult::FAILURE_UNCATEGORIZED;
                 $this->authenticationResultInfo['identity'] = $identity;
