@@ -123,6 +123,12 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         $accountService = $parentLocator->get('Fryday\Service\AccountService');
         $crudController->accountService = $accountService;
 
+        $subscriberService = $parentLocator->get('Fryday\Service\SubscriberService');
+        $crudController->subscriberService = $subscriberService;
+
+        $mailingService = $parentLocator->get('VisoftMailerModule\Service\MailerService');
+        $crudController->mailingService = $mailingService;
+
         $formElementManager = $parentLocator->get('FormElementManager');
         $crudController->formElementManager = $formElementManager;
 

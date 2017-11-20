@@ -35,12 +35,13 @@ class Module
                     $config = $serviceLocator->get('Config');
                     return new Options\ModuleOptions(isset($config['visoftbasemodule']) ? $config['visoftbasemodule'] : []);
                 },
-                'VisoftBaseModule\Service\UserService' => function($serviceLocator) {
-                    $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
-                    // $moduleOptions = $serviceLocator->get('VisoftBaseModule\Options\ModuleOptions');
-                    $authenticationService = $serviceLocator->get('Zend\Authentication\AuthenticationService');
-                    return new Service\UserService($entityManager, $authenticationService);
-                },
+                'VisoftBaseModule\Service\UserService' => \Core\User\Service\UserServiceFactory::class,
+                // 'VisoftBaseModule\Service\UserService' => function($serviceLocator) {
+                //     $entityManager = $serviceLocator->get('Doctrine\ORM\EntityManager');
+                //     // $moduleOptions = $serviceLocator->get('VisoftBaseModule\Options\ModuleOptions');
+                //     $authenticationService = $serviceLocator->get('Zend\Authentication\AuthenticationService');
+                //     return new Service\UserService($entityManager, $authenticationService);
+                // },
                 'VisoftBaseModule\Options\OAuth2FacebookOptions' => function($serviceLocator){
                     $config = $serviceLocator->get('Config');
                     return new Options\OAuth2Options(isset($config['oauth2']['facebook']) ? $config['oauth2']['facebook'] : []);
@@ -237,8 +238,7 @@ class Module
     }
 
     public function onRoute(\Zend\EventManager\EventInterface $e) 
-    {         
-
+    {
         $application = $e->getApplication();
         $routeMatch = $e->getRouteMatch();
         $serviceManager = $application->getServiceManager();
@@ -262,7 +262,6 @@ class Module
         if (!$acl->hasResource($controller)) {
             throw new \Exception('Resource ' . $controller . ' not defined in ACL');
         }
-
         
         if (!$acl->isAllowed($role, $controller, $action)) {
 
