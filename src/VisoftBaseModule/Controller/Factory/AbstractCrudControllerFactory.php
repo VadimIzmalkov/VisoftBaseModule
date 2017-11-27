@@ -123,8 +123,8 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         $accountService = $parentLocator->get('Fryday\Service\AccountService');
         $crudController->accountService = $accountService;
 
-        $subscriberService = $parentLocator->get('Fryday\Service\SubscriberService');
-        $crudController->subscriberService = $subscriberService;
+        // $subscriberService = $parentLocator->get('Fryday\Service\SubscriberService');
+        // $crudController->subscriberService = $subscriberService;
 
         $mailingService = $parentLocator->get('VisoftMailerModule\Service\MailerService');
         $crudController->mailingService = $mailingService;
@@ -143,6 +143,9 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
 
         $processingService = $parentLocator->get('VisoftBaseModule\Service\ProcessingService');
         $crudController->processingService = $processingService;
+
+        $crudController->facebookOAuth2Provider = $parentLocator->get('VisoftBaseModule\OAuth2\FacebookProvider');
+        $crudController->linkedInOAuth2Provider = $parentLocator->get('VisoftBaseModule\OAuth2\LinkedinProvider');
 
         return $crudController;
     }

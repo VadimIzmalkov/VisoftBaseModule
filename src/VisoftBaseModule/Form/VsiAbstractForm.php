@@ -138,6 +138,7 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		    'attributes' => [
 		    	'class' => $parameters['class'],
 		    	'placeholder' => $parameters['placeholder'],
+		    	'required' => $parameters['required'],
             ]
 		]);
 	}

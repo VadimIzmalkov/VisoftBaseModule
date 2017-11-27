@@ -133,7 +133,8 @@ class Module
                     $authenticationService = $serviceLocator->get('Zend\Authentication\AuthenticationService');
                     $userService = $serviceLocator->get('VisoftBaseModule\Service\UserService');
                     $oAuth2Client = $serviceLocator->get('VisoftBaseModule\OAuth2\oAuth2Client');
-                    return new Controller\AuthenticationController($entityManager, $authenticationService, $moduleOptions, $userService, $oAuth2Client);
+                    $formElementManager = $serviceLocator->get('FormElementManager');
+                    return new Controller\AuthenticationController($entityManager, $authenticationService, $moduleOptions, $userService, $oAuth2Client, $formElementManager);
                 },
             ],
             'abstract_factories' => [

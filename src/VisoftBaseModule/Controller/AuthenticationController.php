@@ -9,6 +9,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
 	// third part services
 	protected $entityManager;
 	protected $doctineAuthenticationService;
+    protected $formElementManager;
 
 	// internals
 	protected $userService;
@@ -21,10 +22,11 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
     protected $redirects;
     protected $forms;
 
-    public function __construct($entityManager, $doctineAuthenticationService, $options, $userService, $oAuth2Client) 
+    public function __construct($entityManager, $doctineAuthenticationService, $options, $userService, $oAuth2Client, $formElementManager) 
     {
         $this->entityManager = $entityManager;
         $this->doctineAuthenticationService = $doctineAuthenticationService;
+        $this->formElementManager = $formElementManager;
 
 		$this->userService = $userService;
 		$this->oAuth2Client = $oAuth2Client;
@@ -103,7 +105,8 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
             return $this->redirect()->toRoute($route);
         }
 
-        $form = new $this->forms['sign-in']($this->entityManager, 'sign-in');
+        // $form = new $this->forms['sign-in']($this->entityManager, 'sign-in');
+        $form = $this->formElementManager->get('UserForm', ['name' => 'Fryday Form', 'options' => ['type' => $this->forms['sign-in']]]);
         $form->setAttributes(['action' => $this->request->getRequestUri()]);
         $viewModel = new ViewModel([
             'form' => $form,
@@ -180,9 +183,9 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
 
                         return $this->redirect()->toUrl($redirectUri);
                     }  else {
-                        $route = $this->redirects['sign-in']['route'];
-                        $parameters = isset($this->redirects['sign-in']['parameters']) ? $this->redirects['sign-in']['parameters'] : [];
-                        $query = $this->redirects['sign-in']['query'];
+                        $route = $this->redirects['after-sign-in']['route'];
+                        $parameters = isset($this->redirects['after-sign-in']['parameters']) ? $this->redirects['after-sign-in']['parameters'] : [];
+                        $query = $this->redirects['after-sign-in']['query'];
                         return $this->redirect()->toRoute($route, $parameters, ['query' => $query]);
                     }
                 }
@@ -284,7 +287,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                         // trigger sign in activity
                         $this->getEventManager()->trigger('signIn', null, array('provider' => $provider));
 
-                        $route = $this->redirects['sign-in']['route'];
+                        $route = $this->redirects['after-sign-in']['route'];
                         return $this->redirect()->toRoute($route, [], ['query' => $queryRedirect]);
                     }  
 	            }
