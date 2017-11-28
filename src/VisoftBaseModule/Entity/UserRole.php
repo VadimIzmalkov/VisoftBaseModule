@@ -12,6 +12,11 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class UserRole
 {
+    const ID_ADMINISTRATOR      = 1;
+    const ID_REPRESENTATIVE     = 2;
+    const ID_MEMBER             = 3;
+    const ID_SUBSCRIBER         = 4;
+
     /**
      * @var integer
      *
