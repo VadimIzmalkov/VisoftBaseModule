@@ -143,6 +143,30 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		]);
 	}
 
+    protected function addCheckbox($parameters) 
+    {
+    	$parameters = $this->arrayExchange($parameters);
+
+        $this->add([
+            'type' => Element\Checkbox::class,
+            'name' => $parameters['name'],
+            'attributes' => [
+                'class' => $parameters['class'],
+                // 'style' => "display: inline; top: 3px; margin-bottom: 0px;",
+                'id' => $parameters['id'],
+            ],
+            'options' => [
+                'label' => $parameters['label'],
+                'label_attributes' => [
+                	'class' => $parameters['labelClass'],
+                ],
+                'use_hidden_element' => true,
+                'checked_value' => 1,
+                'unchecked_value' => 'no',
+            ],
+        ]);
+    }
+
 	protected function addElementSelect($parameters)
 	{
 		$parameters = $this->arrayExchange($parameters);

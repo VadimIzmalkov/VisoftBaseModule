@@ -194,7 +194,7 @@ class BaseForm extends Form implements \Zend\ServiceManager\ServiceLocatorAwareI
                     'class' => 'label',
                 ],
                 'object_manager' => $this->entityManager,
-                'target_class' => 'Admin\Entity\VenuePartner',
+                'target_class' => 'Fryday\Entity\VenuePartner',
                 'property' => 'name',
                 'display_empty_item' => true,
                 'empty_item_label' => '-- Select Venue --',
@@ -225,7 +225,7 @@ class BaseForm extends Form implements \Zend\ServiceManager\ServiceLocatorAwareI
                     'class' => 'label',
                 ],
                 'object_manager' => $this->entityManager,
-                'target_class' => 'Admin\Entity\VenuePartner',
+                'target_class' => 'Fryday\Entity\VenuePartner',
                 'property' => 'name',
                 'display_empty_item' => true,
                 'empty_item_label' => '-- Select Venue --',
@@ -256,7 +256,7 @@ class BaseForm extends Form implements \Zend\ServiceManager\ServiceLocatorAwareI
                     'class' => 'radio fryday-radio'
                 ],
                 'object_manager' => $this->entityManager,
-                'target_class' => 'Admin\Entity\EventType',
+                'target_class' => 'Fryday\Entity\EventType',
                 'property' => 'name',
                 'is_method' => true,
                 'find_method' => array(
@@ -286,7 +286,7 @@ class BaseForm extends Form implements \Zend\ServiceManager\ServiceLocatorAwareI
                     'class' => 'label'
                 ],
                 'object_manager' => $this->entityManager,
-                'target_class' => 'Admin\Entity\SpeakerPartner',
+                'target_class' => 'Fryday\Entity\SpeakerPartner',
                 'label_generator' => function($targetEntity) {
                     return $targetEntity->getFirstName() . ' ' . $targetEntity->getLastName();
                 },
@@ -320,7 +320,7 @@ class BaseForm extends Form implements \Zend\ServiceManager\ServiceLocatorAwareI
                     'class' => 'label'
                 ],
                 'object_manager' => $this->entityManager,
-                'target_class' => 'Admin\Entity\SponsorPartner',
+                'target_class' => 'Fryday\Entity\SponsorPartner',
                 'label_generator' => function($targetEntity) {
                     return $targetEntity->getName();
                 },
@@ -353,9 +353,9 @@ class BaseForm extends Form implements \Zend\ServiceManager\ServiceLocatorAwareI
                     'class' => 'label'
                 ], 
                 'object_manager' => $this->entityManager,
-                'target_class' => 'Admin\Entity\FrydayPartner',
+                'target_class' => 'Fryday\Entity\FrydayPartner',
                 'label_generator' => function($targetEntity) {
-                    if($targetEntity instanceof \Admin\Entity\SpeakerPartner)
+                    if($targetEntity instanceof \Fryday\Entity\SpeakerPartner)
                         return $targetEntity->getFirstName() . ' ' . $targetEntity->getLastName();
                     else
                         return $targetEntity->getName();
@@ -423,7 +423,7 @@ class BaseForm extends Form implements \Zend\ServiceManager\ServiceLocatorAwareI
                     'class' => 'label'
                 ),
                 'object_manager' => $this->entityManager,
-                'target_class' => 'Admin\Entity\VenueType',
+                'target_class' => 'Fryday\Entity\VenueType',
                 'property' => 'name',
                 'display_empty_item' => true,
                 'empty_item_label' => '-- Select Venue Type --',
@@ -487,7 +487,7 @@ class BaseForm extends Form implements \Zend\ServiceManager\ServiceLocatorAwareI
                     return $targetEntity->getName();
                 },
                 'object_manager' => $this->entityManager,
-                'target_class' => 'Admin\Entity\Country',
+                'target_class' => 'Fryday\Entity\Country',
                 'display_empty_item' => true,
                 'empty_item_label' => '-- Select Country --',
                 'is_method' => true,
