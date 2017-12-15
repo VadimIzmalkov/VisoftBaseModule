@@ -37,6 +37,7 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		$parametersOutput['value'] 			= isset($parametersInput['value']) ? $parametersInput['value'] : 'Submit';
 		$parametersOutput['disabled'] 		= isset($parametersInput['disabled']) ? $parametersInput['disabled'] : false;
 		$parametersOutput['required'] 		= isset($parametersInput['required']) ? $parametersInput['required'] : false;
+		$parametersOutput['multiple'] 		= isset($parametersInput['multiple']) ? $parametersInput['multiple'] : false;
 		$parametersOutput['value-options'] 	= isset($parametersInput['value-options']) ? $parametersInput['value-options'] : NULL;
 		$parametersOutput['empty-option'] 	= isset($parametersInput['empty-option']) ? $parametersInput['empty-option'] : NULL;
 
@@ -193,7 +194,7 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 	{
 		$parameters = $this->arrayExchange($parameters);
 
-		$this->add([
+		$options = [
             'name' => $parameters['name'],
             'type' => Element\File::class,
             'attributes' => [
@@ -206,7 +207,14 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
                 	'class' => $parameters['labelClass'],
                 ],
             ]
-        ]);
+        ];
+
+        if($parameters['multiple'])
+        {
+        	$options['attributes']['multiple'] = true;
+        }
+
+		$this->add($options);
 	}
 
 	public function addElementSubmit($parameters)
