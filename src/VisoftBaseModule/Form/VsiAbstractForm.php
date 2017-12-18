@@ -34,7 +34,7 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 		$parametersOutput['labelClass'] 	= isset($parametersInput['labelClass']) ? $parametersInput['labelClass'] : 'label';
 		$parametersOutput['rows'] 			= isset($parametersInput['rows']) ? $parametersInput['rows'] : 5;
 		$parametersOutput['class'] 			= isset($parametersInput['class']) ? $parametersInput['class'] : 'form-control';
-		$parametersOutput['value'] 			= isset($parametersInput['value']) ? $parametersInput['value'] : 'Submit';
+		$parametersOutput['value'] 			= isset($parametersInput['value']) ? $parametersInput['value'] : NULL;
 		$parametersOutput['disabled'] 		= isset($parametersInput['disabled']) ? $parametersInput['disabled'] : false;
 		$parametersOutput['required'] 		= isset($parametersInput['required']) ? $parametersInput['required'] : false;
 		$parametersOutput['multiple'] 		= isset($parametersInput['multiple']) ? $parametersInput['multiple'] : false;
