@@ -47,6 +47,9 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         $uploadPath = isset($config['uploadPath']) ? $config['uploadPath'] : null;
         $crudController = new $controllerClass($entityManager, $entityClass);
 
+        $formElementManager = $parentLocator->get('FormElementManager');
+        $crudController->formElementManager = $formElementManager;
+
         if(isset($config['forms'])) {
             $formParameters = $config['forms'];
             $formClass = $formParameters['class'];
@@ -54,14 +57,20 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
             // form for create action
             if(isset($formParameters['options']['create'])) {
                 $formType = $formParameters['options']['create'];
-                $form = new $formClass($entityManager, $formType, $identity);
+                // $form = new $formClass($entityManager, $formType, $identity);
+                $form = $formElementManager->get($formClass, ['name' => 'CRUD form', 'options' => [
+                    'type' => $formType,
+                ]]);
                 $forms['create'] = $form;
             }
             
             // form for edit action
             if(isset($formParameters['options']['edit'])) {
                 $formType = $formParameters['options']['edit'];
-                $form = new $formClass($entityManager, $formType, $identity);
+                // $form = new $formClass($entityManager, $formType, $identity);
+                $form = $formElementManager->get($formClass, ['name' => 'CRUD form', 'options' => [
+                    'type' => $formType,
+                ]]);
                 $forms['edit'] = $form;
             }
 
@@ -128,9 +137,6 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
 
         $mailingService = $parentLocator->get('VisoftMailerModule\Service\MailerService');
         $crudController->mailingService = $mailingService;
-
-        $formElementManager = $parentLocator->get('FormElementManager');
-        $crudController->formElementManager = $formElementManager;
 
         $googleService = $parentLocator->get('Fryday\Service\GoogleService');
         $crudController->googleService = $googleService;
