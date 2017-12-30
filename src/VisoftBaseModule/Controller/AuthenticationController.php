@@ -127,7 +127,7 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                 if(empty($user)) {
                     $this->flashMessenger()->addMessage('The username or email is not valid!');
                     $route = $this->redirects['authentication-faild']['route'];
-                    $parameters = isset($this->redirects['authentication-faild']['parameters']) ? $this->redirects['sign-in']['parameters'] : [];
+                    $parameters = isset($this->redirects['authentication-faild']['parameters']) ? $this->redirects['authentication-faild']['parameters'] : [];
                     $query = $this->redirects['authentication-faild']['query'];
                     return $this->redirect()->toRoute($route, $parameters, ['query' => $query]);
                 }
