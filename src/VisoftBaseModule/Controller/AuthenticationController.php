@@ -105,14 +105,10 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
             return $this->redirect()->toRoute($route);
         }
 
-        // $form = new $this->forms['sign-in']($this->entityManager, 'sign-in');
         $form = $this->formElementManager->get('UserForm', ['name' => 'Fryday Form', 'options' => ['type' => $this->forms['sign-in']]]);
         $form->setAttributes(['action' => $this->request->getRequestUri()]);
         $viewModel = new ViewModel([
             'form' => $form,
-            // TODO: remove that
-            // 'facebookSignInUrl' => $this->social()->getSignInUrl('facebook'),
-            // 'linkedinSignInUrl' => $this->social()->getSignInUrl('linkedin'),
         ]);
         if ($this->request->isPost()) {
             $post = $this->request->getPost();
@@ -122,7 +118,6 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                 $data = $form->getData();
                 $adapter = $this->doctineAuthenticationService->getAdapter();
                 $email = $this->params()->fromPost('email');
-                // $password = 
                 $user = $this->entityManager->getRepository('VisoftBaseModule\Entity\UserInterface')->findOneBy(['email' => $email]);
                 if(empty($user)) {
                     $this->flashMessenger()->addMessage('The username or email is not valid!');
@@ -134,28 +129,6 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                 $adapter->setIdentityValue($user->getEmail());
                 $adapter->setCredentialValue($this->params()->fromPost('password'));
                 $authenticationResult = $this->doctineAuthenticationService->authenticate();
-
-                // var_dump($user->getEmail());
-                // var_dump($this->params()->fromPost('password'));
-
-                // var_dump($authenticationResult);
-                // var_dump($authenticationResult->isValid());
-                // $user->setPassword('123');
-                // $this->entityManager->persist($user);
-                // $this->entityManager->flush();
-
-                // $passEncrypted = \VisoftBaseModule\Service\RegistrationService::encryptPassword('123');
-                // var_dump($passEncrypted);
-                // var_dump(\VisoftBaseModule\Service\RegistrationService::verifyHashedPasswordTest($passEncrypted, '123'));
-
-                // $user->setPassword('123');
-                // $this->entityManager->persist($user);
-                // $this->entityManager->flush();
-                // var_dump(\VisoftBaseModule\Service\RegistrationService::verifyHashedPassword($user, '123'));
-
-                // // var_dump($bcrypt->verify('123', $passEncrypted));
-                // // var_dump($bcrypt->verify('123', $user->getPassword()));
-                // die('dddd');
 
                 if ($authenticationResult->isValid()) {
                     $identity = $authenticationResult->getIdentity();
