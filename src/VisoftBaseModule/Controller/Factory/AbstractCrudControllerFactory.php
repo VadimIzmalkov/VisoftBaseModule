@@ -81,18 +81,18 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
                 $inputFiltersParameters = $formParameters['inputFilters'];
                 // input filter for create action
                 if(isset($inputFiltersParameters['options']['create'])) {
-                    $inputFilterClass = $inputFiltersParameters['class'];
-                    $inputFilterType = $inputFiltersParameters['options']['create'];
-                    $inputFilter = new $inputFilterClass($entityManager, $inputFilterType, $identity);
+                    $inputFilterClass       = $inputFiltersParameters['class'];
+                    $inputFilterType        = $inputFiltersParameters['options']['create'];
+                    $inputFilter            = new $inputFilterClass($entityManager, $inputFilterType, $identity);
                     $inputFilters['create'] = $inputFilter;
                 }
 
                 // input filter for edit action
                 if(isset($inputFiltersParameters['options']['edit'])) {
-                    $inputFilterClass = $inputFiltersParameters['class'];
-                    $inputFilterType = $inputFiltersParameters['options']['edit'];
-                    $inputFilter = new $inputFilterClass($entityManager, $inputFilterType, $identity);
-                    $inputFilters['edit'] = $inputFilter;
+                    $inputFilterClass       = $inputFiltersParameters['class'];
+                    $inputFilterType        = $inputFiltersParameters['options']['edit'];
+                    $inputFilter            = new $inputFilterClass($entityManager, $inputFilterType, $identity);
+                    $inputFilters['edit']   = $inputFilter;
                 }
 
                 // set input filters
@@ -149,6 +149,9 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
 
         $processingService = $parentLocator->get('VisoftBaseModule\Service\ProcessingService');
         $crudController->processingService = $processingService;
+
+        $gearmanService = $parentLocator->get(\Gearman\Service\GearmanService::class);
+        $crudController->gearmanService = $gearmanService;
 
         $crudController->facebookOAuth2Provider = $parentLocator->get('VisoftBaseModule\OAuth2\FacebookProvider');
         $crudController->linkedInOAuth2Provider = $parentLocator->get('VisoftBaseModule\OAuth2\LinkedinProvider');
