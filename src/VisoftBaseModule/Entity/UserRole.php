@@ -16,6 +16,7 @@ class UserRole
     const ID_REPRESENTATIVE     = 2;
     const ID_MEMBER             = 3;
     const ID_SUBSCRIBER         = 4;
+    const ID_MEMBER_PREMIUM     = 5;
 
     /**
      * @var integer
