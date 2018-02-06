@@ -57,8 +57,19 @@ abstract class AbstractCrudController extends AbstractActionController
         }
 	}
 
+    protected function redirectBeforeCreate()
+    {
+        return false;
+    }
+
 	public function createAction()
 	{
+        $redirect = $this->redirectBeforeCreate();
+        if($redirect) 
+        {
+            return $redirect;
+        }
+
         // entity
         $this->entity = $this->getEntity();
 
