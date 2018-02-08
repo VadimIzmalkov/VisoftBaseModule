@@ -153,6 +153,9 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         $gearmanService = $parentLocator->get(\Gearman\Service\GearmanService::class);
         $crudController->gearmanService = $gearmanService;
 
+        $acMailerService = $parentLocator->get(\AcMailer\Service\MailService::class);
+        $crudController->acMailerService = $acMailerService;
+
         $crudController->facebookOAuth2Provider = $parentLocator->get('VisoftBaseModule\OAuth2\FacebookProvider');
         $crudController->linkedInOAuth2Provider = $parentLocator->get('VisoftBaseModule\OAuth2\LinkedinProvider');
 
