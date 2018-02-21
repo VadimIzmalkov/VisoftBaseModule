@@ -270,9 +270,24 @@ class Module
             $requestedUri = $e->getRequest()->getRequestUri();
             $config = $serviceManager->get('config');
             $redirect_route = $config['acl']['redirect_route'];
-            if(!empty($redirect_route)) {
+
+            // var_dump($routeMatch);
+            // var_dump($redirect_route);
+            // die('123');
+            if(!empty($redirect_route)) 
+            {
                 // TODO: FIXIT
-                $url = $e->getRouter()->assemble($redirect_route['params'], $redirect_route['options']);
+                // var_dump($redirect_route['params']);
+                // var_dump($redirect_route['options']);
+                // die('123');
+                if($routeMatch->getMatchedRouteName() === $redirect_route['options']['name'])
+                {
+                    $url = $e->getRouter()->assemble([], ['name' => 'home']);
+                }
+                else
+                {
+                    $url = $e->getRouter()->assemble($redirect_route['params'], $redirect_route['options']);
+                }
                 $response->getHeaders()->addHeaderLine('Location', $url);
 
                 // The HTTP response status code 302 Found is a common way of performing a redirection.

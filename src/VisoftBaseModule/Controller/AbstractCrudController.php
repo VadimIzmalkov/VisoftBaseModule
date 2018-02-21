@@ -379,7 +379,8 @@ abstract class AbstractCrudController extends AbstractActionController
 
     protected function saveImagesInline($image)
     {
-    	if(!empty($image['name'])) {
+    	if(!empty($image['name'])) 
+        {
 	    	// image data:
             // - name
             // - type
