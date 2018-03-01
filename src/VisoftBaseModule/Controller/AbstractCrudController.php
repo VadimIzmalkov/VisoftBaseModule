@@ -93,8 +93,8 @@ abstract class AbstractCrudController extends AbstractActionController
             	$data = $this->createForm->getData();
             	if(!is_null($this->identity()))
             		$this->entity->setCreatedBy($this->identity());
-            	$this->entityManager->persist($this->entity);
-            	$this->entityManager->flush();
+            	// $this->entityManager->persist($this->entity);
+            	// $this->entityManager->flush();
             	if(!empty($images)) 
             		$this->saveFiles($images);
             	$this->setExtra();
