@@ -26,7 +26,6 @@ abstract class VsiAbstractForm extends \Zend\Form\Form
 
 	protected function arrayExchange($parametersInput) 
 	{
-
 		$parametersOutput['id']				= isset($parametersInput['id']) ? $parametersInput['id'] : NULL;
 		$parametersOutput['name'] 			= isset($parametersInput['name']) ? $parametersInput['name'] : NULL;
 		$parametersOutput['label'] 			= isset($parametersInput['label']) ? $parametersInput['label'] : NULL;

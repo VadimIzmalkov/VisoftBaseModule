@@ -33,12 +33,20 @@ class UserRole
      * @ORM\Column(name="name", type="string", length=255, nullable=false)
      */
     protected $name;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="name_displayed", type="string", length=255, nullable=false)
+     */
+    protected $nameDisplayed;
     
     public function getId() { return $this->id; }
 
     public function getName() { return $this->name; }
-    public function setName($name) {
-        $this->name = $name;
-        return $this;
-    }
+    public function setName($name) { $this->name = $name; return $this; }
+
+    public function getNameDisplayed() { return $this->nameDisplayed; }
+    public function setNameDisplayed($nameDisplayed) { $this->nameDisplayed = $nameDisplayed; return $this; }
+
 }
