@@ -207,7 +207,8 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
 		$authorizationCode = $this->params()->fromQuery('code');
 		$state = $this->params()->fromQuery('state');
 
-		if(strlen($authorizationCode) > 10) {
+		if(strlen($authorizationCode) > 10) 
+        {
 			// setting up OAuth2 client
 			$this->oAuth2Client->setProvider($provider);
             
@@ -223,7 +224,8 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
 			// authenticate
             $authenticationResult = $this->doctineAuthenticationService->authenticate();
 
-            if($authenticationResult->isValid()) {
+            if($authenticationResult->isValid()) 
+            {
             	$identity = $authenticationResult->getIdentity();
             	$this->doctineAuthenticationService->getStorage()->write($identity);
 
@@ -236,17 +238,39 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                 // this parameter tells that user authenticate via O2Auth 
                 $queryRedirect['action'] = 'o2auth';
 	            
-            	if($this->oAuth2Client->isNewUser()) {
+            	if($this->oAuth2Client->isNewUser()) 
+                {
                     // trigger sign up activity
-                    $this->getEventManager()->trigger('signUp', null, array('provider' => $provider));
+                    // $this->getEventManager()->trigger('signUp', null, array('provider' => $provider));
+                    $this->getEventManager()->trigger(\Fryday\Event\Listener\ActivityListener::EVENT_ACTIVITY, null, [
+                        'type'              => \Fryday\Entity\Activity::TYPE_SIGN_UP_SOCIAL,
+                        'socialProvider'    => $provider,
+                        'created-by'        => $identity,
+                        'notify'            => [
+                            'users-group'   => \Fryday\Service\GearmanJob\ActivityNotificationJobService::USERS_GROUP_ADMINISTRATORS,
+                            'by-email'      => false,
+                        ],
+                    ]);
 
             		$route = $this->redirects['after-sign-up-social']['route'];
                     return $this->redirect()->toRoute($route, [], ['query' => $queryRedirect]);
-                } else {
-                    if(isset($cookie->requestedUri)) {
-                        // trigger sign in activity
-                        $this->getEventManager()->trigger('signIn', null, array('provider' => $provider));
-                        
+                } 
+                else 
+                {
+                    // trigger sign in activity
+                    // $this->getEventManager()->trigger('signIn', null, array('provider' => $provider));
+                    $this->getEventManager()->trigger(\Fryday\Event\Listener\ActivityListener::EVENT_ACTIVITY, null, [
+                        'type'              => \Fryday\Entity\Activity::TYPE_SIGN_IN_SOCIAL,
+                        'socialProvider'    => $provider,
+                        'created-by'        => $identity,
+                        'notify'            => [
+                            'users-group'   => \Fryday\Service\GearmanJob\ActivityNotificationJobService::USERS_GROUP_ADMINISTRATORS,
+                            'by-email'      => false,
+                        ],
+                    ]);
+
+                    if(isset($cookie->requestedUri)) 
+                    {
                         // redirect to requested page
                         $requestedUri = $cookie->requestedUri;
                         $redirectUri = $this->getRequest()->getUri()->getScheme() . '://' . $this->getRequest()->getUri()->getHost() . $requestedUri;
@@ -256,19 +280,22 @@ class AuthenticationController extends \Zend\Mvc\Controller\AbstractActionContro
                         $this->getResponse()->getHeaders()->addHeader($newCookie);
 
                         return $this->redirect()->toUrl($redirectUri);
-                    } else {
-                        // trigger sign in activity
-                        $this->getEventManager()->trigger('signIn', null, array('provider' => $provider));
-
+                    } 
+                    else 
+                    {
                         $route = $this->redirects['after-sign-in']['route'];
                         return $this->redirect()->toRoute($route, [], ['query' => $queryRedirect]);
                     }  
 	            }
-            } else {
+            } 
+            else 
+            {
             	// if($authenticationResult)
 				exit('VisoftBaseModule.Invalid.OAuth2.AuthenticationResult');
             }
-		} else {
+		} 
+        else 
+        {
 			// TODO: handle this error in correct way
 			exit('VisoftBaseModule.Invalid.OAuth2.Code');
 		}
