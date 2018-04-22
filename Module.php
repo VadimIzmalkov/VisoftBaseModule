@@ -240,6 +240,7 @@ class Module
 
     public function onRoute(\Zend\EventManager\EventInterface $e) 
     {
+
         $application = $e->getApplication();
         $routeMatch = $e->getRouteMatch();
         $serviceManager = $application->getServiceManager();
@@ -249,31 +250,34 @@ class Module
         // everyone is guest until logging in
         $role = \VisoftBaseModule\Service\Authorization\Acl\Acl::DEFAULT_ROLE; // The default role is guest $acl
 
+        var_dump('hi1');
         // get role if user logged in
-        if ($authenticationService->hasIdentity()) {
+        if ($authenticationService->hasIdentity()) 
+        {
             $user = $authenticationService->getIdentity();
+            var_dump($user);
+            // var_dump($user->getFullName());
             $role = $user->getRole()->getName();
         }
 
+        var_dump('hi2');
         // requested route
         $controller = $routeMatch->getParam('controller');
         $action = $routeMatch->getParam('action');
         $params = $routeMatch->getParams();
 
-        if (!$acl->hasResource($controller)) {
+        if (!$acl->hasResource($controller)) 
+        {
             throw new \Exception('Resource ' . $controller . ' not defined in ACL');
         }
         
-        if (!$acl->isAllowed($role, $controller, $action)) {
-
+        if (!$acl->isAllowed($role, $controller, $action)) 
+        {
             $response = $e->getResponse();
             $requestedUri = $e->getRequest()->getRequestUri();
             $config = $serviceManager->get('config');
             $redirect_route = $config['acl']['redirect_route'];
 
-            // var_dump($routeMatch);
-            // var_dump($redirect_route);
-            // die('123');
             if(!empty($redirect_route)) 
             {
                 // TODO: FIXIT
@@ -296,9 +300,10 @@ class Module
                 $headers = $response->getHeaders();
                 $cookie = new \Zend\Http\Header\SetCookie('requestedUri', $requestedUri, time() + 60, '/');
                 $headers->addHeader($cookie);
-                $response->sendHeaders();    
-                exit;
-            } else {
+                $response->sendHeaders();
+            } 
+            else 
+            {
                 // Status code 403 responses are the result of the web server being configured to deny access,
                 // for some reason, to the requested resource by the client.
                 // http://en.wikipedia.org/wiki/HTTP_403
