@@ -249,18 +249,14 @@ class Module
         
         // everyone is guest until logging in
         $role = \VisoftBaseModule\Service\Authorization\Acl\Acl::DEFAULT_ROLE; // The default role is guest $acl
-
-        var_dump('hi1');
+        
         // get role if user logged in
         if ($authenticationService->hasIdentity()) 
         {
             $user = $authenticationService->getIdentity();
-            var_dump($user);
-            // var_dump($user->getFullName());
             $role = $user->getRole()->getName();
         }
 
-        var_dump('hi2');
         // requested route
         $controller = $routeMatch->getParam('controller');
         $action = $routeMatch->getParam('action');

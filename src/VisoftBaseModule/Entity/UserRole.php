@@ -18,6 +18,14 @@ class UserRole
     const ID_SUBSCRIBER         = 4;
     const ID_MEMBER_PREMIUM     = 5;
 
+    public static $roleNamesTable = [
+        self::ID_ADMINISTRATOR      => 'administrator',
+        self::ID_REPRESENTATIVE     => 'representative',
+        self::ID_MEMBER             => 'member',
+        self::ID_SUBSCRIBER         => 'subscriber',
+        self::ID_MEMBER_PREMIUM     => 'member-premium',
+    ];
+
     /**
      * @var integer
      *
