@@ -147,8 +147,8 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
         $contactService = $parentLocator->get('VisoftMailerModule\Service\ContactService');
         $crudController->contactService = $contactService;
 
-        $processingService = $parentLocator->get('VisoftBaseModule\Service\ProcessingService');
-        $crudController->processingService = $processingService;
+        // $processingService = $parentLocator->get('VisoftBaseModule\Service\ProcessingService');
+        // $crudController->processingService = $processingService;
 
         $gearmanService = $parentLocator->get(\Gearman\Service\GearmanService::class);
         $crudController->gearmanService = $gearmanService;

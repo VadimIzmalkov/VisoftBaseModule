@@ -1,5 +1,4 @@
 <?php
-
 namespace VisoftBaseModule\Adapter;
 
 use Zend\Authentication\Result as AuthenticationResult;
@@ -10,18 +9,22 @@ class AuthenticationAdapter extends \DoctrineModule\Authentication\Adapter\Objec
 
     public function authenticate()
     {
-    	if(is_object($this->oAuth2Client)) {
+    	if(is_object($this->oAuth2Client)) 
+        {
     		// authentication with social networks
     		$identity = $this->oAuth2Client->getIdentity();
 
             $isBlocked = $identity->getIsBlocked();
             
-    		if (!$identity) { // || $identity->getIsBlocked()) {
+    		if (!$identity) 
+            { // || $identity->getIsBlocked()) {
 	            $this->authenticationResultInfo['code']       = AuthenticationResult::FAILURE_CREDENTIAL_INVALID;
 	            $this->authenticationResultInfo['messages'][] = 'Authentication with OAuth2 protocol failed';
 
 	            return $this->createAuthenticationResult();
-	        } elseif($identity->getIsBlocked()) {
+	        } 
+            elseif($identity->getIsBlocked()) 
+            {
                 // user not active or not confirmed email
                 $this->authenticationResultInfo['code'] = AuthenticationResult::FAILURE_UNCATEGORIZED;
                 $this->authenticationResultInfo['identity'] = $identity;
