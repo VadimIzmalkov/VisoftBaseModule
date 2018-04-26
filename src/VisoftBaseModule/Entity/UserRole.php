@@ -20,7 +20,7 @@ class UserRole
 
     public static $roleNamesTable = [
         self::ID_ADMINISTRATOR      => 'administrator',
-        self::ID_REPRESENTATIVE     => 'representative',
+        self::ID_REPRESENTATIVE     => 'franchisor',
         self::ID_MEMBER             => 'member',
         self::ID_SUBSCRIBER         => 'subscriber',
         self::ID_MEMBER_PREMIUM     => 'member-premium',
