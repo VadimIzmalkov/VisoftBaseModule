@@ -88,21 +88,30 @@ abstract class AbstractCrudController extends AbstractActionController
             $images = $this->params()->fromFiles();
             $this->setCreateInputFilter();
             $this->createForm->setData($this->post);
-            if($this->createForm->isValid()) {
+            if($this->createForm->isValid()) 
+            {
                 // die('Abstract CRUD controller. Form errors');
             	$data = $this->createForm->getData();
             	if(!is_null($this->identity()))
+                {
             		$this->entity->setCreatedBy($this->identity());
-            	// $this->entityManager->persist($this->entity);
-            	// $this->entityManager->flush();
-            	if(!empty($images)) 
-            		$this->saveFiles($images);
-            	$this->setExtra();
+                }
             	$this->entityManager->persist($this->entity);
+            	$this->entityManager->flush();
+            	
+                if(!empty($images)) 
+                {
+            		$this->saveFiles($images);
+                }
+            	$this->setExtra();
+            	
+                $this->entityManager->persist($this->entity);
 	            $this->entityManager->flush();
-	            $this->flashMessenger()->addSuccessMessage(static::CREATE_SUCCESS_MESSAGE);
+	            
+                $this->flashMessenger()->addSuccessMessage(static::CREATE_SUCCESS_MESSAGE);
                 $this->triggerCreateActivity();
-	            return $this->redirectAfterCreate();
+	            
+                return $this->redirectAfterCreate();
             }
             // dump the form, find an errors
             // $errorMessages = $this->createForm->getMessages();
