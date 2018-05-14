@@ -26,25 +26,29 @@ class AbstractCrudControllerFactory implements AbstractFactoryInterface
     public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
         if (!$this->canCreateServiceWithName($serviceLocator, $name, $requestedName)) 
+        {
             throw new \BadMethodCallException('This abstract factory can\'t create service "' . $requestedName . '"');
+        }
         
-        $parentLocator = $serviceLocator->getServiceLocator();
-        $entityManager = $parentLocator->get('Doctrine\ORM\EntityManager');
-        $authenticationService = $parentLocator->get('Zend\Authentication\AuthenticationService');
-        $identity = $authenticationService->getIdentity();
+        $parentLocator          = $serviceLocator->getServiceLocator();
+        $entityManager          = $parentLocator->get('Doctrine\ORM\EntityManager');
+        $authenticationService  = $parentLocator->get('Zend\Authentication\AuthenticationService');
+        
+        $identity               = $authenticationService->getIdentity();
 
         $config = $parentLocator->get('config');
         $config = $config['crud_controllers'][$requestedName];
-        
-        if (isset($config['controller_class']))
-            $controllerClass = $config['controller_class'];
-        else
-            $controllerClass = $requestedName;
-        if (!class_exists($controllerClass))
-            if ('Controller' !== substr($requestedName, -10))
-                $controllerClass .= 'Controller';
+
+        $controllerClass = isset($config['controller_class']) ? $config['controller_class'] : $requestedName;
+
+
+        if (!class_exists($controllerClass) && 'Controller' !== substr($requestedName, -10))
+        {
+            $controllerClass .= 'Controller';
+        }
         $entityClass = isset($config['entityClass']) ? $config['entityClass'] : null;
         $uploadPath = isset($config['uploadPath']) ? $config['uploadPath'] : null;
+
         $crudController = new $controllerClass($entityManager, $entityClass);
 
         $formElementManager = $parentLocator->get('FormElementManager');

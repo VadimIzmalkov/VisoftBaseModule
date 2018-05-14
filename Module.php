@@ -240,12 +240,12 @@ class Module
 
     public function onRoute(\Zend\EventManager\EventInterface $e) 
     {
-
-        $application = $e->getApplication();
-        $routeMatch = $e->getRouteMatch();
+        $application    = $e->getApplication();
+        $routeMatch     = $e->getRouteMatch();
         $serviceManager = $application->getServiceManager();
-        $authenticationService = $serviceManager->get('Zend\Authentication\AuthenticationService');
-        $acl = $serviceManager->get('VisoftBaseModule\Service\Authorization\Acl\Acl');
+
+        $authenticationService  = $serviceManager->get('Zend\Authentication\AuthenticationService');
+        $acl                    = $serviceManager->get('VisoftBaseModule\Service\Authorization\Acl\Acl');
         
         // everyone is guest until logging in
         $role = \VisoftBaseModule\Service\Authorization\Acl\Acl::DEFAULT_ROLE; // The default role is guest $acl
