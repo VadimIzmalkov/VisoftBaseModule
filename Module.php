@@ -269,7 +269,7 @@ class Module
         
         if (!$acl->isAllowed($role, $controller, $action)) 
         {
-            $response = $e->getResponse();
+            
             $requestedUri = $e->getRequest()->getRequestUri();
             $config = $serviceManager->get('config');
             $redirect_route = $config['acl']['redirect_route'];
@@ -277,9 +277,6 @@ class Module
             if(!empty($redirect_route)) 
             {
                 // TODO: FIXIT
-                // var_dump($redirect_route['params']);
-                // var_dump($redirect_route['options']);
-                // die('123');
                 if($routeMatch->getMatchedRouteName() === $redirect_route['options']['name'])
                 {
                     $url = $e->getRouter()->assemble([], ['name' => 'home']);
@@ -288,15 +285,19 @@ class Module
                 {
                     $url = $e->getRouter()->assemble($redirect_route['params'], $redirect_route['options']);
                 }
-                $response->getHeaders()->addHeaderLine('Location', $url);
 
+                // we store request URL in cookie to use it later after sign-in
+                $cookie = new \Zend\Http\Header\SetCookie('requestedUri', $requestedUri, time() + 60, '/');
                 // The HTTP response status code 302 Found is a common way of performing a redirection.
                 // http://en.wikipedia.org/wiki/HTTP_302
+                $response = $e->getResponse();
                 $response->setStatusCode(302);
-                $headers = $response->getHeaders();
-                $cookie = new \Zend\Http\Header\SetCookie('requestedUri', $requestedUri, time() + 60, '/');
-                $headers->addHeader($cookie);
+                $response->getHeaders()
+                    ->addHeaderLine('Location', $url)   // loging page
+                    ->addHeader($cookie);               // a page redirect to after successful login
                 $response->sendHeaders();
+
+                return $response;
             } 
             else 
             {
